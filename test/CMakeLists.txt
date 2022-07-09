@@ -11,7 +11,7 @@ file(GLOB_RECURSE HDRS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 add_executable(${PROJECT_NAME} ${SRCS} ${HDRS})
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
-        ${PROJECT_LIB}
+        ${CMAKE_PROJECT_NAME}_lib
         gtest
         gtest_main
 )
