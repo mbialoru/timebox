@@ -23,7 +23,7 @@ RUN apt -y install apt-utils
 # Install needed tools, packages and libraries
 RUN apt install -y build-essential binutils autoconf automake clang clang-12  \
     clang-14 clang-15 gcc-10 g++-10 gcc-12 g++-12 cmake meson ninja-build gdb \
-    git ruby graphviz doxygen
+    git ruby graphviz doxygen moreutils
 RUN apt install -y python2 python3 python3-pip python3-venv
 RUN apt install -y libboost-all-dev libgtest-dev libbenchmark-dev \
     libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config
