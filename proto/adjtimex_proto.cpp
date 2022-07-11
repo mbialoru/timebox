@@ -1,9 +1,19 @@
 #include "defines.hpp"
+#include "utils.hpp"
 
 /* Description
 ==============
 Prototype to practice and explore usage of adjtimex to control pacing of system
 clock
+==============
+*/
+
+/* Notes
+==============
+Tests which require sudo might fail when launched from within devcontainer. We
+are trying to actively change kernel parameters and it's not possible to modify
+host machine like this from container! To run these tests, a baremetal or VM is
+advised - and do not forget about privileges.
 ==============
 */
 
@@ -56,15 +66,14 @@ void debug_print_timex(timex& t)
     "tai: " << t.tai << std::endl;
 }
 
-
 TEST(AdjtimexTest, timex_from_adjtimex)
 {
   GTEST_SKIP();
   timex buf;
   int res{ adjtimex(&buf) };
 
-  EXPECT_EQ(res, 0);    // Expect success
-  EXPECT_EQ(errno, 0);  // Expect no error number
+  EXPECT_EQ(res, 0);
+  EXPECT_EQ(errno, 0);
 }
 
 TEST(AdjtimexTest, timex_from_ntp_adjtime)
@@ -73,8 +82,8 @@ TEST(AdjtimexTest, timex_from_ntp_adjtime)
   timex buf;
   int res{ ntp_adjtime(&buf) };
 
-  EXPECT_EQ(res, 0);    // Expect success
-  EXPECT_EQ(errno, 0);  // Expect no error number
+  EXPECT_EQ(res, 0);
+  EXPECT_EQ(errno, 0);
 }
 
 TEST(AdjtimexTest, print_timex_structure)
@@ -87,10 +96,18 @@ TEST(AdjtimexTest, print_timex_structure)
   debug_print_timex(buf);
 }
 
+
 TEST(AdjtimexTest, change_tick_value)
 {
-  // adjtimex enables us to only dable with tick value within 10%
-  // 9000 to 11000
+#if SUDO_NODOCKER
+  if (!RunningAsRoot())
+    GTEST_FAIL() << "MUST RUN AS ROOT";
+  if (RunningFromDockerContainer())
+    GTEST_FAIL() << "CANNOT RUN FROM DOCKER";
+#else
+  GTEST_SKIP() << "NEEDS ROOT PRIVILEGES AND CANNOT RUN FROM DOCKER CONTAINER"
+#endif
+
   timex cur;
   cur.modes = 0;
   int res{ adjtimex(&cur) };
@@ -98,15 +115,11 @@ TEST(AdjtimexTest, change_tick_value)
   EXPECT_EQ(errno, 0);
   timex buf = cur;
 
-  sleep(1);
-
   buf.modes |= ADJ_TICK;
   buf.tick = 9500;
   res = adjtimex(&buf);
   EXPECT_EQ(res, 0);
   EXPECT_EQ(errno, 0);
-
-  sleep(1);
 
   timex tmp;
   res = adjtimex(&tmp);
@@ -122,7 +135,15 @@ TEST(AdjtimexTest, change_tick_value)
 
 TEST(AdjtimexTest, change_tick_value_invalid)
 {
-  GTEST_SKIP();
+#if SUDO_NODOCKER
+  if (!RunningAsRoot())
+    GTEST_FAIL() << "MUST RUN AS ROOT";
+  if (RunningFromDockerContainer())
+    GTEST_FAIL() << "CANNOT RUN FROM DOCKER";
+#else
+  GTEST_SKIP() << "NEEDS ROOT PRIVILEGES AND CANNOT RUN FROM DOCKER CONTAINER"
+#endif
+
   timex cur;
   int res{ adjtimex(&cur) };
   EXPECT_EQ(res, 0);
