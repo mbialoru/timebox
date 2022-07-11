@@ -3,13 +3,13 @@ FROM debian:sid-slim
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
-ARG MIRROR=poland
+ARG MIRROR=germany
 
 # Set root password
 RUN echo 'root:docker' | chpasswd
 
 # Update and upgrade
-RUN apt -y update && apt-get install -y
+RUN apt -y update && apt -y upgrade
 
 # Set fastest available mirror
 RUN apt -y install netselect-apt
