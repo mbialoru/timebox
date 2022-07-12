@@ -1,5 +1,4 @@
 #include "defines.hpp"
-#include "utils.hpp"
 
 /* Description
 ==============
@@ -23,6 +22,7 @@ advised - and do not forget about privileges.
 #include <sys/timex.h>
 #include <iostream>
 #include <errno.h>
+#include "utils.hpp"
 
 // Note about used units:
 /*
@@ -105,7 +105,7 @@ TEST(AdjtimexTest, change_tick_value)
   if (RunningFromDockerContainer())
     GTEST_FAIL() << "CANNOT RUN FROM DOCKER";
 #else
-  GTEST_SKIP() << "NEEDS ROOT PRIVILEGES AND CANNOT RUN FROM DOCKER CONTAINER"
+  GTEST_SKIP() << "NEEDS ROOT PRIVILEGES AND CANNOT RUN FROM DOCKER CONTAINER";
 #endif
 
   timex cur;
@@ -141,7 +141,7 @@ TEST(AdjtimexTest, change_tick_value_invalid)
   if (RunningFromDockerContainer())
     GTEST_FAIL() << "CANNOT RUN FROM DOCKER";
 #else
-  GTEST_SKIP() << "NEEDS ROOT PRIVILEGES AND CANNOT RUN FROM DOCKER CONTAINER"
+  GTEST_SKIP() << "NEEDS ROOT PRIVILEGES AND CANNOT RUN FROM DOCKER CONTAINER";
 #endif
 
   timex cur;

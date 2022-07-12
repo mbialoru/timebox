@@ -9,6 +9,7 @@ file(GLOB_RECURSE SRCS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB_RECURSE HDRS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 
 add_executable(${PROJECT_NAME} ${SRCS} ${HDRS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         Threads::Threads
