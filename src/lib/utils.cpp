@@ -20,3 +20,17 @@ bool RunningFromDockerContainer()
     return true;
   return false;
 }
+
+bool TimeSyncServiceIsRunning()
+{
+  // For now it only detects systemd-timesyncd
+  char line[100];
+  FILE* f = popen("pidof systemd-timesyncd", "r");
+  fgets(line, 100, f);
+  pid_t pid = strtoul(line, NULL, 10);
+  pclose(f);
+
+  if (pid > 0)
+    return true;
+  return false;
+}
