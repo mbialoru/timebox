@@ -31,10 +31,16 @@ RUN apt install -y libboost-all-dev libgtest-dev libbenchmark-dev \
 # Python packages
 RUN pip install autopep8
 
-# Symbolic link for compatibility if needed
+# Symbolic link for compatibility
 # RUN ln -s /bin/uname /usr/bin/uname
 
 # Create the user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME -s /bin/bash
 USER $USERNAME
+
+# Add alias for python3
+RUN echo "alias python=python3" >> ~/.bashrc
+
+# Change default cd directory to app
+RUN echo "alias cd='HOME=/workspaces/app cd'" >> ~/.bashrc
