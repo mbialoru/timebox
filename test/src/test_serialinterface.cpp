@@ -2,27 +2,41 @@
 #include <functional>
 #include "serialinterface.hpp"
 
-int callback_calls{ 0 };
-
-void CallbackDummy()
+class SerialInterfaceTest : public ::testing::Test
 {
-  // This cannot be a member function for some reason, cannot access this method
-  // from within test body
-  std::cout << " Callback Launched " << callback_calls << std::endl;
-  callback_calls++;
-}
+protected:
+  int callback_calls{ 0 };
 
-TEST(SerialInterfaceTest, creating_objects)
-{
-  GTEST_SKIP() << "Test ends too quickly";
-  SerialInterface si{ "/dev/ttyACM0", 9600, &CallbackDummy };
-}
+public:
+  void SetUp() override {};
+  void TearDown() override {};
 
-TEST(SerialInterfaceTest, thread_callback)
+  void CallbackDummy()
+  {
+    // This cannot be a member function for some reason, cannot access this method
+    // from within test body
+    std::cout << " Callback Launched " << callback_calls << std::endl;
+    callback_calls++;
+  }
+};
+
+TEST_F(SerialInterfaceTest, thread_callback)
 {
-  SerialInterface si{ "/dev/ttyACM0", 9600, &CallbackDummy };
+  GTEST_SKIP() << "Long running";
+  SerialInterface si{ "/dev/ttyACM0", 9600, std::bind(&SerialInterfaceTest::CallbackDummy, this) };
   // When warm starting, arduino needs about ~5s to initizize and start sending
   // When cold starting GPS module will need much longer to obtain signal !
   sleep(10);
-  EXPECT_TRUE(callback_calls > 0);
+  EXPECT_TRUE(callback_calls > 5);
+}
+
+void MyCallback()
+{
+  std::cout << " Free function callback Launched ";
+}
+
+TEST_F(SerialInterfaceTest, using_free_function_callback)
+{
+  GTEST_SKIP();
+  SerialInterface si{ "/dev/ttyACM0", 9600, std::function(MyCallback) };
 }
