@@ -3,10 +3,9 @@
 
 #pragma once
 
-#include <iostream>
+#include <functional>
 #include <fstream>
 #include <thread>
-#include <ctime>
 
 class SerialInterface
 {
@@ -17,10 +16,10 @@ private:
   std::string cmd, in_str;
   std::unique_ptr<time_t> sys_time{ std::make_unique<time_t>() };
   unsigned long worker_tick{ 0 };
-  void WorkerLoop(void(*)());
+  void WorkerLoop(std::function<void()> cb);
 
 public:
-  SerialInterface(const char*, short, void(*)());
+  SerialInterface(const char*, short, std::function<void()>);
   ~SerialInterface();
 };
 

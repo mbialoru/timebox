@@ -1,6 +1,6 @@
 #include "serialinterface.hpp"
 
-SerialInterface::SerialInterface(const char* tty, short baud, void(*cb)())
+SerialInterface::SerialInterface(const char* tty, short baud, std::function<void()> cb)
 {
   // Check if shell is available
   if (!system(NULL))
@@ -28,7 +28,7 @@ SerialInterface::~SerialInterface()
   arduino_out.close();
 }
 
-void SerialInterface::WorkerLoop(void(*cb)())
+void SerialInterface::WorkerLoop(std::function<void()> cb)
 {
   std::time(sys_time.get());
   while (!arduino_in.eof())
