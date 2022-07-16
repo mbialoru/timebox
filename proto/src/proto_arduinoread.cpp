@@ -30,13 +30,14 @@ TEST_F(ArduinoReadTest, read_from_ttyACM0)
   noflsh -ixon -crtscts");
 
   std::ifstream arduino_in(dev);
+  std::unique_ptr<time_t> p_time{ std::make_unique<time_t>() };
+  std::time(p_time.get());
 
-  long time = std::time(NULL);
   std::string time_str;
 
   for (std::size_t i = 0; i < 100;)
   {
-    time = std::time(NULL);
+    std::time(p_time.get());
 
     while (!arduino_in.eof())
     {
