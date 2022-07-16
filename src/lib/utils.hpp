@@ -9,5 +9,6 @@
 bool UsingSudo();
 bool RunningAsRoot();
 bool RunningFromDockerContainer();
+bool TimeSyncServiceIsRunning();
 
 #endif // UTILS_HPP

@@ -3,13 +3,13 @@ FROM debian:sid-slim
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
-ARG MIRROR=germany
+ARG MIRROR=poland
 
 # Set root password
 RUN echo 'root:docker' | chpasswd
 
 # Update and upgrade
-RUN apt -y update && apt -y upgrade
+RUN apt update && apt -y upgrade
 
 # Set fastest available mirror
 RUN apt -y install netselect-apt
@@ -26,15 +26,21 @@ RUN apt install -y build-essential binutils autoconf automake clang clang-12  \
     git ruby graphviz doxygen moreutils
 RUN apt install -y python2 python3 python3-pip python3-venv
 RUN apt install -y libboost-all-dev libgtest-dev libbenchmark-dev \
-    libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config
+    libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config libsystemd-dev
 
 # Python packages
 RUN pip install autopep8
 
-# Symbolic link for compatibility if needed
+# Symbolic link for compatibility
 # RUN ln -s /bin/uname /usr/bin/uname
 
 # Create the user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME -s /bin/bash
 USER $USERNAME
+
+# Add alias for python3
+RUN echo "alias python=python3" >> ~/.bashrc
+
+# Change default cd directory to app
+RUN echo "alias cd='HOME=/workspaces/app cd'" >> ~/.bashrc

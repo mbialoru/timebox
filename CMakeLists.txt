@@ -27,6 +27,7 @@ include_directories(${PROJECT_CLASSES_DIR})
 add_subdirectory(submodules)
 add_subdirectory(src)
 add_subdirectory(test)
+add_subdirectory(benchmark)
 add_subdirectory(proto)
 
 if (CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")

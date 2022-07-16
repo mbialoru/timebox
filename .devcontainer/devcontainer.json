@@ -29,7 +29,8 @@
         "--cap-add=SYS_PTRACE",
         "--security-opt",
         "seccomp=unconfined",
-        "--net=host"
+        "--net=host",
+        "--device=/dev/ttyACM0"
     ],
     "remoteEnv": {
         "DISPLAY": ":0"
