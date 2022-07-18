@@ -4,4 +4,5 @@
 
 #define PROTO_IMGUI false
 #define PROTO_ADJTIMEX false
-#define PROTO_ARDUINOREAD true
+#define PROTO_ARDUINOREAD false
+#define PROTO_LIBSERIAL true
