@@ -34,3 +34,13 @@ bool TimeSyncServiceIsRunning()
     return true;
   return false;
 }
+
+size_t ConvertBaudRate(int baud)
+{
+  for (size_t i = 0; i < sizeof(conversiontable) / sizeof(conversiontable[0]); i++)
+  {
+    if (conversiontable[i].rawrate == baud)
+      return conversiontable[i].termiosrate;
+  }
+  return -1;
+}
