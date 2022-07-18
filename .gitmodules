@@ -5,3 +5,6 @@
 [submodule "submodules/SDL"]
 	path = submodules/SDL
 	url = https://github.com/libsdl-org/SDL
+[submodule "submodules/libserial"]
+	path = submodules/libserial
+	url = https://github.com/crayzeewulf/libserial
