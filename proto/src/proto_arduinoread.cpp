@@ -12,7 +12,7 @@ Prototype to retrieve stream of serial data from arduino
 #include <fstream>
 #include <cstdlib>
 
-class ArduinoReadTest : public ::testing::Test
+class Proto_ArduinoRead : public ::testing::Test
 {
 protected:
   const char* dev = "/dev/ttyACM0";
@@ -22,7 +22,7 @@ public:
   void TearDown() override {}
 };
 
-TEST_F(ArduinoReadTest, read_from_ttyACM0)
+TEST_F(Proto_ArduinoRead, read_from_ttyACM0)
 {
   // Activate a tty connection
   system("stty -F /dev/ttyACM0 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost \

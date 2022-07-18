@@ -196,9 +196,7 @@ int ProtoMain()
   return 0;
 }
 
-class P_imgui : public ::testing::Test {};
-
-TEST_F(P_imgui, Test)
+TEST(Proto_ImGUI, Test)
 {
   ProtoMain();
 }

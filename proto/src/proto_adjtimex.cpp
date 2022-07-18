@@ -66,7 +66,7 @@ void debug_print_timex(timex& t)
     "tai: " << t.tai << std::endl;
 }
 
-TEST(AdjtimexTest, timex_from_adjtimex)
+TEST(Proto_adjtimex, timex_from_adjtimex)
 {
   GTEST_SKIP();
   timex buf;
@@ -76,7 +76,7 @@ TEST(AdjtimexTest, timex_from_adjtimex)
   EXPECT_EQ(errno, 0);
 }
 
-TEST(AdjtimexTest, timex_from_ntp_adjtime)
+TEST(Proto_adjtimex, timex_from_ntp_adjtime)
 {
   GTEST_SKIP();
   timex buf;
@@ -86,7 +86,7 @@ TEST(AdjtimexTest, timex_from_ntp_adjtime)
   EXPECT_EQ(errno, 0);
 }
 
-TEST(AdjtimexTest, print_timex_structure)
+TEST(Proto_adjtimex, print_timex_structure)
 {
   GTEST_SKIP() << "Only for testing debug tools";
   timex buf;
@@ -96,8 +96,7 @@ TEST(AdjtimexTest, print_timex_structure)
   debug_print_timex(buf);
 }
 
-
-TEST(AdjtimexTest, change_tick_value)
+TEST(Proto_adjtimex, change_tick_value)
 {
 #if SUDO_NODOCKER
   if (!RunningAsRoot())
@@ -133,7 +132,7 @@ TEST(AdjtimexTest, change_tick_value)
   EXPECT_EQ(errno, 0);
 }
 
-TEST(AdjtimexTest, change_tick_value_invalid)
+TEST(Proto_adjtimex, change_tick_value_invalid)
 {
 #if SUDO_NODOCKER
   if (!RunningAsRoot())
