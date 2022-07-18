@@ -18,6 +18,7 @@ target_link_libraries(${PROJECT_NAME}
         gtest_main
         IMGUI
         SDL2
+        libserial_static
 )
 
 if( ipo_supported )

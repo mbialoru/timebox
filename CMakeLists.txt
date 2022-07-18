@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "-march=native")
-set(CMAKE_CXX_FLAGS_DEBUG "-ggdb3 -Wall -Werror -DDEBUG -fsanitize=address")
+set(CMAKE_CXX_FLAGS_DEBUG "-ggdb3 -Wall -Werror -Wno-unused-variable -DDEBUG -fsanitize=address")
 
 set(PROJECT_HEADERS_DIR ${PROJECT_SOURCE_DIR}/src/lib)
 set(PROJECT_CLASSES_DIR ${PROJECT_SOURCE_DIR}/src/lib/classes)
