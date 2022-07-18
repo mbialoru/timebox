@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-#include <functional>
 #include "serialinterface.hpp"
 
 class SerialInterfaceTest : public ::testing::Test
@@ -22,11 +21,12 @@ public:
 
 TEST_F(SerialInterfaceTest, thread_callback)
 {
-  GTEST_SKIP() << "Long running";
+  // GTEST_SKIP() << "Long running";
   SerialInterface si{ "/dev/ttyACM0", 9600, std::bind(&SerialInterfaceTest::CallbackDummy, this) };
+
   // When warm starting, arduino needs about ~5s to initizize and start sending
   // When cold starting GPS module will need much longer to obtain signal !
-  sleep(10);
+  std::this_thread::sleep_for(std::chrono::seconds(30));
   EXPECT_TRUE(callback_calls > 5);
 }
 
