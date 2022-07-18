@@ -9,6 +9,10 @@
 
 class ClockController
 {
+public:
+  ClockController();
+  ~ClockController() = default;
+
 private:
   struct tm curr { 0 };
   struct tm last { 0 };
@@ -18,9 +22,6 @@ private:
   // Way to influence system clock speed (tick for unix - timex)
   // Way to access current data (history and last difference)
   // Preferably time measurements done on a separate thread ?
-public:
-  ClockController();
-  ~ClockController() = default;
 };
 
 
