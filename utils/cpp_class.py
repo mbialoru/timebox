@@ -1,6 +1,6 @@
 import sys
 
- """ Small script to generate header and implementation file for C++ class """
+""" Small script to generate header and implementation file for C++ class """
 
 def main():
     name = str(sys.argv[1])
@@ -11,10 +11,10 @@ def main():
         f.write("#pragma once\n\n")
         f.write("// Includes here\n\n")
         f.write(f"class {name}\n{{\n")
-        f.write("private:\n\n")
         f.write("public:\n")
         f.write(f"  {name}();\n")
-        f.write(f"  ~{name}() = default;\n")
+        f.write(f"  ~{name}() = default;\n\n")
+        f.write("private:\n\n")
         f.write("};\n\n")
         f.write(f"#endif // {name.upper()}_HPP")
 
