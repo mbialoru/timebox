@@ -5,7 +5,6 @@
 
 #include <thread>
 #include <chrono>
-#include <iostream>
 #include <termios.h>
 #include <functional>
 #include <libserial/SerialPort.h>

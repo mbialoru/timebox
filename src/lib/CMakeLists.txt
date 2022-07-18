@@ -16,6 +16,5 @@ endif()
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         Boost::log
-        Boost::program_options
         Boost::log_setup
         libserial_static)

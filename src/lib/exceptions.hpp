@@ -16,3 +16,20 @@ public:
 private:
   std::string msg{};
 };
+
+
+class TimexAcquisitionError : public std::exception
+{
+public:
+  TimexAcquisitionError(const char* msg = "Error during acquisition of timex struct")
+  {
+    this->msg = msg;
+  }
+  const char* what() const noexcept
+  {
+    return this->msg.c_str();
+  }
+
+private:
+  std::string msg{};
+};

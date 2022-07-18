@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <unistd.h>
 #include <termios.h>
 #include <filesystem>
@@ -36,5 +37,6 @@ bool RunningAsRoot();
 bool RunningFromDockerContainer();
 bool TimeSyncServiceIsRunning();
 size_t ConvertBaudRate(int);
+void PrintTimex(timex&);
 
 #endif // UTILS_HPP
