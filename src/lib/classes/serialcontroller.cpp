@@ -1,6 +1,6 @@
-#include "serialinterface.hpp"
+#include "serialcontroller.hpp"
 
-SerialInterface::SerialInterface(const char* tty, unsigned baud,
+SerialController::SerialController(const char* tty, unsigned baud,
   std::function<void()> callback)
 {
   try
@@ -19,26 +19,26 @@ SerialInterface::SerialInterface(const char* tty, unsigned baud,
   sp.SetStopBits(LibSerial::StopBits::STOP_BITS_1);
 
   wt_run = true;
-  worker = std::thread(&SerialInterface::WorkerLoop, this, callback);
+  worker = std::thread(&SerialController::WorkerLoop, this, callback);
   worker.detach();
 
   wd_run = true;
-  watchdog = std::thread(&SerialInterface::WatchdogLoop, this);
+  watchdog = std::thread(&SerialController::WatchdogLoop, this);
   watchdog.detach();
 };
 
-SerialInterface::~SerialInterface()
+SerialController::~SerialController()
 {
   wt_run = false;
   wd_run = false;
 }
 
-void SerialInterface::Reset()
+void SerialController::Reset()
 {
   throw NotImplementedException();
 }
 
-void SerialInterface::WorkerLoop(std::function<void()> callback)
+void SerialController::WorkerLoop(std::function<void()> callback)
 {
   while (wt_run)
   {
@@ -63,11 +63,11 @@ void SerialInterface::WorkerLoop(std::function<void()> callback)
       worker_tick++;
       callback();
     }
-    std::this_thread::sleep_for(delay);
+    std::this_thread::sleep_for(worker_delay);
   }
 }
 
-void SerialInterface::WatchdogLoop()
+void SerialController::WatchdogLoop()
 {
   static std::string last_buf{ std::string(data_buffer, BUFFER_SIZE) };
   while (wd_run)
