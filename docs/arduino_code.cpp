@@ -49,6 +49,7 @@ void printTimeOnDisplay(TinyGPSTime& time, TinyGPSDate& date,
   lcd.print(time.second());
   lcd.print('.');
   lcd.print(time.centisecond());
+  lcd.print("    ");
 
   if (time.isUpdated())
     lcd.print(" *");
