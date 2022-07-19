@@ -17,4 +17,5 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
         Boost::log
         Boost::log_setup
+        Boost::date_time
         libserial_static)

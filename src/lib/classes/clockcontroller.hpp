@@ -4,26 +4,29 @@
 #pragma once
 
 #include <ctime>
+#include <chrono>
 #include <memory>
 #include <sys/timex.h>
+#include <boost/date_time.hpp>
+
 #include "pid.hpp"
 #include "exceptions.hpp"
 
 class ClockController
 {
 public:
-  ClockController();
-  ~ClockController() = default;
-  void Trigger(char*);
+  ClockController(char);
+  ~ClockController();
+  void Trigger(std::string);
 
 private:
-  int clock_mode;
-  timex buffer;
-  struct tm curr { 0 };
-  struct tm last { 0 };
+  char clock_mode;
+  timex original, modified;
   std::unique_ptr<PID<double>> pid;
-  void AdjustKernelTick(unsigned);
 
+  void AdjustKernelTick(unsigned);
+  double ClockDifference(std::string,
+    std::chrono::time_point<std::chrono::system_clock>);
 
   // TODO: Some container to store differences in PPS time and system clock time
   // Way to calculate these differences

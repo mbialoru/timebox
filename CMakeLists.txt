@@ -16,7 +16,7 @@ check_ipo_supported(RESULT ipo_supported OUTPUT error)
 
 # required packages
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED COMPONENTS log program_options log_setup)
+find_package(Boost REQUIRED COMPONENTS log program_options log_setup date_time)
 find_package(GTest REQUIRED)
 find_package(benchmark REQUIRED)
 find_package(PkgConfig REQUIRED)
