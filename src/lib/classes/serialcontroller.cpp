@@ -44,20 +44,20 @@ void SerialController::WorkerLoop(std::function<void()> callback)
   {
     while (sp.IsDataAvailable())
     {
-      for (size_t i = 0; i < BUFFER_SIZE; i++)
-        data_buffer[i] = '*';
+      for (size_t i = 0; i < buffer_size; i++)
+        data_buffer[i] = '\0';
 
-      for (std::size_t i = 0; i < BUFFER_SIZE; i++)
+      for (std::size_t i = 0; i < buffer_size; i++)
       {
         try
         {
-          sp.ReadByte(data_buffer[i], timeout);
+          sp.ReadByte(data_buffer[i], read_timeout);
           if (data_buffer[i] == '\n')
             break;
         }
         catch (const LibSerial::ReadTimeout&)
         {
-          std::cout << "Reached port timeout value !";
+          std::cout << "Reached port timeout value !" << std::flush;
         }
       }
       worker_tick++;
@@ -69,13 +69,16 @@ void SerialController::WorkerLoop(std::function<void()> callback)
 
 void SerialController::WatchdogLoop()
 {
-  static std::string last_buf{ std::string(data_buffer, BUFFER_SIZE) };
+  static std::string last_buf{ std::string(std::begin(data_buffer),
+    std::end(data_buffer)) };
+
   while (wd_run)
   {
     if (wt_run)
     {
       std::this_thread::sleep_for(std::chrono::seconds(2));
-      std::string curr_buf{ std::string(data_buffer, BUFFER_SIZE) };
+      std::string curr_buf{ std::string(std::begin(data_buffer),
+        std::end(data_buffer)) };
 
       if (curr_buf == last_buf && worker_tick > 0)
         std::cout << "Connection error!" << std::flush;

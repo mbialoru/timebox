@@ -20,16 +20,17 @@ public:
   void Reset();
 
 private:
-  static const std::size_t BUFFER_SIZE{ 256 };
+  static const std::size_t buffer_size{ 256 };
+  static const std::size_t read_timeout{ 250 };
   std::chrono::milliseconds worker_delay{ 500 };
-  unsigned long worker_tick{ 0 };
-  char data_buffer[BUFFER_SIZE];
-  std::thread worker, watchdog;
-  std::size_t timeout{ 250 };
+
   LibSerial::SerialPort sp;
+  std::thread worker, watchdog;
+  std::array<char, buffer_size> data_buffer;
 
   std::atomic<bool> wd_run{ false };
   std::atomic<bool> wt_run{ false };
+  std::atomic<std::size_t> worker_tick{ 0 };
 
   void WorkerLoop(std::function<void()>);
   void WatchdogLoop();

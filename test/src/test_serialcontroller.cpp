@@ -12,8 +12,6 @@ public:
 
   void CallbackDummy()
   {
-    // This cannot be a member function for some reason, cannot access this method
-    // from within test body
     std::cout << " Callback Launched " << callback_calls << std::endl;
     callback_calls++;
   }
@@ -21,12 +19,12 @@ public:
 
 TEST_F(SerialControllerTest, thread_callback)
 {
-  // GTEST_SKIP() << "Long running";
+  GTEST_SKIP() << "Long running";
   SerialController si{ "/dev/ttyACM0", 9600, std::bind(&SerialControllerTest::CallbackDummy, this) };
 
   // When warm starting, arduino needs about ~5s to initizize and start sending
   // When cold starting GPS module will need much longer to obtain signal !
-  std::this_thread::sleep_for(std::chrono::seconds(30));
+  std::this_thread::sleep_for(std::chrono::seconds(20));
   EXPECT_TRUE(callback_calls > 5);
 }
 
