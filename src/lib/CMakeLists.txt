@@ -15,7 +15,9 @@ endif()
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
+        Threads::Threads
         Boost::log
         Boost::log_setup
         Boost::date_time
-        libserial_static)
+        libserial_static
+)

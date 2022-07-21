@@ -24,11 +24,11 @@ find_package(PkgConfig REQUIRED)
 include_directories(${PROJECT_HEADERS_DIR})
 include_directories(${PROJECT_CLASSES_DIR})
 
-add_subdirectory(submodules)
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(benchmark)
 add_subdirectory(proto)
+add_subdirectory(submodules)
 
 if (CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
 option(BUILD_DOC "Build documentation" ON)

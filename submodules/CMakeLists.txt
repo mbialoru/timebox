@@ -1,6 +1,7 @@
 add_subdirectory(SDL)
 add_subdirectory(libserial)
 
+project(IMGUI)
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
 add_library(IMGUI STATIC)
 
