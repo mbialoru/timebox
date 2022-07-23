@@ -8,6 +8,7 @@
 #include <atomic>
 #include <termios.h>
 #include <functional>
+#include <boost/log/trivial.hpp>
 #include <libserial/SerialPort.h>
 #include "exceptions.hpp"
 #include "utils.hpp"

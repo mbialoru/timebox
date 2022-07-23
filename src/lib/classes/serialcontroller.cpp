@@ -7,9 +7,10 @@ SerialController::SerialController(const char* tty, unsigned baud,
   {
     sp.Open(tty);
   }
-  catch (const LibSerial::OpenFailed&)
+  catch (const LibSerial::OpenFailed& e)
   {
-    std::cerr << "The serial port did not open correctly." << std::endl;
+    BOOST_LOG_TRIVIAL(fatal) << "Failed to open connection on " << tty;
+    throw e;
   }
 
   sp.SetBaudRate(static_cast<LibSerial::BaudRate>(ConvertBaudRate(baud)));
@@ -18,19 +19,24 @@ SerialController::SerialController(const char* tty, unsigned baud,
   sp.SetParity(LibSerial::Parity::PARITY_NONE);
   sp.SetStopBits(LibSerial::StopBits::STOP_BITS_1);
 
+  BOOST_LOG_TRIVIAL(debug) << "Creating SerialController worker thread";
   wt_run = true;
   worker = std::thread(&SerialController::WorkerLoop, this, callback);
-  worker.detach();
 
+  BOOST_LOG_TRIVIAL(debug) << "Creating SerialController watchdog thread";
   wd_run = true;
   watchdog = std::thread(&SerialController::WatchdogLoop, this);
-  watchdog.detach();
 };
 
 SerialController::~SerialController()
 {
+  BOOST_LOG_TRIVIAL(debug) << "Cancelling SerialController worker thread";
   wt_run = false;
+  worker.join();
+
+  BOOST_LOG_TRIVIAL(debug) << "Cancelling SerialController watchdog thread";
   wd_run = false;
+  watchdog.join();
 }
 
 void SerialController::Reset()
@@ -57,7 +63,7 @@ void SerialController::WorkerLoop(std::function<void()> callback)
         }
         catch (const LibSerial::ReadTimeout&)
         {
-          std::cout << "Reached port timeout value !" << std::flush;
+          BOOST_LOG_TRIVIAL(info) << "Reached port timeout value !";
         }
       }
       worker_tick++;
@@ -81,7 +87,7 @@ void SerialController::WatchdogLoop()
         std::end(data_buffer)) };
 
       if (curr_buf == last_buf && worker_tick > 0)
-        std::cout << "Connection error!" << std::flush;
+        BOOST_LOG_TRIVIAL(error) << "Connection error!";
 
       last_buf = curr_buf;
     }
