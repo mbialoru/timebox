@@ -2,7 +2,7 @@
 #include "pid.hpp"
 
 
-class PIDTest : public ::testing::Test
+class Test_PID : public ::testing::Test
 {
 protected:
   PID<double> pid{ 1.2, 1.0, 0.001, 0 };
@@ -20,7 +20,7 @@ public:
   void TearDown() override {}
 };
 
-TEST_F(PIDTest, Control_Temperature)
+TEST_F(Test_PID, Control_Temperature)
 {
   for (std::size_t i = 0; i < 50; i++)
   {
