@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import sys
 
 """ Small script to generate header and implementation file for C++ class """
