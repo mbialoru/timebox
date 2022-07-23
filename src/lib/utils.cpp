@@ -35,7 +35,7 @@ bool TimeSyncServiceIsRunning()
   return false;
 }
 
-size_t ConvertBaudRate(int baud)
+std::size_t ConvertBaudRate(int baud)
 {
   for (size_t i = 0; i < sizeof(conversiontable) / sizeof(conversiontable[0]); i++)
   {
@@ -68,4 +68,23 @@ void PrintTimex(timex& t)
     "errcnt: " << t.errcnt << std::endl <<
     "stbcnt: " << t.stbcnt << std::endl <<
     "tai: " << t.tai << std::endl;
+}
+
+std::chrono::system_clock::time_point TimepointFromString(std::string time_str)
+{
+  std::vector<std::string> tmp;
+  time_t now = std::chrono::system_clock::to_time_t(
+    std::chrono::system_clock::now());
+  struct tm tm = *std::localtime(&now);
+
+  boost::split(tmp, time_str, boost::is_any_of(":."));
+
+  tm.tm_hour = std::stoi(tmp[0]);
+  tm.tm_min = std::stoi(tmp[1]);
+  tm.tm_sec = std::stoi(tmp[2]);
+
+  auto res = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+  res += std::chrono::duration<int, std::milli>(std::stoi(tmp[3]) * 10);
+
+  return res;
 }
