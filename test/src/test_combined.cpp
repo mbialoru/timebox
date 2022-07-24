@@ -24,5 +24,5 @@ void Test_Combined::Trigger()
 
 TEST_F(Test_Combined, try_to_adjust_clock_mockup)
 {
-  sleep(20);
+  std::this_thread::sleep_for(std::chrono::seconds(5));
 }

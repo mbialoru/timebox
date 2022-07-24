@@ -6,6 +6,7 @@
 #include <ctime>
 #include <chrono>
 #include <memory>
+#include <future>
 #include <sys/timex.h>
 #include <boost/date_time.hpp>
 #include <boost/log/trivial.hpp>
@@ -21,6 +22,7 @@ public:
   ~ClockController();
   void AdjustClock(std::string);
   std::vector<std::size_t> tick_history, timediff_history;
+  std::atomic<std::chrono::system_clock::time_point> last_call;
 
 private:
   char clock_mode;
@@ -28,6 +30,8 @@ private:
   timex original, modified;
   std::unique_ptr<PID<double>> pid;
 
+  timex GetTimex();
+  bool SetTimex(timex*);
   std::size_t ClockDifference();
   void AdjustKernelTick(unsigned);
   short NormalizeTickValue(short);

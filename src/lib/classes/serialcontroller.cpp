@@ -6,6 +6,8 @@ SerialController::SerialController(const char* tty, unsigned baud,
   try
   {
     sp.Open(tty);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    sp.FlushIOBuffers();
   }
   catch (const LibSerial::OpenFailed& e)
   {
