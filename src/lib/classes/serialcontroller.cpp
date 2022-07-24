@@ -66,8 +66,8 @@ void SerialController::WorkerLoop(std::function<void()> callback)
           BOOST_LOG_TRIVIAL(info) << "Reached port timeout value !";
         }
       }
-      worker_tick++;
       callback();
+      worker_tick++;
     }
     std::this_thread::sleep_for(worker_delay);
   }
@@ -92,4 +92,11 @@ void SerialController::WatchdogLoop()
       last_buf = curr_buf;
     }
   }
+}
+
+std::string SerialController::getBufferString()
+{
+  std::string curr_buf{ std::string(std::begin(data_buffer),
+    std::end(data_buffer)) };
+  return curr_buf;
 }

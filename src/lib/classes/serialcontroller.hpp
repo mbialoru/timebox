@@ -18,6 +18,7 @@ class SerialController
 public:
   SerialController(const char*, unsigned, std::function<void()>);
   ~SerialController();
+  std::string getBufferString();
   void Reset();
 
 private:

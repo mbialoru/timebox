@@ -17,7 +17,7 @@ public:
   ThreadRunner(std::size_t, std::size_t);
   virtual ~ThreadRunner();
 
-  void Start();
+  void Resume();
   void Pause();
 
 private:

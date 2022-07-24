@@ -1,3 +1,8 @@
+#ifndef EXCEPTIONS_HPP
+#define EXCEPTIONS_HPP
+
+#pragma once
+
 #include <string>
 #include <stdexcept>
 #include <boost/log/trivial.hpp>
@@ -54,3 +59,5 @@ public:
 private:
   std::string msg{};
 };
+
+#endif

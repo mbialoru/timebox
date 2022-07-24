@@ -11,6 +11,7 @@
 #include <boost/log/trivial.hpp>
 
 #include "pid.hpp"
+#include "utils.hpp"
 #include "exceptions.hpp"
 
 class ClockController
@@ -18,7 +19,8 @@ class ClockController
 public:
   ClockController(char, double);
   ~ClockController();
-  void AdjustKernelTick(unsigned);
+  void AdjustClock(std::string);
+  std::vector<std::size_t> tick_history, timediff_history;
 
 private:
   char clock_mode;
@@ -26,15 +28,9 @@ private:
   timex original, modified;
   std::unique_ptr<PID<double>> pid;
 
+  std::size_t ClockDifference();
+  void AdjustKernelTick(unsigned);
   short NormalizeTickValue(short);
-
-  // TODO: Some container to store differences in PPS time and system clock time
-  // Way to calculate these differences
-  // Way to connect that with embedded PID object
-  // Way to influence system clock speed (tick for unix - timex)
-  // Way to access current data (history and last difference)
-  // Preferably time measurements done on a separate thread ?
-  // No, we will make a trigger method, which will do all the work
 };
 
 

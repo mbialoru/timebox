@@ -3,7 +3,7 @@
 #define SUDO_NODOCKER false
 
 #define PROTO_IMGUI false
-#define PROTO_ADJTIMEX false
+#define PROTO_ADJTIMEX true
 #define PROTO_ARDUINOREAD false
 #define PROTO_LIBSERIAL false
-#define PROTO_TIMEFROMSTR true
+#define PROTO_TIMEFROMSTR false

@@ -14,6 +14,9 @@ ThreadRunner::~ThreadRunner()
 {
   BOOST_LOG_TRIVIAL(debug) << "Cancelling thread for " << name << " " << id;
   worker_on = false;
+  if (worker.joinable())
+    worker.join();
+  BOOST_LOG_TRIVIAL(debug) << "Stopped thread for " << name << " " << id;
 }
 
 void ThreadRunner::WorkLoop()
@@ -35,10 +38,12 @@ void ThreadRunner::WorkLoop()
 
 void ThreadRunner::Pause()
 {
+  BOOST_LOG_TRIVIAL(debug) << "Pausing thread for " << name << " " << id;
   paused = true;
 }
 
-void ThreadRunner::Start()
+void ThreadRunner::Resume()
 {
+  BOOST_LOG_TRIVIAL(debug) << "Resumed thread for " << name << " " << id;
   paused = false;
 }
