@@ -8,8 +8,9 @@
 class Test_Combined : public ::testing::Test
 {
 protected:
-  SerialController sc{ "/dev/ttyACM0", 9600, std::bind(&Test_Combined::Trigger, this) };
+  // Order matters, we need to prevent this
   ClockController cc{ 0, 0.001 };
+  SerialController sc{ "/dev/ttyACM0", 9600, std::bind(&Test_Combined::Trigger, this) };
 
 public:
   void SetUp() override {};
