@@ -8,11 +8,15 @@ ClockController::ClockController(char clock_mode, double resolution)
   // 0 is the aimed value of difference between system clock and PPS
   pid = std::make_unique<PID<double>>(1.2, 1.0, 0.001, 0);
 
+  BOOST_LOG_TRIVIAL(trace) << "Retrieving timex from kernel";
+
   std::packaged_task<timex()> task(std::bind(&ClockController::GetTimex, this));
   std::future<timex> ret = task.get_future();
   std::thread th(std::move(task));
   original = ret.get();
   th.join();
+
+  BOOST_LOG_TRIVIAL(trace) << "Success in retrieving timex from kernel";
 
   modified = original;
   modified.modes |= ADJ_TICK;
@@ -33,7 +37,8 @@ void ClockController::AdjustKernelTick(unsigned tick)
   BOOST_LOG_TRIVIAL(debug) << "Adjusting kernel tick to " << tick;
   modified.tick = tick;
 
-  // I cannot get it to work :(
+  // TODO: Fix code below, idea is okay, but it doesn't compile
+  /*
   std::packaged_task<bool(timex)> task(std::bind(&ClockController::SetTimex, this));
   std::future<bool> ret = task.get_future();
   timex* mod_ptr = &modified;
@@ -43,8 +48,7 @@ void ClockController::AdjustKernelTick(unsigned tick)
 
   if (is_changed)
     BOOST_LOG_TRIVIAL(debug) << "Successfully changed kernel tick to " << tick;
-
-  // TODO: Here code to modify timex and try to apply it
+  */
 }
 
 short ClockController::NormalizeTickValue(short tick)
