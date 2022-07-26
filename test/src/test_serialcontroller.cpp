@@ -1,9 +1,11 @@
-#if TEST_SERIALCONTROLLER
+#include "defines.hpp"
+
+#if TEST_SERIALREADER
 
 #include <gtest/gtest.h>
-#include "serialcontroller.hpp"
+#include "serialreader.hpp"
 
-class Test_SerialController : public ::testing::Test
+class Test_SerialReader : public ::testing::Test
 {
 protected:
   int callback_calls{ 0 };
@@ -19,11 +21,11 @@ public:
   }
 };
 
-TEST_F(Test_SerialController, thread_callback)
+TEST_F(Test_SerialReader, thread_callback)
 {
   // GTEST_SKIP() << "Long running";
-  SerialController si{ "/dev/ttyACM0", 9600,
-    std::bind(&Test_SerialController::CallbackDummy, this) };
+  SerialReader si{ "/dev/ttyACM0", 9600,
+    std::bind(&Test_SerialReader::CallbackDummy, this) };
 
   // When warm starting, arduino needs about ~5s to initizize and start sending
   // When cold starting GPS module will need much longer to obtain signal !
@@ -36,10 +38,10 @@ void MyCallback()
   std::cout << " Free function callback Launched ";
 }
 
-TEST_F(Test_SerialController, using_free_function_callback)
+TEST_F(Test_SerialReader, using_free_function_callback)
 {
   GTEST_SKIP();
-  SerialController si{ "/dev/ttyACM0", 9600, std::function(MyCallback) };
+  SerialReader si{ "/dev/ttyACM0", 9600, std::function(MyCallback) };
 }
 
 #endif

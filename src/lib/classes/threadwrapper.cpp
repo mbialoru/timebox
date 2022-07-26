@@ -1,25 +1,30 @@
 #include "threadwrapper.hpp"
 
-ThreadWrapper::ThreadWrapper(std::size_t sd = 0, std::size_t pd = 500)
+ThreadWrapper::ThreadWrapper(std::string name, std::size_t sd, std::size_t pd)
 {
-  BOOST_LOG_TRIVIAL(debug) << "Creating thread for " << name << " " << id;
-  paused = false;
+  BOOST_LOG_TRIVIAL(debug) << "Creating thread for " << name;
+  paused = true;
   worker_on = true;
-  id = std::this_thread::get_id();
+  startup_delay = sd;
+  pause_delay = pd;
+  this->name = name;
 
-  worker = std::thread(&ThreadWrapper::InnerLoop, this);
+  worker = std::thread(&ThreadWrapper::WorkerLoop, this);
+  tester = std::thread(&ThreadWrapper::TesterLoop, this);
 };
 
 ThreadWrapper::~ThreadWrapper()
 {
-  BOOST_LOG_TRIVIAL(debug) << "Cancelling thread for " << name << " " << id;
+  BOOST_LOG_TRIVIAL(debug) << "Cancelling thread for " << name;
   worker_on = false;
   if (worker.joinable())
     worker.join();
-  BOOST_LOG_TRIVIAL(debug) << "Stopped thread for " << name << " " << id;
+  if (tester.joinable())
+    tester.join();
+  BOOST_LOG_TRIVIAL(debug) << "Stopped thread for " << name;
 }
 
-void ThreadWrapper::InnerLoop()
+void ThreadWrapper::WorkerLoop()
 {
   std::this_thread::sleep_for(std::chrono::milliseconds(startup_delay));
   while (worker_on)
@@ -27,23 +32,37 @@ void ThreadWrapper::InnerLoop()
     if (not paused)
     {
       Work();
-      Test();
       worker_tick++;
     }
-    else {
+    else
       std::this_thread::sleep_for(std::chrono::milliseconds(pause_delay));
-    }
+  }
+}
+
+void ThreadWrapper::TesterLoop()
+{
+  std::this_thread::sleep_for(std::chrono::milliseconds(startup_delay));
+  while (worker_on)
+  {
+    if (not paused)
+      Test();
+    else
+      std::this_thread::sleep_for(std::chrono::milliseconds(pause_delay));
   }
 }
 
 void ThreadWrapper::Pause()
 {
-  BOOST_LOG_TRIVIAL(debug) << "Pausing thread for " << name << " " << id;
+  BOOST_LOG_TRIVIAL(debug) << "Pausing thread for " << name;
   paused = true;
 }
 
 void ThreadWrapper::Resume()
 {
-  BOOST_LOG_TRIVIAL(debug) << "Resumed thread for " << name << " " << id;
+  BOOST_LOG_TRIVIAL(debug) << "Resumed thread for " << name;
   paused = false;
 }
+
+void ThreadWrapper::Work() {};
+
+void ThreadWrapper::Test() {};

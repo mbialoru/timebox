@@ -1,2 +1,2 @@
 // Define which conditional tests to run
-#define TEST_SERIALCONTROLLER false
+#define TEST_SERIALREADER false

@@ -112,7 +112,7 @@ TEST(Proto_LibSerial, read_from_stream)
     usleep(1000);
   }
 
-  char data_buffer[32];
+  char serial_buffer[32];
 
   for (std::size_t i = 0; i < 20;)
   {
@@ -120,13 +120,13 @@ TEST(Proto_LibSerial, read_from_stream)
     {
       for (size_t i = 0; i < 32; i++)
       {
-        data_buffer[i] = '*';
+        serial_buffer[i] = '*';
       }
 
       for (std::size_t i = 0; i < 32; i++)
       {
-        serial_stream.get(data_buffer[i]);
-        if (data_buffer[i] == '\n')
+        serial_stream.get(serial_buffer[i]);
+        if (serial_buffer[i] == '\n')
         {
           break;
         }
@@ -136,12 +136,12 @@ TEST(Proto_LibSerial, read_from_stream)
       unsigned short length{ 0 };
       for (std::size_t i = 0; i < 32; i++)
       {
-        if (data_buffer[i] == '*')
+        if (serial_buffer[i] == '*')
         {
           continue;
         }
 
-        if (data_buffer[i] != '\n')
+        if (serial_buffer[i] != '\n')
         {
           length++;
         }
@@ -156,10 +156,10 @@ TEST(Proto_LibSerial, read_from_stream)
 
       for (size_t i = 0; i < 32; i++)
       {
-        std::cout << data_buffer[i];
-        if (data_buffer[i] == '\n')
+        std::cout << serial_buffer[i];
+        if (serial_buffer[i] == '\n')
         {
-          std::cout << data_buffer[i];
+          std::cout << serial_buffer[i];
           break;
         }
       }
@@ -173,7 +173,7 @@ TEST(Proto_LibSerial, read_from_stream)
 TEST(Proto_LibSerial, read_with_callback)
 {
   // NOTE: First OPEN the stream, then SET its properties !
-  char data_buffer[32];
+  char serial_buffer[32];
   LibSerial::SerialStream serial_stream;
 
   try
@@ -196,16 +196,16 @@ TEST(Proto_LibSerial, read_with_callback)
     while (serial_stream.IsDataAvailable())
     {
       for (size_t i = 0; i < 32; i++)
-        data_buffer[i] = '*';
+        serial_buffer[i] = '*';
 
       for (std::size_t i = 0; i < 32; i++)
       {
-        serial_stream.get(data_buffer[i]);
-        if (data_buffer[i] == '\n')
+        serial_stream.get(serial_buffer[i]);
+        if (serial_buffer[i] == '\n')
           break;
       }
 
-      CallbackDummy(data_buffer, 32);
+      CallbackDummy(serial_buffer, 32);
 
       usleep(1000);
       i++;
