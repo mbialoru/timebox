@@ -10,12 +10,11 @@
 #include <atomic>
 #include <boost/log/trivial.hpp>
 
-class ThreadRunner
+class ThreadWrapper
 {
 public:
-  ThreadRunner();
-  ThreadRunner(std::size_t, std::size_t);
-  virtual ~ThreadRunner();
+  ThreadWrapper(std::size_t, std::size_t);
+  virtual ~ThreadWrapper();
 
   void Resume();
   void Pause();
@@ -28,9 +27,9 @@ private:
   std::atomic<bool> worker_on, paused;
   std::atomic<std::size_t> worker_tick;
 
-  void WorkLoop();
-  virtual void DoWork() = 0;
-  virtual void Watchdog() = 0;
+  void InnerLoop();
+  virtual void Work() = 0;
+  virtual void Test() = 0;
 };
 
 #endif // THREADRUNNER_HPP

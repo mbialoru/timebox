@@ -1,16 +1,16 @@
-#include "threadrunner.hpp"
+#include "threadwrapper.hpp"
 
-ThreadRunner::ThreadRunner(std::size_t sd = 0, std::size_t pd = 500)
+ThreadWrapper::ThreadWrapper(std::size_t sd = 0, std::size_t pd = 500)
 {
   BOOST_LOG_TRIVIAL(debug) << "Creating thread for " << name << " " << id;
   paused = false;
   worker_on = true;
   id = std::this_thread::get_id();
 
-  worker = std::thread(&ThreadRunner::WorkLoop, this);
+  worker = std::thread(&ThreadWrapper::InnerLoop, this);
 };
 
-ThreadRunner::~ThreadRunner()
+ThreadWrapper::~ThreadWrapper()
 {
   BOOST_LOG_TRIVIAL(debug) << "Cancelling thread for " << name << " " << id;
   worker_on = false;
@@ -19,15 +19,15 @@ ThreadRunner::~ThreadRunner()
   BOOST_LOG_TRIVIAL(debug) << "Stopped thread for " << name << " " << id;
 }
 
-void ThreadRunner::WorkLoop()
+void ThreadWrapper::InnerLoop()
 {
   std::this_thread::sleep_for(std::chrono::milliseconds(startup_delay));
   while (worker_on)
   {
     if (not paused)
     {
-      DoWork();
-      Watchdog();
+      Work();
+      Test();
       worker_tick++;
     }
     else {
@@ -36,13 +36,13 @@ void ThreadRunner::WorkLoop()
   }
 }
 
-void ThreadRunner::Pause()
+void ThreadWrapper::Pause()
 {
   BOOST_LOG_TRIVIAL(debug) << "Pausing thread for " << name << " " << id;
   paused = true;
 }
 
-void ThreadRunner::Resume()
+void ThreadWrapper::Resume()
 {
   BOOST_LOG_TRIVIAL(debug) << "Resumed thread for " << name << " " << id;
   paused = false;
