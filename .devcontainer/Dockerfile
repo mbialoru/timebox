@@ -40,6 +40,10 @@ RUN conan --version
 ARG GCC_VER="12"
 RUN apt install -y gcc-${GCC_VER} g++-${GCC_VER}
 
+# Set gcc-${GCC_VER} as default gcc
+RUN update-alternatives --install /usr/bin/gcc gcc $(which gcc-${GCC_VER}) 100
+RUN update-alternatives --install /usr/bin/g++ g++ $(which g++-${GCC_VER}) 100
+
 # Install clang llvm
 ARG LLVM_VER="15"
 RUN apt install -y clang-${LLVM_VER} lldb-${LLVM_VER} lld-${LLVM_VER} \
@@ -58,7 +62,7 @@ RUN update-alternatives --install /usr/bin/clang++ clang++ $(which \
 
 # Install this project dependencies
 RUN apt install -y libboost-all-dev libgtest-dev libgmock-dev libbenchmark-dev \
-    libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config libsystemd-dev
+    libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config
 
 # Symbolic link for compatibility
 # RUN ln -s /bin/uname /usr/bin/uname

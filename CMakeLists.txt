@@ -1,12 +1,78 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 
-project(timebox LANGUAGES C CXX)
-
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Strongly encouraged to enable this globally to avoid conflicts between
+# -Wpedantic being enabled and -std=c++20 and -std=gnu++20 for example
+# when compiling with PCH enabled
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "-march=native")
-set(CMAKE_CXX_FLAGS_DEBUG "-ggdb3 -Wall -Werror -Wno-unused-variable -DDEBUG -fsanitize=address")
+
+# Flags
+set(CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS}-march=native")
+set(CMAKE_CXX_FLAGS_DEBUG
+    "${CMAKE_CXX_FLAGS_DEBUG} -Wall -ggdb3 -DDEBUG -fno-omit-frame-pointer -fsanitize=address")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+set(CMAKE_LINKER_FLAGS_DEBUG
+    "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+
+# Add project_options v0.20.0
+# https://github.com/cpp-best-practices/project_options
+include(FetchContent)
+FetchContent_Declare(_project_options URL
+    https://github.com/aminya/project_options/archive/refs/tags/v0.24.0.zip)
+FetchContent_MakeAvailable(_project_options)
+include(${_project_options_SOURCE_DIR}/Index.cmake)
+
+project(timebox VERSION 0.0.1 LANGUAGES C CXX
+    DESCRIPTION ""
+    HOMEPAGE_URL ""
+    )
+
+# This variable is set by project() in CMake 3.21+
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
+    PROJECT_IS_TOP_LEVEL)
+if(PROJECT_IS_TOP_LEVEL)
+  # Consider the CTest module, which creates targets and options!
+  # Only needed if you want to enable submissions to a CDash server.
+  include(CTest)
+endif()
+
+set(GIT_SHA
+    "Unknown"
+    CACHE STRING "SHA this build was generated from")
+string(SUBSTRING "${GIT_SHA}" 0 8 GIT_SHORT_SHA)
+
+include(${_project_options_SOURCE_DIR}/src/DynamicProjectOptions.cmake)
+# Initialize project_options variable related to this project
+# This overwrites `project_options` and sets `project_warnings`
+# uncomment the options to enable them:
+dynamic_project_options(
+    # This is a list of headers to pre-compile, here are some common ones
+    <vector>
+    <string>
+    # ENABLE_CONAN     # Enable when ready to package
+    # CONAN_OPTIONS    # Extra options to pass to conan
+    # MSVC_WARNINGS    # Override the defaults for the MSVC warnings
+    # CLANG_WARNINGS   # Override the defaults for the CLANG warnings
+    # GCC_WARNINGS     # Override the defaults for the GCC warnings
+    CPPCHECK_OPTIONS
+    --enable=style,performance,warning,portability
+    --inline-suppr
+    # We cannot act on a bug/missing feature of cppcheck
+    --suppress=cppcheckError
+    --suppress=internalAstError
+    # if a file does not have an internalAstError, we get an unmatchedSuppression error
+    --suppress=unmatchedSuppression
+    --suppress=passedByValue
+    --suppress=syntaxError
+    --inconclusive
+)
+
+target_compile_features(project_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+add_library(myproject::project_options INTERFACE IMPORTED)
+add_library(myproject::project_warnings INTERFACE IMPORTED)
 
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported OUTPUT error)
@@ -41,3 +107,9 @@ else (DOXYGEN_FOUND)
 message("Doxygen need to be installed to generate the doxygen documentation")
 endif (DOXYGEN_FOUND)
 endif()
+
+set(CPACK_PACKAGE_FILE_NAME
+    "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
+)
+
+include(CPack)
