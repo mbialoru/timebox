@@ -1,7 +1,8 @@
 #include "serialreader.hpp"
 
 SerialReader::SerialReader(const char* tty, std::size_t baud,
-  std::function<void(std::string)> callback) : ThreadWrapper::ThreadWrapper("StringReader")
+  std::function<void(std::string)> callback) :
+  ThreadWrapper::ThreadWrapper("StringReader")
 {
   this->callback = callback;
   InitSerial(tty, baud);
@@ -57,15 +58,15 @@ void SerialReader::Work()
 
 void SerialReader::Test()
 {
-  static std::string last_buf{ std::string(std::begin(serial_buffer),
-    std::end(serial_buffer)) };
+  thread_local static std::string last_buf{ std::string(std::begin(
+    serial_buffer), std::end(serial_buffer)) };
 
-  std::string curr_buf{ std::string(std::begin(serial_buffer),
+  thread_local std::string curr_buf{ std::string(std::begin(serial_buffer),
     std::end(serial_buffer)) };
 
   if (curr_buf == last_buf && worker_tick > 0)
     BOOST_LOG_TRIVIAL(error) << "Serial connection error!";
 
   last_buf = curr_buf;
-  std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+  std::this_thread::sleep_for(std::chrono::milliseconds(pause_delay * 3));
 }

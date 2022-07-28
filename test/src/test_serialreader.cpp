@@ -3,7 +3,23 @@
 #if TEST_SERIALREADER
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include "serialreader.hpp"
+
+class MockSerialReader
+{
+private:
+  std::function<void(std::string)> callback = nullptr;
+
+public:
+  MockSerialReader(const char*, std::size_t, std::function<void(std::string)>);
+};
+
+MockSerialReader::MockSerialReader(const char* a, std::size_t b,
+  std::function<void(std::string)> callback)
+{
+  this->callback = callback;
+}
 
 class Test_SerialReader : public ::testing::Test
 {
@@ -33,7 +49,7 @@ TEST_F(Test_SerialReader, thread_callback)
   EXPECT_TRUE(callback_calls > 5);
 }
 
-void MyCallback()
+void MyCallback(std::string test)
 {
   std::cout << " Free function callback Launched ";
 }

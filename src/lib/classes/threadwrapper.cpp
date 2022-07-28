@@ -9,8 +9,8 @@ ThreadWrapper::ThreadWrapper(std::string name, std::size_t sd, std::size_t pd)
   pause_delay = pd;
   this->name = name;
 
-  worker = std::thread(&ThreadWrapper::WorkerLoop, this);
-  tester = std::thread(&ThreadWrapper::TesterLoop, this);
+  worker = std::thread(&ThreadWrapper::WorkLoop, this);
+  tester = std::thread(&ThreadWrapper::TestLoop, this);
 };
 
 ThreadWrapper::~ThreadWrapper()
@@ -24,7 +24,7 @@ ThreadWrapper::~ThreadWrapper()
   BOOST_LOG_TRIVIAL(debug) << "Stopped thread for " << name;
 }
 
-void ThreadWrapper::WorkerLoop()
+void ThreadWrapper::WorkLoop()
 {
   std::this_thread::sleep_for(std::chrono::milliseconds(startup_delay));
   while (worker_on)
@@ -39,7 +39,7 @@ void ThreadWrapper::WorkerLoop()
   }
 }
 
-void ThreadWrapper::TesterLoop()
+void ThreadWrapper::TestLoop()
 {
   std::this_thread::sleep_for(std::chrono::milliseconds(startup_delay));
   while (worker_on)
@@ -62,7 +62,3 @@ void ThreadWrapper::Resume()
   BOOST_LOG_TRIVIAL(debug) << "Resumed thread for " << name;
   paused = false;
 }
-
-void ThreadWrapper::Work() {};
-
-void ThreadWrapper::Test() {};

@@ -26,10 +26,10 @@ protected:
   std::atomic<bool> worker_on, paused;
   std::atomic<std::size_t> worker_tick;
 
-  void WorkerLoop();
-  void TesterLoop();
-  virtual void Work();
-  virtual void Test();
+  virtual void WorkLoop();
+  virtual void TestLoop();
+  virtual void Work() {};
+  virtual void Test() {};
 };
 
 #endif // THREADRUNNER_HPP

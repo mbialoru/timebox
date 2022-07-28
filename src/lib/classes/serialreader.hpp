@@ -1,5 +1,5 @@
-#ifndef SERIALCONTROLLER_HPP
-#define SERIALCONTROLLER_HPP
+#ifndef SERIALREADER_HPP
+#define SERIALREADER_HPP
 
 #pragma once
 
@@ -12,6 +12,10 @@
 
 class SerialReader : public ThreadWrapper
 {
+public:
+  SerialReader(const char*, std::size_t, std::function<void(std::string)>);
+  ~SerialReader();
+
 private:
   std::function<void(std::string)> callback = nullptr;
 
@@ -25,10 +29,6 @@ private:
   void InitSerial(const char*, std::size_t);
   void Work() override;
   void Test() override;
-
-public:
-  SerialReader(const char*, std::size_t, std::function<void(std::string)>);
-  ~SerialReader();
 };
 
-#endif // SERIALCONTROLLER_HPP
+#endif // SERIALREADER_HPP
