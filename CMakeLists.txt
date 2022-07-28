@@ -8,9 +8,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "-march=native")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb3 -Wall -Werror -Wno-unused-variable -DDEBUG -fsanitize=address")
 
-set(PROJECT_HEADERS_DIR ${PROJECT_SOURCE_DIR}/src/lib)
-set(PROJECT_CLASSES_DIR ${PROJECT_SOURCE_DIR}/src/lib/classes)
-
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported OUTPUT error)
 
@@ -20,9 +17,6 @@ find_package(Boost REQUIRED COMPONENTS log program_options log_setup date_time)
 find_package(GTest REQUIRED)
 find_package(benchmark REQUIRED)
 find_package(PkgConfig REQUIRED)
-
-include_directories(${PROJECT_HEADERS_DIR})
-include_directories(${PROJECT_CLASSES_DIR})
 
 add_subdirectory(src)
 add_subdirectory(test)

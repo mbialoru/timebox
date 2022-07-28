@@ -28,6 +28,6 @@ private:
   double pTerm, iTerm, dTerm;
 };
 
-#include "pid.ipp"
+#include "../pid.ipp"
 
 #endif // PID_HPP
