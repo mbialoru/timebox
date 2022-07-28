@@ -15,6 +15,8 @@ target_link_libraries(${PROJECT_NAME}
         ${CMAKE_PROJECT_NAME}_lib
         gtest
         gtest_main
+        gmock
+        gmock_main
 )
 
 if( ipo_supported )

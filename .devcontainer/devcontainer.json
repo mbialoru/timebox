@@ -30,7 +30,7 @@
         "--security-opt",
         "seccomp=unconfined",
         "--net=host",
-        "--device=/dev/ttyACM0"
+        // "--device=/dev/ttyACM0"
     ],
     "remoteEnv": {
         "DISPLAY": ":0"
