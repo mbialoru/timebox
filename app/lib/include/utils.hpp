@@ -41,5 +41,6 @@ bool RunningFromDockerContainer();
 bool TimeSyncServiceIsRunning();
 std::size_t ConvertBaudRate(int);
 std::chrono::system_clock::time_point TimepointFromString(std::string);
+std::string StringFromTimepoint(std::chrono::system_clock::time_point);
 
 #endif // UTILS_HPP

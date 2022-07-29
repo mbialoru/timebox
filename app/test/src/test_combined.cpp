@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "defines.hpp"
 #include "clockcontroller.hpp"
 #include "serialreader.hpp"
 
@@ -13,6 +14,7 @@ public:
 
 TEST_F(Test_Combined, try_to_adjust_clock_mockup)
 {
+  GTEST_SKIP();
   ClockController cc{ 0, 0.001 };
   SerialReader sc{ "/dev/ttyACM0", 9600, std::bind(&ClockController::AdjustClock, &cc, std::placeholders::_1) };
 

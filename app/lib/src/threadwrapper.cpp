@@ -2,7 +2,7 @@
 
 ThreadWrapper::ThreadWrapper(std::string name, std::size_t sd, std::size_t pd)
 {
-  BOOST_LOG_TRIVIAL(debug) << "Creating thread for " << name;
+  BOOST_LOG_TRIVIAL(debug) << "Creating threads for " << name;
   paused = true;
   worker_on = true;
   startup_delay = sd;
@@ -15,13 +15,13 @@ ThreadWrapper::ThreadWrapper(std::string name, std::size_t sd, std::size_t pd)
 
 ThreadWrapper::~ThreadWrapper()
 {
-  BOOST_LOG_TRIVIAL(debug) << "Cancelling thread for " << name;
+  BOOST_LOG_TRIVIAL(debug) << "Cancelling threads for " << name;
   worker_on = false;
   if (worker.joinable())
     worker.join();
   if (tester.joinable())
     tester.join();
-  BOOST_LOG_TRIVIAL(debug) << "Stopped thread for " << name;
+  BOOST_LOG_TRIVIAL(debug) << "Stopped threads for " << name;
 }
 
 void ThreadWrapper::WorkLoop()

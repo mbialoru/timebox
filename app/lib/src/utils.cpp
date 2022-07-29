@@ -88,3 +88,14 @@ std::chrono::system_clock::time_point TimepointFromString(std::string time_str)
 
   return res;
 }
+
+std::string StringFromTimepoint(std::chrono::system_clock::time_point tp)
+{
+  time_t tmp = std::chrono::system_clock::to_time_t(tp);
+  struct tm tm = *std::localtime(&tmp);
+  std::string res{ std::to_string(tm.tm_hour) + ":"
+    + std::to_string(tm.tm_min) + ":"
+    + std::to_string(tm.tm_sec) };
+
+  return res;
+}

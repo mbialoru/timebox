@@ -9,8 +9,6 @@ SerialReader::SerialReader(const char* tty, std::size_t baud,
   paused = false;
 }
 
-SerialReader::~SerialReader() {};
-
 void SerialReader::InitSerial(const char* tty, std::size_t baud)
 {
   try
@@ -52,7 +50,6 @@ void SerialReader::Work()
       }
     }
     callback(std::string(serial_buffer.begin(), serial_buffer.end()));
-    worker_tick++;
   }
 }
 

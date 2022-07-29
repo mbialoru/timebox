@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "defines.hpp"
 #include "utils.hpp"
 
 

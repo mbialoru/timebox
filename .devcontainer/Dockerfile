@@ -79,7 +79,7 @@ USER $USERNAME
 RUN echo "alias python=python3" >> ~/.bashrc
 
 # Change default cd directory to app
-RUN echo "alias cd='HOME=${WORKDIR} cd'" >> ~/.bashrc
+RUN echo "alias cd='HOME=/workspaces/timebox cd'" >> ~/.bashrc
 
 # Add convenient aliases
 RUN echo "alias l='ls -a'" >> ~/.bashrc

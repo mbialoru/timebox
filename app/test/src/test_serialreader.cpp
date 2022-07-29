@@ -1,23 +1,14 @@
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
+#include "defines.hpp"
+
+#if USING_REAL_HARDWARE
 #include "serialreader.hpp"
+#include "threadwrapper.hpp"
+#else
+#include "fakes.hpp"
+#endif
 
-
-class MockSerialReader
-{
-private:
-  std::function<void(std::string)> callback = nullptr;
-
-public:
-  MockSerialReader(const char*, std::size_t, std::function<void(std::string)>);
-};
-
-MockSerialReader::MockSerialReader(const char* a, std::size_t b,
-  std::function<void(std::string)> callback)
-{
-  this->callback = callback;
-}
 
 class Test_SerialReader : public ::testing::Test
 {
@@ -30,30 +21,39 @@ public:
 
   void CallbackDummy()
   {
-    std::cout << " Callback Launched " << callback_calls << std::endl;
     callback_calls++;
   }
 };
 
 TEST_F(Test_SerialReader, thread_callback)
 {
-  // GTEST_SKIP() << "Long running";
+#if USING_REAL_HARDWARE
   SerialReader si{ "/dev/ttyACM0", 9600,
     std::bind(&Test_SerialReader::CallbackDummy, this) };
+#else
+  FakeSerialReader si{ "/dev/ttyACM0", 9600,
+    std::bind(&Test_SerialReader::CallbackDummy, this) };
+#endif
 
-  // When warm starting, arduino needs about ~5s to initizize and start sending
-  // When cold starting GPS module will need much longer to obtain signal !
-  std::this_thread::sleep_for(std::chrono::seconds(20));
-  EXPECT_TRUE(callback_calls > 5);
+  std::this_thread::sleep_for(std::chrono::seconds(5));
+  EXPECT_TRUE(callback_calls > 3);
 }
 
-void MyCallback(std::string test)
+int MyCallback_calls{ 0 };
+void MyCallback(std::string)
 {
-  std::cout << " Free function callback Launched ";
+  MyCallback_calls++;
 }
 
 TEST_F(Test_SerialReader, using_free_function_callback)
 {
-  GTEST_SKIP();
-  SerialReader si{ "/dev/ttyACM0", 9600, std::function(MyCallback) };
+#if USING_REAL_HARDWARE
+  SerialReader si{ "/dev/ttyACM0", 9600,
+    std::bind(MyCallback, std::placeholders::_1)};
+#else
+  FakeSerialReader si{ "/dev/ttyACM0", 9600,
+    std::bind(MyCallback, std::placeholders::_1) };
+#endif
+  std::this_thread::sleep_for(std::chrono::seconds(5));
+  EXPECT_TRUE(MyCallback_calls > 3);
 }
