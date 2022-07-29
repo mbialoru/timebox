@@ -4,11 +4,12 @@ enable_testing()
 set(CTEST_TEST_TIMEOUT 20) # if triggered, log files won't be written
 
 file(GLOB_RECURSE SRCS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE HDRS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 
-add_executable(${PROJECT_NAME}_test ${SRCS} fakes.hpp)
+add_executable(${PROJECT_NAME}_test ${HDRS} ${SRCS})
 target_include_directories(${PROJECT_NAME}_test
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR})
+        ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(${PROJECT_NAME}_test
     PRIVATE
