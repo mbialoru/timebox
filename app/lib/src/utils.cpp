@@ -37,12 +37,19 @@ bool TimeSyncServiceIsRunning()
 
 std::size_t ConvertBaudRate(int baud)
 {
-  for (size_t i = 0; i < sizeof(conversiontable) / sizeof(conversiontable[0]); i++)
+  static std::map<int, int> conversion_map
   {
-    if (conversiontable[i].rawrate == baud)
-      return conversiontable[i].termiosrate;
-  }
-  return -1;
+    {0, B0}, {50, B50}, {75, B75}, {110, B110}, {134, B134}, {150, B150},
+    {200, B200}, {300, B300}, {600, B600}, {1200, B1200}, {1800, B1800},
+    {2400, B2400}, {4800, B4800}, {9600, B9600}, {19200, B19200},
+    {38400, B38400}
+  };
+
+  auto search = conversion_map.find(baud);
+  if (search != conversion_map.end())
+    return search->second;
+  else
+    throw std::invalid_argument("Invalid baud rate !");
 }
 
 void PrintTimex(timex& t)

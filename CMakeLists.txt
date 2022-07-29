@@ -30,14 +30,17 @@ FetchContent_Declare(_project_options URL
 FetchContent_MakeAvailable(_project_options)
 include(${_project_options_SOURCE_DIR}/Index.cmake)
 
-# This variable is set by project() in CMake 3.21+
-string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
-    PROJECT_IS_TOP_LEVEL)
-if(PROJECT_IS_TOP_LEVEL)
-  # Consider the CTest module, which creates targets and options!
-  # Only needed if you want to enable submissions to a CDash server.
-  include(CTest)
-endif()
+# Libraries we use here, generate errors in their unitests when including ctest
+# in top level!
+
+# # This variable is set by project() in CMake 3.21+
+# string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
+#     PROJECT_IS_TOP_LEVEL)
+# if(PROJECT_IS_TOP_LEVEL)
+#   # Consider the CTest module, which creates targets and options!
+#   # Only needed if you want to enable submissions to a CDash server.
+#   include(CTest)
+# endif()
 
 set(GIT_SHA
     "Unknown"
