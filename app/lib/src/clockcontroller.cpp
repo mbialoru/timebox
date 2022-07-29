@@ -10,11 +10,9 @@ ClockController::ClockController(char clock_mode, double resolution)
 
   BOOST_LOG_TRIVIAL(trace) << "Retrieving timex from kernel";
 
-  std::packaged_task<timex()> task(std::bind(&ClockController::GetTimex, this));
-  std::future<timex> ret = task.get_future();
-  std::thread th(std::move(task));
+  std::future<timex> ret = std::async(std::launch::async,
+    std::bind(&ClockController::GetTimex, this));
   original = ret.get();
-  th.join();
 
   BOOST_LOG_TRIVIAL(trace) << "Success in retrieving timex from kernel";
 
@@ -37,18 +35,13 @@ void ClockController::AdjustKernelTick(unsigned tick)
   BOOST_LOG_TRIVIAL(debug) << "Adjusting kernel tick to " << tick;
   modified.tick = tick;
 
-  // TODO: Fix code below, idea is okay, but it doesn't compile
-  /*
-  std::packaged_task<bool(timex)> task(std::bind(&ClockController::SetTimex, this));
-  std::future<bool> ret = task.get_future();
-  timex* mod_ptr = &modified;
-  std::thread th(std::move(task), mod_ptr);
+  std::future<bool> ret = std::async(std::launch::async, std::bind(
+    &ClockController::SetTimex, this, std::placeholders::_1), &modified);
+
   bool is_changed = ret.get();
-  th.join();
 
   if (is_changed)
     BOOST_LOG_TRIVIAL(debug) << "Successfully changed kernel tick to " << tick;
-  */
 }
 
 short ClockController::NormalizeTickValue(short tick)
@@ -81,19 +74,37 @@ void ClockController::AdjustClock(std::string time_str)
   last_call.store(now);
 }
 
+timex ClockController::getModifiedTimex()
+{
+  return modified;
+}
+
+timex ClockController::getOriginalTimex()
+{
+  return original;
+}
+
 timex ClockController::GetTimex()
 {
+  // TODO: On Fedora it doesn't work from container for some reason ...
   timex ret;
-  bool success = false;
+  thread_local bool success = false;
   while (not success)
+  {
     success = (bool)adjtimex(&ret);
+    if (errno == EPERM)
+      BOOST_LOG_TRIVIAL(error) << "Operation not permitted when acquiring timex";
+    if (errno == EINVAL)
+      BOOST_LOG_TRIVIAL(warning) << "Invalid argument when acquiring timex";
+  }
   return ret;
 }
 
 bool ClockController::SetTimex(timex* t)
 {
-  bool success = false;
-  while (not success)
-    success = (bool)adjtimex(t);
-  return success;
+  return true;
+  // bool success = false;
+  // while (not success)
+  //   success = (bool)adjtimex(t);
+  // return success;
 }

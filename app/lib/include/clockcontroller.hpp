@@ -20,21 +20,24 @@ class ClockController
 public:
   ClockController(char, double);
   ~ClockController();
+  timex getOriginalTimex();
+  timex getModifiedTimex();
   void AdjustClock(std::string);
+
   std::vector<std::size_t> tick_history, timediff_history;
   std::atomic<std::chrono::system_clock::time_point> last_call;
 
 private:
-  char clock_mode;
-  short resolution_power;
-  timex original, modified;
-  std::unique_ptr<PID<double>> pid;
-
   timex GetTimex();
   bool SetTimex(timex*);
   std::size_t ClockDifference();
   void AdjustKernelTick(unsigned);
   short NormalizeTickValue(short);
+
+  char clock_mode;
+  short resolution_power;
+  timex original, modified;
+  std::unique_ptr<PID<double>> pid;
 };
 
 
