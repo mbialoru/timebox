@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 
+project(timebox VERSION 0.0.1 LANGUAGES C CXX
+    DESCRIPTION ""
+    HOMEPAGE_URL ""
+    )
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -24,11 +29,6 @@ FetchContent_Declare(_project_options URL
     https://github.com/aminya/project_options/archive/refs/tags/v0.24.0.zip)
 FetchContent_MakeAvailable(_project_options)
 include(${_project_options_SOURCE_DIR}/Index.cmake)
-
-project(timebox VERSION 0.0.1 LANGUAGES C CXX
-    DESCRIPTION ""
-    HOMEPAGE_URL ""
-    )
 
 # This variable is set by project() in CMake 3.21+
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
@@ -84,9 +84,13 @@ find_package(GTest REQUIRED)
 find_package(benchmark REQUIRED)
 find_package(PkgConfig REQUIRED)
 
-add_subdirectory(src)
-add_subdirectory(test)
-add_subdirectory(benchmark)
+# Boost vars
+set( Boost_USE_STATIC_LIBS        OFF )
+set( Boost_USE_MULTITHREADED      ON )
+set( Boost_USE_STATIC_RUNTIME     OFF )
+set( BOOST_ALL_DYN_LINK           ON ) # force dynamic linking for all libraries
+
+add_subdirectory(app)
 add_subdirectory(proto)
 add_subdirectory(submodules)
 

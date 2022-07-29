@@ -1,7 +1,9 @@
 add_subdirectory(lib)
+add_subdirectory(test)
+add_subdirectory(benchmark)
 
-add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
+add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE lib${CMAKE_PROJECT_NAME}_static)
 
 if( ipo_supported )
     message(STATUS "IPO / LTO enabled for ${PROJECT_NAME}")

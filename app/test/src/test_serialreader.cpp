@@ -1,10 +1,8 @@
-#include "defines.hpp"
-
-#if TEST_SERIALREADER
-
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+
 #include "serialreader.hpp"
+
 
 class MockSerialReader
 {
@@ -59,5 +57,3 @@ TEST_F(Test_SerialReader, using_free_function_callback)
   GTEST_SKIP();
   SerialReader si{ "/dev/ttyACM0", 9600, std::function(MyCallback) };
 }
-
-#endif

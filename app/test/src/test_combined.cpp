@@ -3,6 +3,7 @@
 #include "clockcontroller.hpp"
 #include "serialreader.hpp"
 
+
 class Test_Combined : public ::testing::Test
 {
 public:
