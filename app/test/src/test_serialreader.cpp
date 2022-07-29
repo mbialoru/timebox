@@ -4,7 +4,6 @@
 
 #if USING_REAL_HARDWARE
 #include "serialreader.hpp"
-#include "threadwrapper.hpp"
 #else
 #include "fakes.hpp"
 #endif
@@ -27,11 +26,14 @@ public:
 
 TEST_F(Test_SerialReader, thread_callback)
 {
+  if (!LONG_TESTS)
+    GTEST_SKIP() << "Skipping, LONG_TESTS " << LONG_TESTS;
+
 #if USING_REAL_HARDWARE
-  SerialReader si{ "/dev/ttyACM0", 9600,
+  SerialReader sr{ "/dev/ttyACM0", 9600,
     std::bind(&Test_SerialReader::CallbackDummy, this) };
 #else
-  FakeSerialReader si{ "/dev/ttyACM0", 9600,
+  FakeSerialReader sr{ "/dev/ttyACM0", 9600,
     std::bind(&Test_SerialReader::CallbackDummy, this) };
 #endif
 
@@ -47,11 +49,14 @@ void MyCallback(std::string)
 
 TEST_F(Test_SerialReader, using_free_function_callback)
 {
+  if (!LONG_TESTS)
+    GTEST_SKIP() << "Skipping, LONG_TESTS " << LONG_TESTS;
+
 #if USING_REAL_HARDWARE
-  SerialReader si{ "/dev/ttyACM0", 9600,
+  SerialReader sr{ "/dev/ttyACM0", 9600,
     std::bind(MyCallback, std::placeholders::_1)};
 #else
-  FakeSerialReader si{ "/dev/ttyACM0", 9600,
+  FakeSerialReader sr{ "/dev/ttyACM0", 9600,
     std::bind(MyCallback, std::placeholders::_1) };
 #endif
   std::this_thread::sleep_for(std::chrono::seconds(5));

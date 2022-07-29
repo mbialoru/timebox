@@ -87,7 +87,6 @@ timex ClockController::GetTimex()
   bool success = false;
   while (not success)
     success = (bool)adjtimex(&ret);
-
   return ret;
 }
 
