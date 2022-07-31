@@ -47,11 +47,15 @@ RUN update-alternatives --install /usr/bin/g++ g++ $(which g++-${GCC_VER}) 100
 ARG LLVM_VER="15"
 RUN apt install -y clang-${LLVM_VER} lldb-${LLVM_VER} lld-${LLVM_VER} \
     clangd-${LLVM_VER} llvm-${LLVM_VER}-dev libclang-${LLVM_VER}-dev \
-    clang-tidy-${LLVM_VER}
+    clang-tidy-${LLVM_VER} clang-format-${LLVM_VER}
 
 # Set the default clang-tidy, so CMake can find it
 RUN update-alternatives --install /usr/bin/clang-tidy clang-tidy \
     $(which clang-tidy-${LLVM_VER}) 1
+
+# Set default clang-format
+RUN update-alternatives --install /usr/bin/clang-format clang-format \
+    $(which clang-format-${LLVM_VER}) 1
 
 # Set clang-${LLVM_VER} as default clang
 RUN update-alternatives --install /usr/bin/clang clang $(which \

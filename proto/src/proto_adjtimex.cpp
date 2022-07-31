@@ -18,11 +18,11 @@ advised - and do not forget about privileges.
 
 #if PROTO_ADJTIMEX
 
-#include <gtest/gtest.h>
-#include <sys/timex.h>
-#include <iostream>
-#include <errno.h>
 #include "utils.hpp"
+#include <errno.h>
+#include <gtest/gtest.h>
+#include <iostream>
+#include <sys/timex.h>
 
 // Note about used units:
 /*
@@ -41,29 +41,28 @@ advised - and do not forget about privileges.
   by the call itself.
 */
 
-void debug_print_timex(timex& t)
+void debug_print_timex(timex &t)
 {
-  std::cout <<
-    "modes: " << t.modes << std::endl <<
-    "offset: " << t.offset << std::endl <<
-    "freq: " << t.freq << std::endl <<
-    "maxerror: " << t.maxerror << std::endl <<
-    "esterror: " << t.esterror << std::endl <<
-    "status: " << t.status << std::endl <<
-    "constant: " << t.constant << std::endl <<
-    "precision: " << t.precision << std::endl <<
-    "tolerance: " << t.tolerance << std::endl <<
-    "timeval_sec: " << t.time.tv_sec << std::endl <<
-    "timeval_usec: " << t.time.tv_usec << std::endl <<
-    "tick: " << t.tick << std::endl <<
-    "ppsfreq: " << t.ppsfreq << std::endl <<
-    "jitter: " << t.jitter << std::endl <<
-    "shift: " << t.shift << std::endl <<
-    "stabil: " << t.stabil << std::endl <<
-    "calcnt: " << t.calcnt << std::endl <<
-    "errcnt: " << t.errcnt << std::endl <<
-    "stbcnt: " << t.stbcnt << std::endl <<
-    "tai: " << t.tai << std::endl;
+  std::cout << "modes: " << t.modes << std::endl
+            << "offset: " << t.offset << std::endl
+            << "freq: " << t.freq << std::endl
+            << "maxerror: " << t.maxerror << std::endl
+            << "esterror: " << t.esterror << std::endl
+            << "status: " << t.status << std::endl
+            << "constant: " << t.constant << std::endl
+            << "precision: " << t.precision << std::endl
+            << "tolerance: " << t.tolerance << std::endl
+            << "timeval_sec: " << t.time.tv_sec << std::endl
+            << "timeval_usec: " << t.time.tv_usec << std::endl
+            << "tick: " << t.tick << std::endl
+            << "ppsfreq: " << t.ppsfreq << std::endl
+            << "jitter: " << t.jitter << std::endl
+            << "shift: " << t.shift << std::endl
+            << "stabil: " << t.stabil << std::endl
+            << "calcnt: " << t.calcnt << std::endl
+            << "errcnt: " << t.errcnt << std::endl
+            << "stbcnt: " << t.stbcnt << std::endl
+            << "tai: " << t.tai << std::endl;
 }
 
 TEST(Proto_adjtimex, timex_from_adjtimex)
@@ -99,10 +98,8 @@ TEST(Proto_adjtimex, print_timex_structure)
 TEST(Proto_adjtimex, change_tick_value)
 {
 #if SUDO_NODOCKER
-  if (!RunningAsRoot())
-    GTEST_FAIL() << "MUST RUN AS ROOT";
-  if (RunningFromDockerContainer())
-    GTEST_FAIL() << "CANNOT RUN FROM DOCKER";
+  if (!RunningAsRoot()) GTEST_FAIL() << "MUST RUN AS ROOT";
+  if (RunningFromDockerContainer()) GTEST_FAIL() << "CANNOT RUN FROM DOCKER";
 #else
   GTEST_SKIP() << "NEEDS ROOT PRIVILEGES AND CANNOT RUN FROM DOCKER CONTAINER";
 #endif
@@ -135,10 +132,8 @@ TEST(Proto_adjtimex, change_tick_value)
 TEST(Proto_adjtimex, change_tick_value_invalid)
 {
 #if SUDO_NODOCKER
-  if (!RunningAsRoot())
-    GTEST_FAIL() << "MUST RUN AS ROOT";
-  if (RunningFromDockerContainer())
-    GTEST_FAIL() << "CANNOT RUN FROM DOCKER";
+  if (!RunningAsRoot()) GTEST_FAIL() << "MUST RUN AS ROOT";
+  if (RunningFromDockerContainer()) GTEST_FAIL() << "CANNOT RUN FROM DOCKER";
 #else
   GTEST_SKIP() << "NEEDS ROOT PRIVILEGES AND CANNOT RUN FROM DOCKER CONTAINER";
 #endif

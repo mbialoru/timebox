@@ -3,8 +3,7 @@
 
 #pragma once
 
-template <class T>
-class PID
+template<class T> class PID
 {
 public:
   PID(double, double, double, T);
@@ -28,8 +27,7 @@ private:
   double pTerm, iTerm, dTerm;
 };
 
-template <class T>
-PID<T>::PID(double p, double i, double d, T target)
+template<class T> PID<T>::PID(double p, double i, double d, T target)
 {
   this->kp = p;
   this->ki = i;
@@ -42,38 +40,17 @@ PID<T>::PID(double p, double i, double d, T target)
   this->target = target;
 }
 
-template <class T>
-T PID<T>::get_output() const
-{
-  return this->output;
-}
+template<class T> T PID<T>::get_output() const { return this->output; }
 
-template <class T>
-T PID<T>::get_target() const
-{
-  return target;
-}
+template<class T> T PID<T>::get_target() const { return target; }
 
-template <class T>
-void PID<T>::set_target(T target)
-{
-  this->target = target;
-}
+template<class T> void PID<T>::set_target(T target) { this->target = target; }
 
-template <class T>
-double PID<T>::get_errorGuard() const
-{
-  return errorGuard;
-}
+template<class T> double PID<T>::get_errorGuard() const { return errorGuard; }
 
-template <class T>
-void PID<T>::set_errorGuard(double errorGuard)
-{
-  this->errorGuard = errorGuard;
-}
+template<class T> void PID<T>::set_errorGuard(double errorGuard) { this->errorGuard = errorGuard; }
 
-template <class T>
-void PID<T>::update(T feedback, double timeDelta)
+template<class T> void PID<T>::update(T feedback, double timeDelta)
 {
   T error = target - feedback;
   T errorDelta = error - lastError;
@@ -90,4 +67,4 @@ void PID<T>::update(T feedback, double timeDelta)
   this->output = pTerm + (ki * iTerm) + (kd * dTerm);
 }
 
-#endif // PID_HPP
+#endif// PID_HPP

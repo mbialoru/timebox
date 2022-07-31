@@ -1,15 +1,15 @@
 #include <gtest/gtest.h>
 
+#include "clockcontroller.hpp"
 #include "defines.hpp"
 #include "utils.hpp"
-#include "clockcontroller.hpp"
 
 
 class Test_ClockController : public ::testing::Test
 {
 public:
-  void SetUp() override {};
-  void TearDown() override {};
+  void SetUp() override{};
+  void TearDown() override{};
 };
 
 TEST_F(Test_ClockController, adjust_clock)
@@ -19,8 +19,7 @@ TEST_F(Test_ClockController, adjust_clock)
   auto time_str = StringFromTimepoint(time);
   std::this_thread::sleep_for(std::chrono::milliseconds(600));
   if (not RunningAsRoot())
-    EXPECT_THROW(cc->AdjustClock(time_str + ".0"),
-      InsufficientPermissionsError) << "Not running as root !";
+    EXPECT_THROW(cc->AdjustClock(time_str + ".0"), InsufficientPermissionsError) << "Not running as root !";
   else
     EXPECT_NO_THROW(cc->AdjustClock(time_str + ".0"));
 }

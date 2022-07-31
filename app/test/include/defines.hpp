@@ -7,4 +7,4 @@
 // Constexpr
 constexpr bool LONG_TESTS = false;
 
-#endif // TEST_DEFINES_HPP
+#endif// TEST_DEFINES_HPP

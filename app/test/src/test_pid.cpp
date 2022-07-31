@@ -24,15 +24,12 @@ public:
 
 TEST_F(Test_PID, Control_Temperature)
 {
-  for (std::size_t i = 0; i < 50; i++)
-  {
-    if (i >= 9)
-    {
+  for (std::size_t i = 0; i < 50; i++) {
+    if (i >= 9) {
       pid.set_target(60);
       pid.update(this->temperature(), 1);
     }
-    if (pid.get_target() > 0)
-      this->temperature(pid.get_output() - 1 / i);
+    if (pid.get_target() > 0) this->temperature(pid.get_output() - 1 / i);
   }
   EXPECT_NEAR(this->temperature(), 60, 0.01);
 }

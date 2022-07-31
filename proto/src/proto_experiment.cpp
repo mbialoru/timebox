@@ -16,11 +16,7 @@ private:
   int a;
 
 public:
-
-  A()
-  {
-    std::cout << "Called delegated constructor";
-  }
+  A() { std::cout << "Called delegated constructor"; }
 
   A(int a) : A()
   {

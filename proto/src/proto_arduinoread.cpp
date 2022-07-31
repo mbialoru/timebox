@@ -8,14 +8,14 @@ Prototype to retrieve stream of serial data from arduino
 
 #if PROTO_ARDUINOREAD
 
-#include <gtest/gtest.h>
-#include <fstream>
 #include <cstdlib>
+#include <fstream>
+#include <gtest/gtest.h>
 
 class Proto_ArduinoRead : public ::testing::Test
 {
 protected:
-  const char* dev = "/dev/ttyACM0";
+  const char *dev = "/dev/ttyACM0";
 
 public:
   void SetUp() override {}
@@ -25,7 +25,8 @@ public:
 TEST_F(Proto_ArduinoRead, read_from_ttyACM0)
 {
   // Activate a tty connection
-  system("stty -F /dev/ttyACM0 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost \
+  system(
+    "stty -F /dev/ttyACM0 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost \
   -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke \
   noflsh -ixon -crtscts");
 
@@ -35,12 +36,10 @@ TEST_F(Proto_ArduinoRead, read_from_ttyACM0)
 
   std::string time_str;
 
-  for (std::size_t i = 0; i < 100;)
-  {
+  for (std::size_t i = 0; i < 100;) {
     std::time(p_time.get());
 
-    while (!arduino_in.eof())
-    {
+    while (!arduino_in.eof()) {
       arduino_in >> time_str;
       i++;
     }

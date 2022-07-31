@@ -3,17 +3,17 @@
 
 #pragma once
 
-#include <functional>
 #include <boost/log/trivial.hpp>
+#include <functional>
 #include <libserial/SerialPort.h>
 
-#include "utils.hpp"
 #include "threadwrapper.hpp"
+#include "utils.hpp"
 
 class SerialReader : public ThreadWrapper
 {
 public:
-  SerialReader(const char*, std::size_t, std::function<void(std::string)>);
+  SerialReader(const char *, std::size_t, std::function<void(std::string)>);
   ~SerialReader() = default;
 
 private:
@@ -26,9 +26,9 @@ private:
 
   LibSerial::SerialPort sp;
 
-  void InitSerial(const char*, std::size_t);
+  void InitSerial(const char *, std::size_t);
   void Work() override;
   void Test() override;
 };
 
-#endif // SERIALREADER_HPP
+#endif// SERIALREADER_HPP

@@ -3,23 +3,19 @@
 
 #pragma once
 
-#include <string>
-#include <stdexcept>
 #include <boost/log/trivial.hpp>
+#include <stdexcept>
+#include <string>
 
 class NotImplementedException : public std::exception
 {
 public:
-  NotImplementedException(const char* msg =
-    "Function or method not yet implemented")
+  NotImplementedException(const char *msg = "Function or method not yet implemented")
   {
     this->msg = msg;
     BOOST_LOG_TRIVIAL(error) << msg;
   }
-  const char* what() const noexcept
-  {
-    return this->msg.c_str();
-  }
+  const char *what() const noexcept { return this->msg.c_str(); }
 
 private:
   std::string msg{};
@@ -28,17 +24,13 @@ private:
 class TimexOperationError : public std::exception
 {
 public:
-  TimexOperationError(const char* msg =
-    "Error during operation with timex struct")
+  TimexOperationError(const char *msg = "Error during operation with timex struct")
   {
     this->msg = msg;
     BOOST_LOG_TRIVIAL(error) << msg;
     BOOST_LOG_TRIVIAL(error) << "errno " << errno;
   }
-  const char* what() const noexcept
-  {
-    return this->msg.c_str();
-  }
+  const char *what() const noexcept { return this->msg.c_str(); }
 
 private:
   std::string msg{};
@@ -47,19 +39,15 @@ private:
 class InsufficientPermissionsError : public std::exception
 {
 public:
-  InsufficientPermissionsError(const char* msg =
-    "Operation not permitted, invalid permissions")
+  InsufficientPermissionsError(const char *msg = "Operation not permitted, invalid permissions")
   {
     this->msg = msg;
     BOOST_LOG_TRIVIAL(error) << msg;
   }
-  const char* what() const noexcept
-  {
-    return this->msg.c_str();
-  }
+  const char *what() const noexcept { return this->msg.c_str(); }
 
 private:
   std::string msg{};
 };
 
-#endif // EXCEPTIONS_HPP
+#endif// EXCEPTIONS_HPP

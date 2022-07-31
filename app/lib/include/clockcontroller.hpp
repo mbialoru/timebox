@@ -3,17 +3,18 @@
 
 #pragma once
 
-#include <ctime>
-#include <chrono>
-#include <memory>
-#include <future>
 #include <sys/timex.h>
+
 #include <boost/date_time.hpp>
 #include <boost/log/trivial.hpp>
+#include <chrono>
+#include <ctime>
+#include <future>
+#include <memory>
 
+#include "exceptions.hpp"
 #include "pid.hpp"
 #include "utils.hpp"
-#include "exceptions.hpp"
 
 class ClockController
 {
@@ -29,8 +30,8 @@ public:
 
 private:
   timex getSystemTimex();
-  void setSystemTimex(timex*);
-  bool TimexOperate(timex*);
+  void setSystemTimex(timex *);
+  bool TimexOperate(timex *);
   std::size_t ClockDifference();
   void AdjustKernelTick(unsigned);
   short NormalizeTickValue(short);
@@ -41,4 +42,4 @@ private:
   std::unique_ptr<PID<double>> pid;
 };
 
-#endif // CLOCKCONTROLLER_HPP
+#endif// CLOCKCONTROLLER_HPP

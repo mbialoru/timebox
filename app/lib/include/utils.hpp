@@ -3,21 +3,21 @@
 
 #pragma once
 
-#include <map>
-#include <chrono>
-#include <iostream>
-#include <unistd.h>
-#include <termios.h>
-#include <filesystem>
 #include <boost/algorithm/string.hpp>
+#include <chrono>
+#include <filesystem>
+#include <iostream>
+#include <map>
+#include <termios.h>
+#include <unistd.h>
 
 bool UsingSudo();
 bool RunningAsRoot();
-void PrintTimex(timex&);
+void PrintTimex(timex &);
 bool RunningFromDockerContainer();
 bool TimeSyncServiceIsRunning();
 std::size_t ConvertBaudRate(int);
 std::chrono::system_clock::time_point TimepointFromString(std::string);
 std::string StringFromTimepoint(std::chrono::system_clock::time_point);
 
-#endif // UTILS_HPP
+#endif// UTILS_HPP

@@ -1,5 +1,3 @@
 #include <iostream>
 
-int main(int argc, const char* argv[]) {
-  return EXIT_SUCCESS;
-}
+int main(int argc, const char *argv[]) { return EXIT_SUCCESS; }

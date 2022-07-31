@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include <memory>
-#include <thread>
-#include <chrono>
-#include <string>
 #include <atomic>
 #include <boost/log/trivial.hpp>
+#include <chrono>
+#include <memory>
+#include <string>
+#include <thread>
 
 class ThreadWrapper
 {
@@ -28,8 +28,8 @@ protected:
 
   virtual void WorkLoop();
   virtual void TestLoop();
-  virtual void Work() {};
-  virtual void Test() {};
+  virtual void Work(){};
+  virtual void Test(){};
 };
 
-#endif // THREADRUNNER_HPP
+#endif// THREADRUNNER_HPP

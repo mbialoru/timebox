@@ -17,24 +17,19 @@ ThreadWrapper::~ThreadWrapper()
 {
   BOOST_LOG_TRIVIAL(debug) << "Cancelling threads for " << name;
   worker_on = false;
-  if (worker.joinable())
-    worker.join();
-  if (tester.joinable())
-    tester.join();
+  if (worker.joinable()) worker.join();
+  if (tester.joinable()) tester.join();
   BOOST_LOG_TRIVIAL(debug) << "Stopped threads for " << name;
 }
 
 void ThreadWrapper::WorkLoop()
 {
   std::this_thread::sleep_for(std::chrono::milliseconds(startup_delay));
-  while (worker_on)
-  {
-    if (not paused)
-    {
+  while (worker_on) {
+    if (not paused) {
       Work();
       worker_tick++;
-    }
-    else
+    } else
       std::this_thread::sleep_for(std::chrono::milliseconds(pause_delay));
   }
 }
@@ -42,8 +37,7 @@ void ThreadWrapper::WorkLoop()
 void ThreadWrapper::TestLoop()
 {
   std::this_thread::sleep_for(std::chrono::milliseconds(startup_delay));
-  while (worker_on)
-  {
+  while (worker_on) {
     if (not paused)
       Test();
     else
