@@ -81,3 +81,14 @@ Co prawda opracowałem sposób, można go znaleźć w prototypach
 C++20 będzie wprowadzał bardzo wygodne narzędzia do pracy z czasem, ale nie mamy
 tej za bardzo tutaj wygody, jakoże na dzień dzisiejszy (21/07/2022) kompilator
 GCC nie wspiera tych zmian. Nagłówek `<format>` jest niedostępny.
+
+## Vagrant
+Vagrantfile `config.vm.synced_folder ".", "/vagrant", mount_options: ["vers=3,tcp"]`
+
+Uruchomić w powłoce dla udostępniania nfs
+`$ sudo firewall-cmd --permanent --zone=libvirt --add-service=nfs3`
+`$ sudo firewall-cmd --permanent --zone=libvirt --add-service=nfs`
+`$ sudo firewall-cmd --permanent --zone=libvirt --add-service=mountd`
+`$ sudo firewall-cmd --permanent --zone=libvirt --add-service=rpc-bind`
+`$ sudo firewall-cmd --permanent --zone=libvirt --add-port=2049/tcp`
+`$ sudo firewall-cmd --permanent --zone=libvirt --add-port=2049/udp`

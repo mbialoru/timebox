@@ -10,11 +10,11 @@ ClockController::ClockController(char clock_mode, double resolution)
 
   BOOST_LOG_TRIVIAL(trace) << "Retrieving timex from kernel";
 
-  std::future<timex> ret = std::async(std::launch::async,
-    std::bind(&ClockController::GetTimex, this));
-  original = ret.get();
+  std::future<timex> res = std::async(std::launch::async,
+    std::bind(&ClockController::getSystemTimex, this));
+  original = res.get();
 
-  BOOST_LOG_TRIVIAL(trace) << "Success in retrieving timex from kernel";
+  BOOST_LOG_TRIVIAL(trace) << "Success retrieving timex from kernel";
 
   modified = original;
   modified.modes |= ADJ_TICK;
@@ -23,9 +23,7 @@ ClockController::ClockController(char clock_mode, double resolution)
 
 ClockController::~ClockController()
 {
-  // TODO: Here code to re-adjust kernel tick to old values
-  if (adjtimex(&original) != 0)
-    BOOST_LOG_TRIVIAL(error) << "Could not reset kernel tick value back to original!";
+  setSystemTimex(&original);
 }
 
 void ClockController::AdjustKernelTick(unsigned tick)
@@ -35,13 +33,13 @@ void ClockController::AdjustKernelTick(unsigned tick)
   BOOST_LOG_TRIVIAL(debug) << "Adjusting kernel tick to " << tick;
   modified.tick = tick;
 
-  std::future<bool> ret = std::async(std::launch::async, std::bind(
-    &ClockController::SetTimex, this, std::placeholders::_1), &modified);
+  if (not RunningAsRoot())
+    throw InsufficientPermissionsError();
 
-  bool is_changed = ret.get();
+  std::future<void> _ = std::async(std::launch::async, std::bind(
+    &ClockController::setSystemTimex, this, std::placeholders::_1), &modified);
 
-  if (is_changed)
-    BOOST_LOG_TRIVIAL(debug) << "Successfully changed kernel tick to " << tick;
+  BOOST_LOG_TRIVIAL(debug) << "Successfully changed kernel tick to " << tick;
 }
 
 short ClockController::NormalizeTickValue(short tick)
@@ -58,7 +56,8 @@ void ClockController::AdjustClock(std::string time_str)
   auto tmp_diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - tmp);
   if (tmp_diff.count() < 500)
   {
-    BOOST_LOG_TRIVIAL(warning) << "Too soon to last AdjustClock call !";
+    BOOST_LOG_TRIVIAL(warning) << "Too soon to last AdjustClock call ! "
+      << tmp_diff.count() << " ms";
     return;
   }
 
@@ -84,27 +83,45 @@ timex ClockController::getOriginalTimex()
   return original;
 }
 
-timex ClockController::GetTimex()
+bool ClockController::TimexOperate(timex* tm)
 {
-  // TODO: On Fedora it doesn't work from container for some reason ...
-  timex ret;
-  thread_local bool success = false;
+  bool success{ false };
+  std::size_t attempts{ 0 };
   while (not success)
   {
-    success = (bool)adjtimex(&ret);
-    if (errno == EPERM)
-      BOOST_LOG_TRIVIAL(error) << "Operation not permitted when acquiring timex";
-    if (errno == EINVAL)
+    if (attempts == 100)
+      throw TimexOperationError();
+
+    success = !(bool)adjtimex(tm);
+    attempts++;
+
+    switch (errno)
+    {
+    case 0:
+      break;
+    case EPERM:
+      BOOST_LOG_TRIVIAL(warning) << "Operation not permitted when acquiring timex";
+      break;
+    case EINVAL:
       BOOST_LOG_TRIVIAL(warning) << "Invalid argument when acquiring timex";
+      break;
+    default:
+      BOOST_LOG_TRIVIAL(warning) << "errno when acquiring timex " << errno;
+      break;
+    }
   }
+  BOOST_LOG_TRIVIAL(debug) << "Operation took " << attempts << " attempts";
+  return success;
+}
+
+timex ClockController::getSystemTimex()
+{
+  timex ret{ 0 };
+  TimexOperate(&ret);
   return ret;
 }
 
-bool ClockController::SetTimex(timex* t)
+void ClockController::setSystemTimex(timex* t)
 {
-  return true;
-  // bool success = false;
-  // while (not success)
-  //   success = (bool)adjtimex(t);
-  // return success;
+  TimexOperate(t);
 }

@@ -25,11 +25,30 @@ private:
   std::string msg{};
 };
 
-class TimexAcquisitionError : public std::exception
+class TimexOperationError : public std::exception
 {
 public:
-  TimexAcquisitionError(const char* msg =
-    "Error during acquisition of timex struct")
+  TimexOperationError(const char* msg =
+    "Error during operation with timex struct")
+  {
+    this->msg = msg;
+    BOOST_LOG_TRIVIAL(error) << msg;
+    BOOST_LOG_TRIVIAL(error) << "errno " << errno;
+  }
+  const char* what() const noexcept
+  {
+    return this->msg.c_str();
+  }
+
+private:
+  std::string msg{};
+};
+
+class InsufficientPermissionsError : public std::exception
+{
+public:
+  InsufficientPermissionsError(const char* msg =
+    "Operation not permitted, invalid permissions")
   {
     this->msg = msg;
     BOOST_LOG_TRIVIAL(error) << msg;
@@ -43,21 +62,4 @@ private:
   std::string msg{};
 };
 
-class TimexChangeError : public std::exception
-{
-public:
-  TimexChangeError(const char* msg = "Error during modifying timex struct")
-  {
-    this->msg = msg;
-    BOOST_LOG_TRIVIAL(error) << msg;
-  }
-  const char* what() const noexcept
-  {
-    return this->msg.c_str();
-  }
-
-private:
-  std::string msg{};
-};
-
-#endif
+#endif // EXCEPTIONS_HPP

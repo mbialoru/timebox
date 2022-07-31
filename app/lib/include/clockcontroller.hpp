@@ -28,8 +28,9 @@ public:
   std::atomic<std::chrono::system_clock::time_point> last_call;
 
 private:
-  timex GetTimex();
-  bool SetTimex(timex*);
+  timex getSystemTimex();
+  void setSystemTimex(timex*);
+  bool TimexOperate(timex*);
   std::size_t ClockDifference();
   void AdjustKernelTick(unsigned);
   short NormalizeTickValue(short);
@@ -39,6 +40,5 @@ private:
   timex original, modified;
   std::unique_ptr<PID<double>> pid;
 };
-
 
 #endif // CLOCKCONTROLLER_HPP
