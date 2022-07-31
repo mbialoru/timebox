@@ -1,5 +1,5 @@
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,c++,linux,windows,c,emacs,vim,git,qt,qtcreator,cmake
-# Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,c++,linux,windows,c,emacs,vim,git,qt,qtcreator,cmake
+# Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,c++,linux,windows,c,emacs,vim,git,qt,qtcreator,cmake,vagrant
 
 ### C ###
 # Prerequisites
@@ -323,4 +323,14 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,c++,linux,windows,c,emacs,vim,git,qt,qtcreator,cmake
+### Vagrant ###
+# General
+.vagrant/
+
+# Log files (if you are creating logs in debug mode, uncomment this)
+*.log
+
+### Vagrant Patch ###
+*.box
+
+# End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,c++,linux,windows,c,emacs,vim,git,qt,qtcreator,cmake,vagrant
