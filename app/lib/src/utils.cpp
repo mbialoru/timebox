@@ -2,20 +2,26 @@
 
 bool UsingSudo()
 {
-  if (getuid() == geteuid()) return false;
-  return true;
+  if (getuid() == geteuid())
+    return false;
+  else
+    return true;
 }
 
 bool RunningAsRoot()
 {
-  if (getuid() == 0 || geteuid() == 0) return true;
-  return false;
+  if (getuid() == 0 || geteuid() == 0)
+    return true;
+  else
+    return false;
 }
 
 bool RunningFromDockerContainer()
 {
-  if (std::filesystem::exists(std::filesystem::path("/.dockerenv"))) return true;
-  return false;
+  if (std::filesystem::exists(std::filesystem::path("/.dockerenv")))
+    return true;
+  else
+    return false;
 }
 
 bool TimeSyncServiceIsRunning()
@@ -27,8 +33,10 @@ bool TimeSyncServiceIsRunning()
   pid_t pid = strtoul(line, NULL, 10);
   pclose(f);
 
-  if (pid > 0) return true;
-  return false;
+  if (pid > 0)
+    return true;
+  else
+    return false;
 }
 
 std::size_t ConvertBaudRate(int baud)

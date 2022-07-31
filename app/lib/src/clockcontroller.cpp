@@ -22,6 +22,12 @@ ClockController::ClockController(char clock_mode, double resolution)
 
 ClockController::~ClockController() { setSystemTimex(&original); }
 
+timex ClockController::getModifiedTimex() { return modified; }
+
+timex ClockController::getOriginalTimex() { return original; }
+
+void ClockController::setSystemTimex(timex *t) { TimexOperate(t); }
+
 void ClockController::AdjustKernelTick(unsigned tick)
 {
   tick = NormalizeTickValue(tick);
@@ -70,10 +76,6 @@ void ClockController::AdjustClock(std::string time_str)
   last_call.store(now);
 }
 
-timex ClockController::getModifiedTimex() { return modified; }
-
-timex ClockController::getOriginalTimex() { return original; }
-
 bool ClockController::TimexOperate(timex *tm)
 {
   bool success{ false };
@@ -108,5 +110,3 @@ timex ClockController::getSystemTimex()
   TimexOperate(&ret);
   return ret;
 }
-
-void ClockController::setSystemTimex(timex *t) { TimexOperate(t); }
