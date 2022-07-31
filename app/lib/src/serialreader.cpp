@@ -28,7 +28,7 @@ void SerialReader::InitSerial(const char *tty, std::size_t baud)
 void SerialReader::Work()
 {
   while (sp.IsDataAvailable()) {
-    for (size_t i = 0; i < buffer_size; i++) serial_buffer[i] = '\0';
+    for (size_t i = 0; i < buffer_size; i++) { serial_buffer[i] = '\0'; }
 
     for (std::size_t i = 0; i < buffer_size; i++) {
       try {
