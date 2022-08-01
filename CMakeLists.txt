@@ -93,7 +93,6 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
 
 add_subdirectory(app)
-add_subdirectory(proto)
 add_subdirectory(submodules)
 
 if(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")

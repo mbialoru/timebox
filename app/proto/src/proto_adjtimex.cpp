@@ -18,11 +18,12 @@ advised - and do not forget about privileges.
 
 #if PROTO_ADJTIMEX
 
-#include "utils.hpp"
 #include <errno.h>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <sys/timex.h>
+
+#include "utils.hpp"
 
 // Note about used units:
 /*
