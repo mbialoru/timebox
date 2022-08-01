@@ -9,62 +9,62 @@ public:
   PID(double, double, double, T);
   ~PID() = default;
 
-  void set_target(T);
-  T get_target() const;
+  void SetTarget(T);
+  T GetTarget() const;
 
-  void set_errorGuard(double);
-  double get_errorGuard() const;
+  void SetErrorGuard(double);
+  double GetErrorGuard() const;
 
-  T get_output() const;
-  void update(T, double);
+  T GetOutput() const;
+  void Update(T, double);
 
 private:
-  T target;
-  T output;
-  T lastError;
-  double errorGuard;
-  double kp, ki, kd;
-  double pTerm, iTerm, dTerm;
+  T m_target;
+  T m_output;
+  T m_last_error;
+  double m_error_guard;
+  double m_kp, m_ki, m_kd;
+  double m_pterm, m_iterm, m_dterm;
 };
 
 template<class T> PID<T>::PID(double p, double i, double d, T target)
 {
-  this->kp = p;
-  this->ki = i;
-  this->kd = d;
-  this->pTerm = 0;
-  this->iTerm = 0;
-  this->dTerm = 0;
-  this->lastError = 0;
-  this->errorGuard = 20;
-  this->target = target;
+  m_kp = p;
+  m_ki = i;
+  m_kd = d;
+  m_pterm = 0;
+  m_iterm = 0;
+  m_dterm = 0;
+  m_last_error = 0;
+  m_error_guard = 20;
+  m_target = target;
 }
 
-template<class T> T PID<T>::get_output() const { return this->output; }
+template<class T> T PID<T>::GetOutput() const { return this->m_output; }
 
-template<class T> T PID<T>::get_target() const { return target; }
+template<class T> T PID<T>::GetTarget() const { return m_target; }
 
-template<class T> void PID<T>::set_target(T target) { this->target = target; }
+template<class T> void PID<T>::SetTarget(T target) { this->m_target = target; }
 
-template<class T> double PID<T>::get_errorGuard() const { return errorGuard; }
+template<class T> double PID<T>::GetErrorGuard() const { return m_error_guard; }
 
-template<class T> void PID<T>::set_errorGuard(double errorGuard) { this->errorGuard = errorGuard; }
+template<class T> void PID<T>::SetErrorGuard(double errorGuard) { this->m_error_guard = errorGuard; }
 
-template<class T> void PID<T>::update(T feedback, double timeDelta)
+template<class T> void PID<T>::Update(T feedback, double timeDelta)
 {
-  T error = target - feedback;
-  T errorDelta = error - lastError;
-  lastError = error;
-  pTerm = kp * error;
-  iTerm += error * timeDelta;
+  T error = m_target - feedback;
+  T errorDelta = error - m_last_error;
+  m_last_error = error;
+  m_pterm = m_kp * error;
+  m_iterm += error * timeDelta;
 
-  if (iTerm < -errorGuard)
-    iTerm = -errorGuard;
-  else if (iTerm > errorGuard)
-    iTerm = errorGuard;
+  if (m_iterm < -m_error_guard)
+    m_iterm = -m_error_guard;
+  else if (m_iterm > m_error_guard)
+    m_iterm = m_error_guard;
 
-  dTerm = errorDelta / timeDelta;
-  this->output = pTerm + (ki * iTerm) + (kd * dTerm);
+  m_dterm = errorDelta / timeDelta;
+  m_output = m_pterm + (m_ki * m_iterm) + (m_kd * m_dterm);
 }
 
 #endif// PID_HPP

@@ -1,6 +1,6 @@
 #include "utils.hpp"
 
-bool UsingSudo()
+bool CheckSudo()
 {
   if (getuid() == geteuid())
     return false;
@@ -8,7 +8,7 @@ bool UsingSudo()
     return true;
 }
 
-bool RunningAsRoot()
+bool CheckAdminPrivileges()
 {
   if (getuid() == 0 || geteuid() == 0)
     return true;
@@ -16,7 +16,7 @@ bool RunningAsRoot()
     return false;
 }
 
-bool RunningFromDockerContainer()
+bool CheckIfUsingDockerContainer()
 {
   if (std::filesystem::exists(std::filesystem::path("/.dockerenv")))
     return true;
@@ -24,7 +24,7 @@ bool RunningFromDockerContainer()
     return false;
 }
 
-bool TimeSyncServiceIsRunning()
+bool CheckNTPService()
 {
   // For now it only detects systemd-timesyncd
   char line[100];
@@ -89,7 +89,7 @@ void PrintTimex(timex &t)
             << "tai: " << t.tai << std::endl;
 }
 
-std::chrono::system_clock::time_point TimepointFromString(std::string time_str)
+std::chrono::system_clock::time_point ConvertTimepointToString(std::string time_str)
 {
   std::vector<std::string> tmp;
   time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -107,7 +107,7 @@ std::chrono::system_clock::time_point TimepointFromString(std::string time_str)
   return res;
 }
 
-std::string StringFromTimepoint(std::chrono::system_clock::time_point tp)
+std::string ConvertStringToTimepoint(std::chrono::system_clock::time_point tp)
 {
   time_t tmp = std::chrono::system_clock::to_time_t(tp);
   struct tm tm = *std::localtime(&tmp);

@@ -6,16 +6,16 @@
 
 TEST(Test_utils, timesync_service_running)
 {
-  if (RunningFromDockerContainer())
-    EXPECT_EQ(TimeSyncServiceIsRunning(), false);
+  if (CheckIfUsingDockerContainer())
+    EXPECT_EQ(CheckNTPService(), false);
   else
-    EXPECT_EQ(TimeSyncServiceIsRunning(), true);
+    EXPECT_EQ(CheckNTPService(), true);
 }
 
 TEST(Test_utils, timepoint_from_string)
 {
   std::string test_str{ "9:31:10.0" };
-  auto res = TimepointFromString(test_str);
+  auto res = ConvertTimepointToString(test_str);
   auto diff = res - std::chrono::system_clock::now();
   EXPECT_TRUE(diff.count() < 0);
 }
@@ -23,8 +23,8 @@ TEST(Test_utils, timepoint_from_string)
 TEST(Test_utils, string_from_timepoint)
 {
   std::string test_str{ "12:34:56.7" };
-  auto res = TimepointFromString(test_str);
-  auto res_str = StringFromTimepoint(res);
+  auto res = ConvertTimepointToString(test_str);
+  auto res_str = ConvertStringToTimepoint(res);
   EXPECT_EQ(res_str, "12:34:56");
 }
 

@@ -11,13 +11,13 @@
 #include <termios.h>
 #include <unistd.h>
 
-bool UsingSudo();
-bool RunningAsRoot();
+bool CheckSudo();
+bool CheckAdminPrivileges();
+bool CheckIfUsingDockerContainer();
+bool CheckNTPService();
 void PrintTimex(timex &);
-bool RunningFromDockerContainer();
-bool TimeSyncServiceIsRunning();
 std::size_t ConvertBaudRate(int);
-std::chrono::system_clock::time_point TimepointFromString(std::string);
-std::string StringFromTimepoint(std::chrono::system_clock::time_point);
+std::chrono::system_clock::time_point ConvertTimepointToString(std::string);
+std::string ConvertStringToTimepoint(std::chrono::system_clock::time_point);
 
 #endif// UTILS_HPP

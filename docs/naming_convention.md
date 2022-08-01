@@ -11,48 +11,48 @@
 
 * No underscores (‘_’) are permitted in the class name.
 
-* The private attribute name in class should be prepended with the character
-  ‘m’.
+* The private attribute name in class should be prepended with the characters
+  ‘m_’.
 
-* After prepending ‘m’, the same rules will be followed for the name like that
-  for the class name.
+* After prepending ‘m_’, rest of the name should be snake_case.
 
-* Character ‘m’ also precedes other name modifiers also. For example, ‘p’ for
+* Prefix ‘m_’ also precedes other name modifiers. For example, ‘p_’ for
   pointers.
 
-* Each method / function name should begin with a verb.
+* Each method / function name should begin with a verb, then same rules like for
+  class names should be followed.
 
 * The first character of function / method argument names should be lower case.
-  All words starting after the first letter should be the upper case with class
-  names.
+  All words starting after the first letter should be the upper case - camelCase
 
-* The variable name should begin with an alphabet.
+* The variable name should begin with an alphabet ASCII character, rest should
+  follow snake_case rule.
 
-* Digits may be used in the variable name but only after the alphabet.
+* Digits may be used in the variable name but only after letter.
 
 * No special symbols can be used in variable names except for the
   underscore(‘_’).
 
 * No keywords can be used for variable names.
 
-* Pointer variables should be prepended with ‘p’ and place the asterisk ‘*’
+* Pointer variables should be prepended with ‘p_’ and place the asterisk ‘*’
   close to the variable name instead of pointer type.
 
-* Reference variables should be prepended with ‘r’. This helps to differentiate
+* Reference variables should be prepended with ‘r_’. This helps to differentiate
   between the method returning a modifiable object and the same method returning
   a non-modifiable object.
 
-* Static variables should be prepended with ‘s’.
+* Static variables should be prepended with ‘s_’.
 
-* The global constants should be all capital letters separated with ‘_’.
+* The global constants should be all capital ASCII letters separated with ‘_’.
 
 * No special character is allowed in the file name except for underscore (‘_’)
-  and dash (‘-‘).
+  or dash (‘-‘).
 
 * The file name should end with the .cc (or .h for headers) extension in the
   end or should end with the .cpp extension (.hpp for headers).
 
-* When separating template class into header and source, you can create
+* When separating template code into header and source, you can create
   implementation in .ipp file if it is necessary, however setups like these
   can get ugly with include directories in build systems.
 
@@ -64,16 +64,12 @@
     Name a class in C++ after what it is and use upper case letters as word
     separators. The class name should be a noun. For example, ReverseString,
     Multiply2Numbers. The name should be specific and hint at the functioning of
-    the class without glancing at the body of the class. This type of
-    conventions called PascalCase.
+    the class without glancing at the body of the class.
 
 * Methods
     Every method and function performs an action, so the function name
-    should make it clear what it does. For example, writeDataToFile() is more
-    convenient name than WriteFile(). Function names should begin with a verb.
-    This type of conventions called camel case. We can also follow snake_case
-    for methods. In snake case we have to join two separate words using ‘_’
-    (Underscore).
+    should make it clear what it does. For example, WriteDataToFile() is more
+    convenient name than WriteFile().
 
 * Constants
     Constants should be all capital letters with ‘_’ separators. For example,
@@ -88,14 +84,15 @@
     * No underscores (‘_’) are permitted in the class name.
 
     ```cpp
-    class PerimeterRectangle
+    class Rectangle
     {
     public:
+        int area;
         int perimeter;
 
     private:
-        int mLength;
-        int mWidth;
+        int m_length;
+        int m_width;
     };
     ```
 
@@ -104,32 +101,30 @@
     the function should clearly hint what it does. Each method / function name
     should begin with a verb.
 
-    * Suffixes are sometimes useful. For example,
-        * Count- the current count of the counter.
-        * Key- the key value.
-
     * Prefixes are sometimes useful. For example,
-        * get- get value.
-        * set- set value.
+      * Get- get value.
+      * Set- set value.
 
     The same name convention is used as that for the class names.
     ```cpp
-    int getValue();
+    int GetValue();
     int SolveEquation();
     ```
 
     The first character of function / method argument names should be lower
-    case. All words starting after the first letter should be the upper case
-    with class names.
+    case. All words starting after the first letter should be the upper case -
+    camelCase
+
     ```cpp
-    int PerimeterRectangle(int lengthRectangle, int widthRectangle);
+    int ConnectToDatabase(int accessMode, std::string databaseAddress);
     ```
-    
+
 * Variables
     When the variables are declared dynamically using the new keyword or if the variables are declared as class attributes then they take memory from the heap and when the variables are created in a C++ program, the memory is allocated from the program stack.
 
-    * The variable name should begin with an alphabet.
-    * Digits may be used but only after the alphabet.
+    * The variable name should begin with an alphabet ASCII character, rest
+      should follow snake_case rule.
+    * Digits may be used in the variable name but only after letter.
     * No special symbols can be used in variable names except for the
       underscore(‘_’).
     * No keywords can be used for variable names.
@@ -139,26 +134,26 @@
     int length;
     ```
 
-    Pointer variables should be prepended with ‘p’ and place the asterisk ‘*’
+    Pointer variables should be prepended with ‘p_’ and place the asterisk ‘*’
     close to the variable name instead of pointer type.
 
     ```cpp
-    int *pName;
-    int *pAge, address; // Here only pAge is a pointer variable !
+    int *p_name;
+    int *p_age, address; // Here only pAge is a pointer variable !
     ```
 
-    Reference variables should be prepended with ‘r’. This helps to
+    Reference variables should be prepended with ‘r_’. This helps to
     differentiate between the method returning a modifiable object and the same
     method returning a non-modifiable object.
 
     ```cpp
     int weight = 8;
-    int& rweight = weight;
+    int& r_weight = weight;
     ```
 
-    Static variables should be prepended with ‘s’.
+    Static variables should be prepended with ‘s_’.
     ```cpp
-    static int sCount;
+    static int s_count;
     ```
 
 * Constants

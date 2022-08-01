@@ -1,58 +1,58 @@
 #include "threadwrapper.hpp"
 
-ThreadWrapper::ThreadWrapper(std::string name, std::size_t sd, std::size_t pd)
+ThreadWrapper::ThreadWrapper(std::string name, std::size_t startupDelay, std::size_t pauseDelay)
 {
   BOOST_LOG_TRIVIAL(debug) << "Creating threads for " << name;
-  paused = true;
-  worker_on = true;
-  startup_delay = sd;
-  pause_delay = pd;
-  this->name = name;
+  m_is_paused = true;
+  m_worker_on = true;
+  m_startup_delay = startupDelay;
+  m_pause_delay = pauseDelay;
+  m_name = name;
 
-  worker = std::thread(&ThreadWrapper::WorkLoop, this);
-  tester = std::thread(&ThreadWrapper::TestLoop, this);
+  m_worker = std::thread(&ThreadWrapper::WorkLoop, this);
+  m_tester = std::thread(&ThreadWrapper::TestLoop, this);
 };
 
 ThreadWrapper::~ThreadWrapper()
 {
-  BOOST_LOG_TRIVIAL(debug) << "Cancelling threads for " << name;
-  worker_on = false;
-  if (worker.joinable()) worker.join();
-  if (tester.joinable()) tester.join();
-  BOOST_LOG_TRIVIAL(debug) << "Stopped threads for " << name;
+  BOOST_LOG_TRIVIAL(debug) << "Cancelling threads for " << m_name;
+  m_worker_on = false;
+  if (m_worker.joinable()) m_worker.join();
+  if (m_tester.joinable()) m_tester.join();
+  BOOST_LOG_TRIVIAL(debug) << "Stopped threads for " << m_name;
 }
 
 void ThreadWrapper::WorkLoop()
 {
-  std::this_thread::sleep_for(std::chrono::milliseconds(startup_delay));
-  while (worker_on) {
-    if (not paused) {
+  std::this_thread::sleep_for(std::chrono::milliseconds(m_startup_delay));
+  while (m_worker_on) {
+    if (not m_is_paused) {
       Work();
-      worker_tick++;
+      m_worker_tick++;
     } else
-      std::this_thread::sleep_for(std::chrono::milliseconds(pause_delay));
+      std::this_thread::sleep_for(std::chrono::milliseconds(m_pause_delay));
   }
 }
 
 void ThreadWrapper::TestLoop()
 {
-  std::this_thread::sleep_for(std::chrono::milliseconds(startup_delay));
-  while (worker_on) {
-    if (not paused)
+  std::this_thread::sleep_for(std::chrono::milliseconds(m_startup_delay));
+  while (m_worker_on) {
+    if (not m_is_paused)
       Test();
     else
-      std::this_thread::sleep_for(std::chrono::milliseconds(pause_delay));
+      std::this_thread::sleep_for(std::chrono::milliseconds(m_pause_delay));
   }
 }
 
 void ThreadWrapper::Pause()
 {
-  BOOST_LOG_TRIVIAL(debug) << "Pausing thread for " << name;
-  paused = true;
+  BOOST_LOG_TRIVIAL(debug) << "Pausing thread for " << m_name;
+  m_is_paused = true;
 }
 
 void ThreadWrapper::Resume()
 {
-  BOOST_LOG_TRIVIAL(debug) << "Resumed thread for " << name;
-  paused = false;
+  BOOST_LOG_TRIVIAL(debug) << "Resumed thread for " << m_name;
+  m_is_paused = false;
 }

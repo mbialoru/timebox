@@ -17,18 +17,16 @@ public:
   ~SerialReader() = default;
 
 private:
-  std::function<void(std::string)> callback = nullptr;
-
-  const std::size_t flush_delay{ 2 };
-  static const std::size_t buffer_size{ 256 };
-  static const std::size_t read_timeout{ 250 };
-  std::array<char, buffer_size> serial_buffer;
-
-  LibSerial::SerialPort sp;
-
-  void InitSerial(const char *, std::size_t);
+  void InitalizeSerial(const char *, std::size_t);
   void Work() override;
   void Test() override;
+
+  std::function<void(std::string)> m_callback = nullptr;
+  const std::size_t m_flush_delay{ 2 };
+  static const std::size_t m_buffer_size{ 256 };
+  static const std::size_t m_read_timeout{ 250 };
+  std::array<char, m_buffer_size> m_serial_buffer;
+  LibSerial::SerialPort m_serial_port;
 };
 
 #endif// SERIALREADER_HPP

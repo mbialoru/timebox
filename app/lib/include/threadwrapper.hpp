@@ -20,16 +20,16 @@ public:
   void Pause();
 
 protected:
-  std::string name;
-  std::thread worker, tester;
-  std::size_t startup_delay, pause_delay;
-  std::atomic<bool> worker_on, paused;
-  std::atomic<std::size_t> worker_tick;
-
   virtual void WorkLoop();
   virtual void TestLoop();
   virtual void Work(){};
   virtual void Test(){};
+
+  std::string m_name;
+  std::thread m_worker, m_tester;
+  std::size_t m_startup_delay, m_pause_delay;
+  std::atomic<bool> m_worker_on, m_is_paused;
+  std::atomic<std::size_t> m_worker_tick;
 };
 
 #endif// THREADRUNNER_HPP
