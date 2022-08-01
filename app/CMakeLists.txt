@@ -4,7 +4,15 @@ add_subdirectory(benchmark)
 add_subdirectory(proto)
 
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE lib${CMAKE_PROJECT_NAME}_static)
+target_link_libraries(
+  ${PROJECT_NAME}
+  PRIVATE lib${CMAKE_PROJECT_NAME}_static
+          Boost::log
+          Boost::log_setup
+          Boost::date_time
+          libserial_static
+          IMGUI
+          SDL2)
 
 if(ipo_supported)
   message(STATUS "IPO / LTO enabled for ${PROJECT_NAME}")
