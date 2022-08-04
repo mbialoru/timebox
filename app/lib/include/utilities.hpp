@@ -8,7 +8,6 @@
 #include <boost/log/trivial.hpp>
 #include <chrono>
 #include <filesystem>
-#include <iostream>
 #include <map>
 #include <termios.h>
 #include <unistd.h>
@@ -39,5 +38,27 @@ void PrintTimex(timex &);
 std::size_t ConvertBaudRate(int);
 std::chrono::system_clock::time_point ConvertTimepointToString(std::string);
 std::string ConvertStringToTimepoint(std::chrono::system_clock::time_point);
+
+template<typename T> struct TimingDecorator;// Yes, this is necessary.
+template<typename T, typename... Args> struct TimingDecorator<T(Args...)>
+{
+  TimingDecorator(std::function<T(Args...)> function) : m_function{ function } {}
+
+  std::pair<T, long int> operator()(Args... args)
+  {
+    auto pre_call = std::chrono::system_clock::now();
+    T result = m_function(args...);
+    auto post_call = std::chrono::system_clock::now();
+    std::chrono::duration time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(post_call - pre_call);
+    return std::make_pair<T, long int>(std::move(result), time_diff.count());
+  }
+
+  std::function<T(Args...)> m_function;
+};
+
+template<typename T, typename... Args> auto MakeTimingDecorate(T (*function)(Args...))
+{
+  return TimingDecorator<T(Args...)>(std::function<T(Args...)>(function));
+}
 
 #endif// UTILITIES_HPP

@@ -50,26 +50,26 @@ std::size_t ConvertBaudRate(int baud)
 
 void PrintTimex(timex &t)
 {
-  std::cout << "modes: " << t.modes << std::endl
-            << "offset: " << t.offset << std::endl
-            << "freq: " << t.freq << std::endl
-            << "maxerror: " << t.maxerror << std::endl
-            << "esterror: " << t.esterror << std::endl
-            << "status: " << t.status << std::endl
-            << "constant: " << t.constant << std::endl
-            << "precision: " << t.precision << std::endl
-            << "tolerance: " << t.tolerance << std::endl
-            << "timeval_sec: " << t.time.tv_sec << std::endl
-            << "timeval_usec: " << t.time.tv_usec << std::endl
-            << "tick: " << t.tick << std::endl
-            << "ppsfreq: " << t.ppsfreq << std::endl
-            << "jitter: " << t.jitter << std::endl
-            << "shift: " << t.shift << std::endl
-            << "stabil: " << t.stabil << std::endl
-            << "calcnt: " << t.calcnt << std::endl
-            << "errcnt: " << t.errcnt << std::endl
-            << "stbcnt: " << t.stbcnt << std::endl
-            << "tai: " << t.tai << std::endl;
+  BOOST_LOG_TRIVIAL(debug) << "modes: " << t.modes;
+  BOOST_LOG_TRIVIAL(debug) << "offset: " << t.offset;
+  BOOST_LOG_TRIVIAL(debug) << "freq: " << t.freq;
+  BOOST_LOG_TRIVIAL(debug) << "maxerror: " << t.maxerror;
+  BOOST_LOG_TRIVIAL(debug) << "esterror: " << t.esterror;
+  BOOST_LOG_TRIVIAL(debug) << "status: " << t.status;
+  BOOST_LOG_TRIVIAL(debug) << "constant: " << t.constant;
+  BOOST_LOG_TRIVIAL(debug) << "precision: " << t.precision;
+  BOOST_LOG_TRIVIAL(debug) << "tolerance: " << t.tolerance;
+  BOOST_LOG_TRIVIAL(debug) << "timeval_sec: " << t.time.tv_sec;
+  BOOST_LOG_TRIVIAL(debug) << "timeval_usec: " << t.time.tv_usec;
+  BOOST_LOG_TRIVIAL(debug) << "tick: " << t.tick;
+  BOOST_LOG_TRIVIAL(debug) << "ppsfreq: " << t.ppsfreq;
+  BOOST_LOG_TRIVIAL(debug) << "jitter: " << t.jitter;
+  BOOST_LOG_TRIVIAL(debug) << "shift: " << t.shift;
+  BOOST_LOG_TRIVIAL(debug) << "stabil: " << t.stabil;
+  BOOST_LOG_TRIVIAL(debug) << "calcnt: " << t.calcnt;
+  BOOST_LOG_TRIVIAL(debug) << "errcnt: " << t.errcnt;
+  BOOST_LOG_TRIVIAL(debug) << "stbcnt: " << t.stbcnt;
+  BOOST_LOG_TRIVIAL(debug) << "tai: " << t.tai;
 }
 
 std::chrono::system_clock::time_point ConvertTimepointToString(std::string time_str)
