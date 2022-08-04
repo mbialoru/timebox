@@ -16,7 +16,7 @@ bool CheckAdminPrivileges()
     return false;
 }
 
-bool CheckIfUsingDockerContainer()
+bool CheckIfUsingDocker()
 {
   if (std::filesystem::exists(std::filesystem::path("/.dockerenv")))
     return true;
@@ -41,25 +41,8 @@ bool CheckNTPService()
 
 std::size_t ConvertBaudRate(int baud)
 {
-  static std::map<int, int> conversion_map{ { 0, B0 },
-    { 50, B50 },
-    { 75, B75 },
-    { 110, B110 },
-    { 134, B134 },
-    { 150, B150 },
-    { 200, B200 },
-    { 300, B300 },
-    { 600, B600 },
-    { 1200, B1200 },
-    { 1800, B1800 },
-    { 2400, B2400 },
-    { 4800, B4800 },
-    { 9600, B9600 },
-    { 19200, B19200 },
-    { 38400, B38400 } };
-
-  auto search = conversion_map.find(baud);
-  if (search != conversion_map.end())
+  auto search = s_baud_conversion_map.find(baud);
+  if (search != s_baud_conversion_map.end())
     return search->second;
   else
     throw std::invalid_argument("Invalid baud rate !");
@@ -114,4 +97,28 @@ std::string ConvertStringToTimepoint(std::chrono::system_clock::time_point tp)
   std::string res{ std::to_string(tm.tm_hour) + ":" + std::to_string(tm.tm_min) + ":" + std::to_string(tm.tm_sec) };
 
   return res;
+}
+
+std::vector<std::string> GetSerialDevicesList()
+{
+  std::vector<std::string> port_names;
+
+  const std::filesystem::path dev_directory{ "/dev/serial/by-id" };
+  try {
+    if (!exists(dev_directory)) {
+      throw std::runtime_error(dev_directory.generic_string() + " does not exist");
+    } else {
+      for (auto const &path : std::filesystem::directory_iterator{ dev_directory }) {
+        if (is_symlink(path)) {
+          auto canonical_path = std::filesystem::canonical(read_symlink(path));
+          port_names.push_back(canonical_path.generic_string());
+        }
+      }
+    }
+  } catch (const std::filesystem::filesystem_error &e) {
+    BOOST_LOG_TRIVIAL(error) << e.what();
+    throw e;
+  }
+  std::sort(port_names.begin(), port_names.end());
+  return port_names;
 }

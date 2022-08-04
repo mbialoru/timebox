@@ -6,7 +6,7 @@
 
 TEST(Test_utils, timesync_service_running)
 {
-  if (CheckIfUsingDockerContainer())
+  if (CheckIfUsingDocker())
     EXPECT_EQ(CheckNTPService(), false);
   else
     EXPECT_EQ(CheckNTPService(), true);

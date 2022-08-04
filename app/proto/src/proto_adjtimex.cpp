@@ -100,7 +100,7 @@ TEST(Proto_adjtimex, change_tick_value)
 {
 #if SUDO_NODOCKER
   if (!CheckAdminPrivileges()) GTEST_FAIL() << "MUST RUN AS ROOT";
-  if (CheckIfUsingDockerContainer()) GTEST_FAIL() << "CANNOT RUN FROM DOCKER";
+  if (CheckIfUsingDocker()) GTEST_FAIL() << "CANNOT RUN FROM DOCKER";
 #else
   GTEST_SKIP() << "NEEDS ROOT PRIVILEGES AND CANNOT RUN FROM DOCKER CONTAINER";
 #endif
@@ -134,7 +134,7 @@ TEST(Proto_adjtimex, change_tick_value_invalid)
 {
 #if SUDO_NODOCKER
   if (!CheckAdminPrivileges()) GTEST_FAIL() << "MUST RUN AS ROOT";
-  if (CheckIfUsingDockerContainer()) GTEST_FAIL() << "CANNOT RUN FROM DOCKER";
+  if (CheckIfUsingDocker()) GTEST_FAIL() << "CANNOT RUN FROM DOCKER";
 #else
   GTEST_SKIP() << "NEEDS ROOT PRIVILEGES AND CANNOT RUN FROM DOCKER CONTAINER";
 #endif
