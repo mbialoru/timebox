@@ -13,7 +13,7 @@
 #include "clockcontroller.hpp"
 #include "config.hpp"
 #include "serialreader.hpp"
-#include "utils.hpp"
+#include "utilities.hpp"
 
 int main(int argc, const char *argv[])
 {

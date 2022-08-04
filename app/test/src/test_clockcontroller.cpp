@@ -2,7 +2,7 @@
 
 #include "clockcontroller.hpp"
 #include "defines.hpp"
-#include "utils.hpp"
+#include "utilities.hpp"
 
 
 class Test_ClockController : public ::testing::Test

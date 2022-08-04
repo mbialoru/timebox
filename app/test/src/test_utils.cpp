@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "defines.hpp"
-#include "utils.hpp"
+#include "utilities.hpp"
 
 
 TEST(Test_utils, timesync_service_running)

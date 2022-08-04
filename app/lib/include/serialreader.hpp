@@ -8,7 +8,7 @@
 #include <libserial/SerialPort.h>
 
 #include "threadwrapper.hpp"
-#include "utils.hpp"
+#include "utilities.hpp"
 
 class SerialReader : public ThreadWrapper
 {

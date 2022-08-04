@@ -1,5 +1,5 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef UTILITIES_HPP
+#define UTILITIES_HPP
 
 #pragma once
 
@@ -40,4 +40,4 @@ std::size_t ConvertBaudRate(int);
 std::chrono::system_clock::time_point ConvertTimepointToString(std::string);
 std::string ConvertStringToTimepoint(std::chrono::system_clock::time_point);
 
-#endif// UTILS_HPP
+#endif// UTILITIES_HPP
