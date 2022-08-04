@@ -12,9 +12,9 @@ protected:
   double temperature(double t = 0.0)
   {
     // Could be its own class, but this is more compact
-    static double _temperature{ 15 };
-    _temperature += t / 4;
-    return _temperature;
+    static double temperature{ 15 };
+    temperature += t / 4;
+    return temperature;
   }
 
 public:
@@ -22,14 +22,30 @@ public:
   void TearDown() override {}
 };
 
-TEST_F(Test_PID, Control_Temperature)
+TEST_F(Test_PID, limited_output)
+{
+  pid.SetLimits(10, 30);
+
+  for (std::size_t i = 0; i < 50; i++) {
+    if (i >= 9) {
+      pid.SetTarget(100);
+      pid.Update(this->temperature(), 1);
+    }
+    if (pid.GetTarget() > 0) {
+      auto pid_output = pid.GetOutputLimited();
+      EXPECT_TRUE((pid_output >= 10 && pid_output <= 30));
+    }
+  }
+}
+
+TEST_F(Test_PID, control_temperature)
 {
   for (std::size_t i = 0; i < 50; i++) {
     if (i >= 9) {
-      pid.SetTarget(60);
+      pid.SetTarget(100);
       pid.Update(this->temperature(), 1);
     }
-    if (pid.GetTarget() > 0) this->temperature(pid.GetOutput() - 1 / i);
+    if (pid.GetTarget() > 0) this->temperature(pid.GetOutputRaw() - 1 / i);
   }
-  EXPECT_NEAR(this->temperature(), 60, 0.01);
+  EXPECT_NEAR(this->temperature(), 100, 0.01);
 }
