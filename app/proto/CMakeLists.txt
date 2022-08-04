@@ -9,8 +9,14 @@ add_executable(${PROJECT_NAME}_proto ${SRCS})
 target_include_directories(${PROJECT_NAME}_proto
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(
-  ${PROJECT_NAME}_proto PRIVATE lib${PROJECT_NAME}_static gtest gtest_main
-                                IMGUI SDL2 libserial_static)
+  ${PROJECT_NAME}_proto
+  PRIVATE Threads::Threads
+          lib${PROJECT_NAME}
+          gtest
+          gtest_main
+          IMGUI
+          SDL2
+          libserial_static)
 
 if(ipo_supported)
   message(STATUS "IPO / LTO enabled for ${PROJECT_NAME}_proto")

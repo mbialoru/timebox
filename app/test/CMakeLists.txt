@@ -12,7 +12,7 @@ target_include_directories(${PROJECT_NAME}_test
 
 target_link_libraries(
   ${PROJECT_NAME}_test
-  PRIVATE lib${CMAKE_PROJECT_NAME}_static
+  PRIVATE lib${PROJECT_NAME}
           libserial_static
           gtest
           gtest_main
