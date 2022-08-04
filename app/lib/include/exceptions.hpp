@@ -39,7 +39,7 @@ private:
 class InsufficientPermissionsError : public std::exception
 {
 public:
-  InsufficientPermissionsError(const char *msg = "Operation not permitted, invalid permissions")
+  InsufficientPermissionsError(const char *msg = "Operation not permitted")
   {
     this->msg = msg;
     BOOST_LOG_TRIVIAL(error) << msg;

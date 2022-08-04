@@ -23,7 +23,7 @@ public:
 
 TEST_F(Test_SerialReader, thread_callback)
 {
-  if (!LONG_TESTS) GTEST_SKIP() << "Skipping, LONG_TESTS " << LONG_TESTS;
+  if (!LONG_TESTS) GTEST_SKIP() << "Skipping, LONG_TESTS = " << LONG_TESTS;
 
 #if USING_REAL_HARDWARE
   SerialReader sr{ "/dev/ttyACM0", 9600, std::bind(&Test_SerialReader::CallbackDummy, this) };
@@ -40,7 +40,7 @@ void MyCallback(std::string) { MyCallback_calls++; }
 
 TEST_F(Test_SerialReader, using_free_function_callback)
 {
-  if (!LONG_TESTS) GTEST_SKIP() << "Skipping, LONG_TESTS " << LONG_TESTS;
+  if (!LONG_TESTS) GTEST_SKIP() << "Skipping, LONG_TESTS = " << LONG_TESTS;
 
 #if USING_REAL_HARDWARE
   SerialReader sr{ "/dev/ttyACM0", 9600, std::bind(MyCallback, std::placeholders::_1) };

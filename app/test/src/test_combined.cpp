@@ -19,7 +19,7 @@ public:
 
 TEST_F(Test_Combined, try_to_adjust_clock_mockup)
 {
-  if (!LONG_TESTS) GTEST_SKIP() << "Skipping, LONG_TESTS " << LONG_TESTS;
+  if (!LONG_TESTS) GTEST_SKIP() << "Skipping, LONG_TESTS = " << LONG_TESTS;
 
   ClockController cc{ 0, 0.001 };
 #if USING_REAL_HARDWARE

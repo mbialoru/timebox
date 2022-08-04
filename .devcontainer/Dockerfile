@@ -32,7 +32,7 @@ RUN apt install -y build-essential binutils autoconf automake cmake \
 RUN apt install -y python2 python3 python3-pip python3-venv
 
 # Python packages
-RUN pip install --upgrade pip setuptools autopep8 conan cmakelang
+RUN pip install --upgrade pip setuptools autopep8 conan cmakelang cppclean
 RUN conan --version
 
 # Install GCC

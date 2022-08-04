@@ -11,8 +11,14 @@ target_include_directories(${PROJECT_NAME}_test
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(
-  ${PROJECT_NAME}_test PRIVATE lib${CMAKE_PROJECT_NAME}_static libserial_static
-                               gtest gtest_main gmock gmock_main)
+  ${PROJECT_NAME}_test
+  PRIVATE lib${CMAKE_PROJECT_NAME}_static
+          libserial_static
+          gtest
+          gtest_main
+          gmock
+          gmock_main
+          Boost::log)
 
 if(ipo_supported)
   message(STATUS "IPO / LTO enabled for ${PROJECT_NAME}_test")

@@ -17,6 +17,5 @@ else()
 endif()
 
 target_link_libraries(
-  lib${PROJECT_NAME}_static
-  PRIVATE Threads::Threads Boost::log Boost::log_setup Boost::date_time
-          libserial_static)
+  lib${PROJECT_NAME}_static PRIVATE Threads::Threads Boost::log
+                                    Boost::date_time libserial_static)
