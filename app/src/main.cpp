@@ -1,13 +1,5 @@
 #include <SDL.h>
-#include <boost/log/core.hpp>
-#include <boost/log/expressions.hpp>
-#include <boost/log/sinks/text_file_backend.hpp>
-#include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/trivial.hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
-#include <boost/log/utility/setup/file.hpp>
-#include <cstdlib>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
@@ -19,19 +11,12 @@
 #endif
 
 #include "clockcontroller.hpp"
+#include "config.hpp"
 #include "serialreader.hpp"
 #include "utils.hpp"
 
 int main(int argc, const char *argv[])
 {
-  // Setup logging
-  boost::log::add_file_log(
-    boost::log::keywords::file_name = "timebox_%N.log", boost::log::keywords::format = "[%TimeStamp%]: %Message%");
-  boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
-  boost::log::add_common_attributes();
-  boost::log::sources::severity_logger<boost::log::trivial::severity_level> lg;
-  BOOST_LOG_SEV(lg, boost::log::trivial::info) << "Logging setup";
-
   // Setup SDL
   // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
   // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to latest version of SDL is
@@ -69,9 +54,18 @@ int main(int argc, const char *argv[])
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
   SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-  SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-  SDL_Window *window =
-    SDL_CreateWindow("Timebox Prototype", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+  SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
+  constexpr std::size_t window_height{ 800 };
+  constexpr std::size_t window_width{ 800 };
+
+  std::string window_title;
+  window_title += PROJECT_NAME;
+  window_title[0] = toupper(window_title[0]);
+  window_title += " ver. ";
+  window_title += PROJECT_VER;
+
+  SDL_Window *window = SDL_CreateWindow(
+    window_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_height, window_width, window_flags);
   SDL_GLContext gl_context = SDL_GL_CreateContext(window);
   SDL_GL_MakeCurrent(window, gl_context);
   SDL_GL_SetSwapInterval(1);// Enable vsync
@@ -89,30 +83,42 @@ int main(int argc, const char *argv[])
   ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  // Our state
-  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-  std::unique_ptr<ClockController> pClockController = nullptr;
-  std::unique_ptr<SerialReader> pSerialReader = nullptr;
-  bool runningAsRoot = CheckAdminPrivileges();
+  // Variables for application
+  std::string serial_port;
+  std::size_t baud_rate;
+  std::unique_ptr<ClockController> p_clock_controller;
+  std::unique_ptr<SerialReader> p_serial_reader;
+
+  // Variables for ImGui
+  const Uint32 max_fps{ 20 };
+  Uint32 last_frametime, this_frametime;
+  bool admin_privileges = CheckAdminPrivileges();
+  bool disabled_warning_popup{ false };
+  bool display_connection_dialog{ false };
+  bool app_run{ true };
+  std::vector<std::string> serial_ports;
 
   // Main loop
-  bool done = false;
-  Uint32 previousTime, currentTime;
-  const Uint32 maxFPS{ 5 };
-
-  while (!done) {
-
+  while (app_run) {
     // FPS limiter
-    previousTime = currentTime;
-    currentTime = SDL_GetTicks();
+    last_frametime = this_frametime;
+    this_frametime = SDL_GetTicks();
 
+    // Poll and handle events (inputs, window resize, etc.)
+    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your
+    // inputs.
+    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite
+    // your copy of the mouse data.
+    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or
+    // clear/overwrite your copy of the keyboard data. Generally you may always pass all inputs to dear imgui, and hide
+    // them from your application based on those two flags.
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
       ImGui_ImplSDL2_ProcessEvent(&event);
-      if (event.type == SDL_QUIT) done = true;
+      if (event.type == SDL_QUIT) app_run = true;
       if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE
           && event.window.windowID == SDL_GetWindowID(window))
-        done = true;
+        app_run = false;
     }
 
     // Start the Dear ImGui frame
@@ -120,25 +126,70 @@ int main(int argc, const char *argv[])
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
+    // Main dialog
     {
-      ImGui::Begin("Timebox Prototype");
-      ImGui::Text(
-        "Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-      if (ImGui::Button("Quit")) { done = true; }
+      ImGuiWindowFlags window_flags = 0;
+      window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+      window_flags |= ImGuiWindowFlags_NoCollapse;
+      window_flags |= ImGuiWindowFlags_NoResize;
+      window_flags |= ImGuiWindowFlags_NoMove;
+      window_flags |= ImGuiWindowFlags_MenuBar;
+
+      ImGui::Begin(window_title.c_str(), &app_run, window_flags);
+      ImGui::SetWindowPos(ImVec2(0, 0));
+      ImGui::SetWindowSize(ImVec2(window_height, window_width));
+
+      // Main dialog content
+      ImGui::Text("Frametime %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+      ImGui::Separator();
+      if (ImGui::Button("Connect")) { display_connection_dialog = true; }
+      if (ImGui::Button("Quit")) { app_run = false; }
+
+      // Main dialog context menu
+      if (ImGui::BeginPopupContextWindow()) {
+        if (ImGui::MenuItem("Quit")) app_run = false;
+        ImGui::EndPopup();
+      }
+      ImGui::End();
+    }
+
+    // Insufficient premissions warning popup
+    if (!admin_privileges && !disabled_warning_popup) {
+      ImGui::SetNextWindowBgAlpha(0.35f);
+      ImGui::SetNextWindowSize(ImVec2(window_width / 2, 100));
+      ImGui::SetNextWindowPos(ImVec2(window_width / 4, window_height / 2 - 50));
+
+      ImGuiWindowFlags window_flags = 0;
+      window_flags |= ImGuiWindowFlags_NoDecoration;
+      window_flags |= ImGuiWindowFlags_NoFocusOnAppearing;
+
+      ImGui::Begin("Warning", &admin_privileges, window_flags);
+      ImGui::Text("Program is not running with administrator privileges");
+      if (ImGui::BeginPopupContextWindow()) {
+        if (ImGui::MenuItem("Disable warning")) disabled_warning_popup = true;
+        ImGui::EndPopup();
+      }
+      ImGui::End();
+    }
+
+    // Connection dialog
+    if (display_connection_dialog) {
+      ImGuiWindowFlags window_flags = 0;
+      window_flags |= ImGuiWindowFlags_NoCollapse;
+
+      ImGui::Begin("Connect", &display_connection_dialog, window_flags);
+      if (ImGui::Button("Scan ports")) { serial_ports = GetSerialDevicesList(); }
       ImGui::End();
     }
 
     // Rendering - This is our Viewport
     ImGui::Render();
     glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-    glClearColor(
-      clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-    glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SDL_GL_SwapWindow(window);
 
     // FPS limiter
-    if (currentTime - previousTime < 1000 / maxFPS) SDL_Delay(1000 / maxFPS - currentTime + previousTime);
+    if (this_frametime - last_frametime < 1000 / max_fps) SDL_Delay(1000 / max_fps - this_frametime + last_frametime);
   }
 
   // Cleanup
