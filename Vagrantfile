@@ -73,7 +73,7 @@ Vagrant.configure("2") do |config|
     export MIRROR="poland"
     apt update && apt upgrade -y
     apt install -y netselect-apt
-    netselect-apt -c $MIRROR -t 15 -a amd64 -n stable
+    netselect-apt -c $MIRROR -t 15 -a amd64 -n unstable
     mv sources.list /etc/apt/sources.list
     apt update && apt upgrade
 
@@ -89,7 +89,7 @@ Vagrant.configure("2") do |config|
     apt install -y python3 python3-pip python3-venv
 
     # python packages
-    pip install --upgrade pip setuptools autopep8 conan
+    pip install --upgrade pip setuptools autopep8 conan cmakelang cppclean
 
     # install gcc
     export GCC_VER=12
@@ -113,7 +113,10 @@ Vagrant.configure("2") do |config|
 
     # project dependencies
     apt install -y libboost-all-dev libgtest-dev libgmock-dev libbenchmark-dev \
-    libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config
+    libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config libserial-dev
+
+    # install basic graphical interface
+    apt install -y i3 lightdm slick-greeter stterm
 
     # cleanup cached apt data
     apt autoremove -y && apt clean && rm -rf /var/lib/apt/lists/*

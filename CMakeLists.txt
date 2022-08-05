@@ -84,6 +84,7 @@ add_library(myproject::project_warnings INTERFACE IMPORTED)
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported OUTPUT error)
 
+# add file to find libserial with cmake
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules")
 
 # required packages

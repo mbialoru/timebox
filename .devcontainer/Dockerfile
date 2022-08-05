@@ -65,7 +65,7 @@ RUN update-alternatives --install /usr/bin/clang++ clang++ $(which \
 
 # Install this project dependencies
 RUN apt install -y libboost-all-dev libgtest-dev libgmock-dev libbenchmark-dev \
-    libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config
+    libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config libserial-dev
 
 # Symbolic link for compatibility
 # RUN ln -s /bin/uname /usr/bin/uname
