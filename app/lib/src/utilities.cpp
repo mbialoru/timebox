@@ -102,15 +102,18 @@ std::string ConvertStringToTimepoint(std::chrono::system_clock::time_point tp)
 std::vector<std::string> GetSerialDevicesList()
 {
   std::vector<std::string> port_names;
-
   const std::filesystem::path dev_directory{ "/dev/serial/by-id" };
+  const std::filesystem::path current_directory{ std::filesystem::current_path() };
+  std::filesystem::current_path(dev_directory);
+
   try {
     if (!exists(dev_directory)) {
       throw std::runtime_error(dev_directory.generic_string() + " does not exist");
     } else {
       for (auto const &path : std::filesystem::directory_iterator{ dev_directory }) {
         if (is_symlink(path)) {
-          auto canonical_path = std::filesystem::canonical(read_symlink(path));
+          BOOST_LOG_TRIVIAL(debug) << std::filesystem::canonical(std::filesystem::read_symlink(path));
+          auto canonical_path = std::filesystem::canonical(std::filesystem::read_symlink(path));
           port_names.push_back(canonical_path.generic_string());
         }
       }
@@ -119,6 +122,9 @@ std::vector<std::string> GetSerialDevicesList()
     BOOST_LOG_TRIVIAL(error) << e.what();
     throw e;
   }
+
   std::sort(port_names.begin(), port_names.end());
+  std::filesystem::current_path(current_directory);
+
   return port_names;
 }
