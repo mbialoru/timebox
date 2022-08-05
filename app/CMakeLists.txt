@@ -10,7 +10,7 @@ target_link_libraries(
           SDL2
           IMGUI
           Threads::Threads
-          libserial_static
+          LibSerial::serial
           Boost::log
           Boost::log_setup)
 

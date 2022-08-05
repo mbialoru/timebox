@@ -84,11 +84,14 @@ add_library(myproject::project_warnings INTERFACE IMPORTED)
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported OUTPUT error)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules")
+
 # required packages
 find_package(Threads REQUIRED)
 find_package(Boost REQUIRED COMPONENTS log log_setup date_time)
 find_package(GTest REQUIRED)
 find_package(benchmark REQUIRED)
+find_package(LibSerial REQUIRED)
 find_package(PkgConfig REQUIRED)
 
 # Boost vars

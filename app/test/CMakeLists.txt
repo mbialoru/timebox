@@ -13,7 +13,7 @@ target_include_directories(${PROJECT_NAME}_test
 target_link_libraries(
   ${PROJECT_NAME}_test
   PRIVATE lib${PROJECT_NAME}
-          libserial_static
+          LibSerial::serial
           gtest
           gtest_main
           gmock

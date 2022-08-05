@@ -16,7 +16,7 @@ target_link_libraries(
           gtest_main
           IMGUI
           SDL2
-          libserial_static)
+          LibSerial::serial)
 
 if(ipo_supported)
   message(STATUS "IPO / LTO enabled for ${PROJECT_NAME}_proto")
