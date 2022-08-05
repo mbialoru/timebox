@@ -4,13 +4,19 @@
 #include "defines.hpp"
 #include "utilities.hpp"
 
-int DummyFunction_A()
+int DummyFunctionA()
 {
   usleep(20000);
   return 5;
 }
 
-int DummyFunction_B(int a) { return a + 5; }
+int DummyFunctionB(int a)
+{
+  usleep(20000);
+  return a + 5;
+}
+
+void DummyFunctionC() { usleep(20000); }
 
 TEST(Test_utilities, timesync_service_running)
 {
@@ -49,7 +55,7 @@ TEST(Test_utilities, serial_devices_list)
 
 TEST(Test_utilities, timing_decorator)
 {
-  auto decorated_dummy_a = MakeTimingDecorate(DummyFunction_A);
+  auto decorated_dummy_a = WrapTimingDecorator(DummyFunctionA);
   auto [value, run_time] = decorated_dummy_a();
   EXPECT_EQ(value, 5);
   EXPECT_NEAR(run_time, 20, 1);
@@ -57,7 +63,14 @@ TEST(Test_utilities, timing_decorator)
 
 TEST(Test_utilities, timing_decorator_arguments)
 {
-  auto decorated_dummy_b = MakeTimingDecorate(DummyFunction_B);
+  auto decorated_dummy_b = WrapTimingDecorator(DummyFunctionB);
   auto [value, run_time] = decorated_dummy_b(5);
   EXPECT_EQ(value, 10);
+}
+
+TEST(Test_utilities, timing_decorator_void_type)
+{
+  auto decorated_dummy_c = WrapTimingDecorator(DummyFunctionC);
+  auto run_time = decorated_dummy_c();
+  EXPECT_NEAR(run_time, 20, 1);
 }

@@ -40,6 +40,22 @@ std::chrono::system_clock::time_point ConvertTimepointToString(std::string);
 std::string ConvertStringToTimepoint(std::chrono::system_clock::time_point);
 
 template<typename T> struct TimingDecorator;// Yes, this is necessary.
+template<typename... Args> struct TimingDecorator<void(Args...)>
+{
+  TimingDecorator(std::function<void(Args...)> function) : m_function{ function } {}
+
+  long int operator()(Args... args)
+  {
+    auto pre_call = std::chrono::system_clock::now();
+    m_function(args...);
+    auto post_call = std::chrono::system_clock::now();
+    std::chrono::duration time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(post_call - pre_call);
+    return time_diff.count();
+  }
+
+  std::function<void(Args...)> m_function;
+};
+
 template<typename T, typename... Args> struct TimingDecorator<T(Args...)>
 {
   TimingDecorator(std::function<T(Args...)> function) : m_function{ function } {}
@@ -56,7 +72,12 @@ template<typename T, typename... Args> struct TimingDecorator<T(Args...)>
   std::function<T(Args...)> m_function;
 };
 
-template<typename T, typename... Args> auto MakeTimingDecorate(T (*function)(Args...))
+template<typename... Args> auto WrapTimingDecorator(void (*function)(Args...))
+{
+  return TimingDecorator<void(Args...)>(std::function<void(Args...)>(function));
+}
+
+template<typename T, typename... Args> auto WrapTimingDecorator(T (*function)(Args...))
 {
   return TimingDecorator<T(Args...)>(std::function<T(Args...)>(function));
 }
