@@ -14,7 +14,7 @@ class SerialReader : public ThreadWrapper
 {
 public:
   SerialReader(const char *, std::size_t, std::function<void(std::string)>);
-  ~SerialReader() = default;
+  ~SerialReader();
 
 private:
   void InitalizeSerial(const char *, std::size_t);

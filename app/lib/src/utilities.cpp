@@ -112,7 +112,6 @@ std::vector<std::string> GetSerialDevicesList()
     } else {
       for (auto const &path : std::filesystem::directory_iterator{ dev_directory }) {
         if (is_symlink(path)) {
-          BOOST_LOG_TRIVIAL(debug) << std::filesystem::canonical(std::filesystem::read_symlink(path));
           auto canonical_path = std::filesystem::canonical(std::filesystem::read_symlink(path));
           port_names.push_back(canonical_path.generic_string());
         }

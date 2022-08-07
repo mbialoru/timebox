@@ -26,7 +26,7 @@ int main(int argc, const char *argv[])
     return EXIT_FAILURE;
   }
 
-// Decide GL+GLSL versions
+  // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
   // GL ES 2.0 + GLSL 100
   const char *glsl_version = "#version 100";
@@ -55,8 +55,6 @@ int main(int argc, const char *argv[])
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
   SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
   SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
-  constexpr std::size_t window_height{ 800 };
-  constexpr std::size_t window_width{ 800 };
 
   std::string window_title;
   window_title += PROJECT_NAME;
@@ -86,6 +84,7 @@ int main(int argc, const char *argv[])
   // Variables for application
   std::string serial_port;
   std::size_t baud_rate;
+
   std::unique_ptr<ClockController> p_clock_controller;
   std::unique_ptr<SerialReader> p_serial_reader;
 
@@ -96,7 +95,11 @@ int main(int argc, const char *argv[])
   bool disabled_warning_popup{ false };
   bool display_connection_dialog{ false };
   bool app_run{ true };
-  std::vector<std::string> serial_ports;
+
+  std::vector<std::string> serial_port_list;
+  std::vector<std::string> baud_rate_list = {
+    "50", "75", "110", "134", "150", "200", "300", "600", "1200", "1800", "2400", "4800", "9600", "19200", "38400"
+  };
 
   // Main loop
   while (app_run) {
@@ -143,6 +146,7 @@ int main(int argc, const char *argv[])
       ImGui::Text("Frametime %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
       ImGui::Separator();
       if (ImGui::Button("Connect")) { display_connection_dialog = true; }
+      ImGui::SameLine();
       if (ImGui::Button("Quit")) { app_run = false; }
 
       // Main dialog context menu
@@ -177,8 +181,69 @@ int main(int argc, const char *argv[])
       ImGuiWindowFlags window_flags = 0;
       window_flags |= ImGuiWindowFlags_NoCollapse;
 
+      static std::size_t current_item_index_port{ 0 };
+      static std::size_t current_item_index_baud{ 0 };
+      static bool connected{ false };
+
       ImGui::Begin("Connect", &display_connection_dialog, window_flags);
-      if (ImGui::Button("Scan ports")) { serial_ports = GetSerialDevicesList(); }
+      {
+        // Baud rate choosing combo
+        const char *preview_value_baud = baud_rate_list[current_item_index_baud].c_str();
+        if (ImGui::BeginCombo("Baud rate", preview_value_baud)) {
+          for (std::size_t i{ 0 }; i < baud_rate_list.size(); i++) {
+            const bool is_selected = (current_item_index_baud == i);
+            if (ImGui::Selectable(baud_rate_list[i].c_str(), is_selected)) { current_item_index_baud = i; }
+            if (is_selected) {
+              baud_rate = std::stoi(baud_rate_list[i]);
+              ImGui::SetItemDefaultFocus();
+            }
+          }
+          ImGui::EndCombo();
+        }
+
+        // Serial port choosing combo
+        if (ImGui::Button("Scan ports")) { serial_port_list = GetSerialDevicesList(); }
+        ImGui::SameLine();
+        if (serial_port_list.size() > 0) {
+          const char *preview_value_port = serial_port_list[current_item_index_port].c_str();
+          if (ImGui::BeginCombo("##", preview_value_port)) {
+            for (std::size_t i{ 0 }; i < serial_port_list.size(); i++) {
+              const bool is_selected = (current_item_index_port == i);
+              if (ImGui::Selectable(serial_port_list[i].c_str(), is_selected)) { current_item_index_port = i; }
+              if (is_selected) {
+                serial_port = serial_port_list[i];
+                ImGui::SetItemDefaultFocus();
+              }
+            }
+            ImGui::EndCombo();
+          }
+        }
+
+        if (serial_port != "" && baud_rate != 0) {
+          ImGui::Text("Port: ");
+          ImGui::SameLine();
+          ImGui::Text(serial_port.c_str());
+          ImGui::Text("Baud: ");
+          ImGui::SameLine();
+          ImGui::Text(std::to_string(baud_rate).c_str());
+
+          if (ImGui::Button("Connect")) {
+            p_clock_controller = std::make_unique<ClockController>(0, 0.001);
+            p_serial_reader = std::make_unique<SerialReader>(serial_port.c_str(),
+              baud_rate,
+              std::bind(&ClockController::AdjustClock, p_clock_controller.get(), std::placeholders::_1));
+            connected = true;
+          }
+
+          if (connected) {
+            if (ImGui::Button("Disconnect")) {
+              p_serial_reader.reset();
+              p_clock_controller.reset();
+              connected = false;
+            }
+          }
+        }
+      }
       ImGui::End();
     }
 

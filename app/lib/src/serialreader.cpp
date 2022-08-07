@@ -1,11 +1,18 @@
 #include "serialreader.hpp"
 
 SerialReader::SerialReader(const char *tty, std::size_t baud, std::function<void(std::string)> callback)
-  : ThreadWrapper::ThreadWrapper("StringReader")
+  : ThreadWrapper::ThreadWrapper("SerialReader")
 {
-  this->m_callback = callback;
+  m_callback = callback;
   InitalizeSerial(tty, baud);
   m_is_paused = false;
+}
+
+SerialReader::~SerialReader()
+{
+  m_callback = nullptr;
+  m_is_paused = true;
+  m_serial_port.Close();
 }
 
 void SerialReader::InitalizeSerial(const char *tty, std::size_t baud)
