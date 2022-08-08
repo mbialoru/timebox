@@ -1,7 +1,6 @@
 add_subdirectory(lib)
 add_subdirectory(test)
 add_subdirectory(benchmark)
-add_subdirectory(proto)
 
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 target_link_libraries(
