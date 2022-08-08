@@ -24,7 +24,8 @@ public:
   std::pair<T, T> GetLimits() const;
   void SetLimits(T, T);
 
-  void Update(T, double);
+  void UpdateRaw(T, double);
+  void UpdateLimited(T, double);
 
 private:
   T m_target;
@@ -32,6 +33,8 @@ private:
   T m_last_error;
   T m_lower_limit;
   T m_upper_limit;
+  T m_middle_limit;
+  T m_limit_difference;
   double m_error_guard;
   double m_kp, m_ki, m_kd;
   double m_pterm, m_iterm, m_dterm;
@@ -66,6 +69,8 @@ template<class T> void PID<T>::SetLimits(T lowerLimit, T upperLimit)
 {
   m_lower_limit = lowerLimit;
   m_upper_limit = upperLimit;
+  m_limit_difference = (m_upper_limit - m_lower_limit) / 2;
+  m_middle_limit = m_lower_limit + m_limit_difference;
 }
 
 template<class T> T PID<T>::GetOutputRaw() const { return m_output; }
@@ -77,16 +82,16 @@ template<class T> T PID<T>::GetOutputLimited() const
     return m_output;
   }
 
-  if (m_output > m_upper_limit) {
+  if (m_output + m_middle_limit > m_upper_limit) {
     return m_upper_limit;
-  } else if (m_output < m_lower_limit) {
+  } else if (m_output + m_middle_limit < m_lower_limit) {
     return m_lower_limit;
   } else {
-    return m_output;
+    return m_output + m_middle_limit;
   }
 }
 
-template<class T> void PID<T>::Update(T feedback, double timeDelta)
+template<class T> void PID<T>::UpdateRaw(T feedback, double timeDelta)
 {
   T error = m_target - feedback;
   T errorDelta = error - m_last_error;
@@ -101,6 +106,17 @@ template<class T> void PID<T>::Update(T feedback, double timeDelta)
 
   m_dterm = errorDelta / timeDelta;
   m_output = m_pterm + (m_ki * m_iterm) + (m_kd * m_dterm);
+}
+
+template<class T> void PID<T>::UpdateLimited(T feedback, double timeDelta)
+{
+  if (feedback < (-m_limit_difference)) {
+    feedback = -m_limit_difference;
+  } else if (feedback > (m_limit_difference)) {
+    feedback = m_limit_difference;
+  }
+
+  UpdateRaw(feedback, timeDelta);
 }
 
 #endif// PID_HPP

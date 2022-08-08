@@ -7,7 +7,7 @@ ClockController::ClockController(char clock_mode, double resolution, long int mi
   m_minimal_delay = minimalDelay;
 
   // 0 is the aimed value of difference between system clock and PPS
-  mp_pid = std::make_unique<PID<double>>(1.2, 1.0, 0.001, 0);
+  mp_pid = std::make_unique<PID<double>>(2.0, 1.0, 0.001, 0);
   mp_pid->SetLimits(9000, 11000);
 
   BOOST_LOG_TRIVIAL(trace) << "Retrieving timex from kernel";
@@ -58,9 +58,11 @@ void ClockController::AdjustClock(std::string time_str)
   time_difference_history.push_back(diff.count());
   BOOST_LOG_TRIVIAL(debug) << "Clock difference is " << diff.count() << " milliseconds";
 
-  mp_pid->Update(diff.count(), 1);// For now we assume tick is always 1s (PPS)
+  mp_pid->UpdateLimited(diff.count(), 1);// For now we assume tick is always 1s (PPS)
   auto pid_output = mp_pid->GetOutputLimited();
+  auto pid_output_raw = mp_pid->GetOutputRaw();
   BOOST_LOG_TRIVIAL(debug) << "PID output is " << pid_output;
+  BOOST_LOG_TRIVIAL(debug) << "Raw PID output is " << pid_output_raw;
   AdjustKernelTick(pid_output);
   last_call.store(now);
 }
