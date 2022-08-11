@@ -56,14 +56,11 @@ int main(int argc, const char *argv[])
   SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
   SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
 
-  std::string window_title;
-  window_title += PROJECT_NAME;
+  std::string window_title{ PROJECT_NAME };
   window_title[0] = toupper(window_title[0]);
-  window_title += " ver. ";
-  window_title += PROJECT_VER;
 
   SDL_Window *window = SDL_CreateWindow(
-    window_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_height, window_width, window_flags);
+    window_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_HEIGHT, WINDOW_WIDTH, window_flags);
   SDL_GLContext gl_context = SDL_GL_CreateContext(window);
   SDL_GL_MakeCurrent(window, gl_context);
   SDL_GL_SetSwapInterval(1);// Enable vsync
@@ -97,9 +94,8 @@ int main(int argc, const char *argv[])
   bool app_run{ true };
 
   std::vector<std::string> serial_port_list;
-  std::vector<std::string> baud_rate_list = {
-    "50", "75", "110", "134", "150", "200", "300", "600", "1200", "1800", "2400", "4800", "9600", "19200", "38400"
-  };
+  std::vector<std::string> baud_rate_list;
+  for (const auto &[key, value] : s_baud_conversion_map) { baud_rate_list.push_back(std::to_string(key)); }
 
   // Main loop
   while (app_run) {
@@ -140,10 +136,11 @@ int main(int argc, const char *argv[])
 
       ImGui::Begin(window_title.c_str(), &app_run, window_flags);
       ImGui::SetWindowPos(ImVec2(0, 0));
-      ImGui::SetWindowSize(ImVec2(window_height, window_width));
+      ImGui::SetWindowSize(ImVec2(WINDOW_HEIGHT, WINDOW_WIDTH));
 
       // Main dialog content
       ImGui::Text("Frametime %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+      ImGui::Text(std::string(BUILD_INFO).c_str());
       ImGui::Separator();
       if (ImGui::Button("Connect")) { display_connection_dialog = true; }
       ImGui::SameLine();
@@ -160,15 +157,15 @@ int main(int argc, const char *argv[])
     // Insufficient premissions warning popup
     if (!admin_privileges && !disabled_warning_popup) {
       ImGui::SetNextWindowBgAlpha(0.35f);
-      ImGui::SetNextWindowSize(ImVec2(window_width / 2, 100));
-      ImGui::SetNextWindowPos(ImVec2(window_width / 4, window_height / 2 - 50));
+      ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH / 2, 100));
+      ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2 - 50));
 
       ImGuiWindowFlags window_flags = 0;
       window_flags |= ImGuiWindowFlags_NoDecoration;
       window_flags |= ImGuiWindowFlags_NoFocusOnAppearing;
 
       ImGui::Begin("Warning", &admin_privileges, window_flags);
-      ImGui::Text("Program is not running with administrator privileges");
+      ImGui::TextWrapped("Program is not running with administrator privileges");
       if (ImGui::BeginPopupContextWindow()) {
         if (ImGui::MenuItem("Disable warning")) disabled_warning_popup = true;
         ImGui::EndPopup();
