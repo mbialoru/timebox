@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
     export MIRROR="poland"
     apt-get update && apt-get upgrade -y
     apt-get install -y netselect-apt
-    netselect-apt -c $MIRROR -t 15 -a amd64 -n unstable
+    netselect-apt -c $MIRROR -t 5 -a amd64 -n unstable
     mv sources.list /etc/apt/sources.list
     apt-get update && apt-get upgrade
 
@@ -62,8 +62,9 @@ Vagrant.configure("2") do |config|
     $(which clang++-$LLVM_VER) 100
 
     # project dependencies
-    apt-get install -y libboost-all-dev libgtest-dev libgmock-dev libbenchmark-dev \
-    libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config libserial-dev
+    apt-get install -y libboost-all-dev libgtest-dev libgmock-dev \
+    libbenchmark-dev libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config \
+    libserial-dev
 
     # install basic graphical interface
     apt-get install -y i3 lightdm slick-greeter stterm
@@ -77,7 +78,7 @@ Vagrant.configure("2") do |config|
     echo "alias ll='ls -alFh'" >> /home/vagrant/.bashrc
 
     # set default resolution
-    echo "xrandr --output VGA-1 --mode 1600x900" >> /home/vagrant/.bashrc
+    echo "xrandr --output VGA-1 --mode 1600x900" >> /home/vagrant/.profile
   SHELL
 
   # reboot after provisioning

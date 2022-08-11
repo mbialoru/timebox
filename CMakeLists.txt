@@ -47,7 +47,29 @@ include(${_project_options_SOURCE_DIR}/Index.cmake)
 # and options! # Only needed if you want to enable submissions to a CDash
 # server. include(CTest) endif()
 
-set(GIT_SHA
+find_package(Git)
+find_program(GIT_FOUND git)
+if(GIT_FOUND)
+  message(
+    STATUS "Found Git (${GIT_FOUND}), executable will get SHA and branch used")
+  execute_process(
+    COMMAND git -C ${CMAKE_SOURCE_DIR} rev-parse HEAD
+    OUTPUT_VARIABLE GIT_SHA
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(
+    COMMAND git -C ${CMAKE_SOURCE_DIR} branch --show-current
+    OUTPUT_VARIABLE GIT_BRANCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  add_definitions(-DGIT_SHA=${GIT_SHA})
+  add_definitions(-DGIT_BRANCH=${GIT_BRANCH})
+  message(STATUS "GIT_SHA = ${GIT_SHA}")
+  message(STATUS "GIT_BRANCH = ${GIT_BRANCH}")
+else(GIT_FOUND)
+  add_definitions(-DGIT_SHA=none)
+  add_definitions(-DGIT_BRANCH=none)
+endif(GIT_FOUND)
+
+set(GIT_SHORT_SHA
     "Unknown"
     CACHE STRING "SHA this build was generated from")
 string(SUBSTRING "${GIT_SHA}" 0 8 GIT_SHORT_SHA)
