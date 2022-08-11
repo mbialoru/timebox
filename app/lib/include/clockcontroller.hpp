@@ -21,8 +21,7 @@ class ClockController
 public:
   ClockController(char, double, long int = 500);
   ~ClockController();
-  timex GetOriginalTimex();
-  timex GetModifiedTimex();
+  timex GetTimex();
   void AdjustClock(std::string);
 
   std::vector<std::size_t> tick_history, time_difference_history;
@@ -32,14 +31,14 @@ private:
   timex GetSystemTimex();
   void SetSystemTimex(timex *);
   bool OperateOnTimex(timex *);
-  std::size_t CalculateClockDifference();
   void AdjustKernelTick(std::size_t);
+  std::size_t CalculateClockDifference();
 
+  timex m_timex;
   char m_clock_mode;
   std::size_t m_resolution_power;
   long int m_minimal_delay;
-  timex m_original;
-  timex m_modified;
+  std::size_t m_original_tick;
   std::unique_ptr<PID<double>> mp_pid;
 };
 

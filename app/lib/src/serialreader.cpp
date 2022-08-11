@@ -19,7 +19,7 @@ void SerialReader::InitalizeSerial(const char *tty, std::size_t baud)
 {
   try {
     m_serial_port.Open(tty);
-    std::this_thread::sleep_for(std::chrono::seconds(this->m_flush_delay));
+    std::this_thread::sleep_for(std::chrono::seconds(m_flush_delay));
     m_serial_port.FlushIOBuffers();
   } catch (const LibSerial::OpenFailed &e) {
     BOOST_LOG_TRIVIAL(fatal) << "Failed to open connection on " << tty;
@@ -46,17 +46,6 @@ void SerialReader::Work()
       }
     }
     m_callback(std::string(m_serial_buffer.begin(), m_serial_buffer.end()));
+    m_conditon_variable.notify_one();
   }
-}
-
-void SerialReader::Test()
-{
-  thread_local static std::string s_last_buffer{ std::string(std::begin(m_serial_buffer), std::end(m_serial_buffer)) };
-
-  thread_local std::string current_buffer{ std::string(std::begin(m_serial_buffer), std::end(m_serial_buffer)) };
-
-  if (current_buffer == s_last_buffer && m_worker_tick > 0) BOOST_LOG_TRIVIAL(error) << "Serial connection error!";
-
-  s_last_buffer = current_buffer;
-  std::this_thread::sleep_for(std::chrono::milliseconds(m_pause_delay * 3));
 }

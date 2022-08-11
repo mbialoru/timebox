@@ -13,20 +13,22 @@ ClockController::ClockController(char clock_mode, double resolution, long int mi
   BOOST_LOG_TRIVIAL(trace) << "Retrieving timex from kernel";
 
   std::future<timex> res = std::async(std::launch::async, std::bind(&ClockController::GetSystemTimex, this));
-  m_original = res.get();
+  m_timex = res.get();
+  m_original_tick = m_timex.tick;
 
   BOOST_LOG_TRIVIAL(trace) << "Success retrieving timex from kernel";
 
-  m_modified = m_original;
-  m_modified.modes |= ADJ_TICK;
+  m_timex.modes |= ADJ_TICK;
   last_call = std::chrono::system_clock::now();
 }
 
-ClockController::~ClockController() { SetSystemTimex(&m_original); }
+ClockController::~ClockController()
+{
+  m_timex.tick = m_original_tick;
+  SetSystemTimex(&m_timex);
+}
 
-timex ClockController::GetModifiedTimex() { return m_modified; }
-
-timex ClockController::GetOriginalTimex() { return m_original; }
+timex ClockController::GetTimex() { return m_timex; }
 
 void ClockController::SetSystemTimex(timex *t) { OperateOnTimex(t); }
 
@@ -34,12 +36,12 @@ void ClockController::AdjustKernelTick(std::size_t tick)
 {
   BOOST_LOG_TRIVIAL(debug) << "Adjusting kernel tick to " << tick;
   tick_history.push_back(tick);
-  m_modified.tick = tick;
+  m_timex.tick = tick;
 
   if (not CheckAdminPrivileges()) throw InsufficientPermissionsError();
 
-  std::ignore = std::async(
-    std::launch::async, std::bind(&ClockController::SetSystemTimex, this, std::placeholders::_1), &m_modified);
+  std::ignore =
+    std::async(std::launch::async, std::bind(&ClockController::SetSystemTimex, this, std::placeholders::_1), &m_timex);
 
   BOOST_LOG_TRIVIAL(debug) << "Successfully changed kernel tick to " << tick;
 }
@@ -70,16 +72,21 @@ void ClockController::AdjustClock(std::string time_str)
 bool ClockController::OperateOnTimex(timex *tm)
 {
   bool success{ false };
-  std::size_t attempts{ 0 };
+  std::size_t attempt{ 0 };
   while (not success) {
-    if (attempts == 100) throw TimexOperationError();
+    if (attempt == 100) throw TimexOperationError();
 
     success = !(bool)adjtimex(tm);
-    attempts++;
+    attempt++;
 
     switch (errno) {
     case 0:
+      BOOST_LOG_TRIVIAL(debug) << "Success operating on timex";
       break;
+    case EAGAIN:
+      BOOST_LOG_TRIVIAL(debug) << "EAGAIN - trying again";
+      success = false;
+      continue;
     case EPERM:
       BOOST_LOG_TRIVIAL(warning) << "Operation not permitted when acquiring timex";
       break;
@@ -87,11 +94,11 @@ bool ClockController::OperateOnTimex(timex *tm)
       BOOST_LOG_TRIVIAL(warning) << "Invalid argument when acquiring timex";
       break;
     default:
-      BOOST_LOG_TRIVIAL(warning) << "errno when acquiring timex " << errno;
+      BOOST_LOG_TRIVIAL(warning) << "errno when operating on timex " << errno;
       break;
     }
   }
-  BOOST_LOG_TRIVIAL(debug) << "Operation took " << attempts << " attempts";
+  BOOST_LOG_TRIVIAL(debug) << "Operation took " << attempt << " attempts";
   return success;
 }
 

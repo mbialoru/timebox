@@ -19,7 +19,6 @@ public:
 private:
   void InitalizeSerial(const char *, std::size_t);
   void Work() override;
-  void Test() override;
 
   std::function<void(std::string)> m_callback = nullptr;
   const std::size_t m_flush_delay{ 2 };

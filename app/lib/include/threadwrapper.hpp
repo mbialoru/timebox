@@ -6,7 +6,9 @@
 #include <atomic>
 #include <boost/log/trivial.hpp>
 #include <chrono>
+#include <condition_variable>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <thread>
 
@@ -25,9 +27,12 @@ protected:
   virtual void Work(){};
   virtual void Test(){};
 
-  std::string m_name;
+  std::string m_name, m_timeout_message{ "Reached watchdog timeout !" };
   std::thread m_worker, m_tester;
   std::size_t m_startup_delay, m_pause_delay;
+  std::mutex m_mutex;
+  std::unique_lock<std::mutex> m_lock;
+  std::condition_variable m_conditon_variable;
   std::atomic<bool> m_worker_on, m_is_paused;
   std::atomic<std::size_t> m_worker_tick;
 };
