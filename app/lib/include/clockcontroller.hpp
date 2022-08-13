@@ -23,8 +23,8 @@ public:
   ~ClockController();
   timex GetTimex();
   void AdjustClock(std::string);
-
-  std::vector<std::size_t> tick_history, time_difference_history;
+  std::vector<std::size_t> tick_history;
+  std::vector<long> time_difference_history;
   std::atomic<std::chrono::system_clock::time_point> last_call;
 
 private:

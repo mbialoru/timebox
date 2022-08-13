@@ -86,12 +86,16 @@ int main(int argc, const char *argv[])
   std::unique_ptr<SerialReader> p_serial_reader;
 
   // Variables for ImGui
-  const Uint32 max_fps{ 20 };
-  Uint32 last_frametime, this_frametime;
-  bool admin_privileges = CheckAdminPrivileges();
-  bool disabled_warning_popup{ false };
-  bool display_connection_dialog{ false };
-  bool app_run{ true };
+  static const Uint32 max_fps{ 20 };
+  static Uint32 last_frametime, this_frametime;
+  static bool admin_privileges = CheckAdminPrivileges();
+  static bool ntp_running = CheckNTPService();
+  static bool using_docker = CheckIfUsingDocker();
+  static bool disabled_warning_popup{ false };
+  static bool display_connection_dialog{ false };
+  static bool connected{ false };
+  static bool show_about{ false };
+  static bool app_run{ true };
 
   std::vector<std::string> serial_port_list;
   std::vector<std::string> baud_rate_list;
@@ -132,42 +136,95 @@ int main(int argc, const char *argv[])
       window_flags |= ImGuiWindowFlags_NoCollapse;
       window_flags |= ImGuiWindowFlags_NoResize;
       window_flags |= ImGuiWindowFlags_NoMove;
-      window_flags |= ImGuiWindowFlags_MenuBar;
+      // window_flags |= ImGuiWindowFlags_MenuBar;
 
       ImGui::Begin(window_title.c_str(), &app_run, window_flags);
       ImGui::SetWindowPos(ImVec2(0, 0));
       ImGui::SetWindowSize(ImVec2(WINDOW_HEIGHT, WINDOW_WIDTH));
 
       // Main dialog content
-      ImGui::Text("Frametime %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-      ImGui::Text(std::string(BUILD_INFO).c_str());
-      ImGui::Separator();
+      if (connected) {
+        ImGui::Text("Connection status:");
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "connected");
+        ImGui::SameLine();
+        ImGui::Text(serial_port.c_str());
+        ImGui::Separator();
+
+        if (p_clock_controller->time_difference_history.size() > 0 && p_clock_controller->tick_history.size() > 0) {
+          ImGui::Text("Clock difference %ld ms", p_clock_controller->time_difference_history.back());
+          ImGui::Text("Kernel tick %lu (%.3f %%speed)",
+            p_clock_controller->tick_history.back(),
+            ((float)p_clock_controller->tick_history.back() - 10000) / 100 + 100);
+          ImGui::Separator();
+        }
+      } else {
+        ImGui::Text("Connection status:");
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "disconnected");
+        ImGui::Separator();
+      }
       if (ImGui::Button("Connect")) { display_connection_dialog = true; }
       ImGui::SameLine();
       if (ImGui::Button("Quit")) { app_run = false; }
 
+      ImGui::Dummy(ImVec2(0.0f, 20.0f));
+
       // Main dialog context menu
       if (ImGui::BeginPopupContextWindow()) {
         if (ImGui::MenuItem("Quit")) app_run = false;
+        if (ImGui::MenuItem("About")) show_about = true;
         ImGui::EndPopup();
       }
       ImGui::End();
     }
 
-    // Insufficient premissions warning popup
-    if (!admin_privileges && !disabled_warning_popup) {
+    // Warning popup
+    if ((!admin_privileges || ntp_running || using_docker) && !disabled_warning_popup) {
       ImGui::SetNextWindowBgAlpha(0.35f);
-      ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH / 2, 100));
-      ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2 - 50));
+      ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH / 2, 200));
+      ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2 - 100));
 
       ImGuiWindowFlags window_flags = 0;
       window_flags |= ImGuiWindowFlags_NoDecoration;
       window_flags |= ImGuiWindowFlags_NoFocusOnAppearing;
 
-      ImGui::Begin("Warning", &admin_privileges, window_flags);
-      ImGui::TextWrapped("Program is not running with administrator privileges");
+      ImGui::Begin("Warning", (bool *)NULL, window_flags);
+      ImGui::Text("Warning");
+      ImGui::Separator();
+
+      if (!admin_privileges) { ImGui::TextWrapped("Program is not running with administrator privileges"); }
+      if (ntp_running) { ImGui::TextWrapped("NTP service is running"); }
+      if (using_docker) { ImGui::TextWrapped("Application is running in docker container"); }
+
       if (ImGui::BeginPopupContextWindow()) {
         if (ImGui::MenuItem("Disable warning")) disabled_warning_popup = true;
+        ImGui::EndPopup();
+      }
+      ImGui::End();
+    }
+
+    // About popup
+    if (show_about) {
+      ImGui::SetNextWindowBgAlpha(0.35f);
+      ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH * 0.75, 200));
+      ImGui::SetNextWindowPos(ImVec2((WINDOW_WIDTH - WINDOW_WIDTH * 0.75) / 2, WINDOW_HEIGHT / 2 - 100));
+
+      ImGuiWindowFlags window_flags = 0;
+      window_flags |= ImGuiWindowFlags_NoDecoration;
+      window_flags |= ImGuiWindowFlags_NoFocusOnAppearing;
+
+      ImGui::Begin("About", (bool *)NULL, window_flags);
+      ImGui::Text("About");
+      ImGui::Separator();
+
+      ImGui::TextWrapped(
+        "Frametime %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+      ImGui::TextWrapped(std::string(BUILD_INFO).c_str());
+      ImGui::TextWrapped("dear imgui says hello! (%s) (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
+
+      if (ImGui::BeginPopupContextWindow()) {
+        if (ImGui::MenuItem("Close")) show_about = false;
         ImGui::EndPopup();
       }
       ImGui::End();
@@ -178,14 +235,17 @@ int main(int argc, const char *argv[])
       ImGuiWindowFlags window_flags = 0;
       window_flags |= ImGuiWindowFlags_NoCollapse;
 
+      ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2));
+      ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH / 4, WINDOW_HEIGHT / 4));
+
       static std::size_t current_item_index_port{ 0 };
       static std::size_t current_item_index_baud{ 0 };
-      static bool connected{ false };
 
       ImGui::Begin("Connect", &display_connection_dialog, window_flags);
       {
         // Baud rate choosing combo
         const char *preview_value_baud = baud_rate_list[current_item_index_baud].c_str();
+        baud_rate = std::stoi(baud_rate_list[current_item_index_baud]);
         if (ImGui::BeginCombo("Baud rate", preview_value_baud)) {
           for (std::size_t i{ 0 }; i < baud_rate_list.size(); i++) {
             const bool is_selected = (current_item_index_baud == i);
@@ -203,6 +263,7 @@ int main(int argc, const char *argv[])
         ImGui::SameLine();
         if (serial_port_list.size() > 0) {
           const char *preview_value_port = serial_port_list[current_item_index_port].c_str();
+          serial_port = serial_port_list[current_item_index_port];
           if (ImGui::BeginCombo("##", preview_value_port)) {
             for (std::size_t i{ 0 }; i < serial_port_list.size(); i++) {
               const bool is_selected = (current_item_index_port == i);
@@ -255,6 +316,9 @@ int main(int argc, const char *argv[])
   }
 
   // Cleanup
+  p_serial_reader.reset();
+  p_clock_controller.reset();
+
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
