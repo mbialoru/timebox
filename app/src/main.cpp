@@ -10,6 +10,8 @@
 #include <SDL_opengl.h>
 #endif
 
+#include <fstream>
+
 #include "clockcontroller.hpp"
 #include "config.hpp"
 #include "serialreader.hpp"
@@ -159,12 +161,27 @@ int main(int argc, const char *argv[])
             ((float)p_clock_controller->tick_history.back() - 10000) / 100 + 100);
           ImGui::Separator();
         }
-      } else {
+      }
+
+      else {
         ImGui::Text("Connection status:");
         ImGui::SameLine();
         ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "disconnected");
         ImGui::Separator();
       }
+
+      if (p_clock_controller != nullptr && p_clock_controller->time_difference_history.size() > 0) {
+        if (ImGui::Button("Save History")) {
+          std::fstream output_file;
+          output_file.open("timebox_history.log", std::ios::out);
+          for (const auto entry : p_clock_controller->time_difference_history) {
+            output_file << std::to_string(entry).c_str();
+            output_file << "\n";
+          }
+          output_file.close();
+        }
+      }
+
       if (ImGui::Button("Connect")) { display_connection_dialog = true; }
       ImGui::SameLine();
       if (ImGui::Button("Quit")) { app_run = false; }
@@ -297,7 +314,6 @@ int main(int argc, const char *argv[])
           if (connected) {
             if (ImGui::Button("Disconnect")) {
               p_serial_reader.reset();
-              p_clock_controller.reset();
               connected = false;
             }
           }
