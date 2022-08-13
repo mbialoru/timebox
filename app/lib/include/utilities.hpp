@@ -36,8 +36,10 @@ bool CheckNTPService();
 std::vector<std::string> GetSerialDevicesList();
 void PrintTimex(timex &);
 std::size_t ConvertBaudRate(int);
-std::chrono::system_clock::time_point ConvertTimepointToString(std::string);
-std::string ConvertStringToTimepoint(std::chrono::system_clock::time_point);
+std::chrono::system_clock::time_point ConvertStringToTimepoint(std::string);
+std::string ConvertTimepointToString(std::chrono::system_clock::time_point);
+
+typedef std::pair<std::string, std::chrono::system_clock::time_point> TimeboxReadout;
 
 template<typename T> struct TimingDecorator;// Yes, this is necessary.
 template<typename... Args> struct TimingDecorator<void(Args...)>

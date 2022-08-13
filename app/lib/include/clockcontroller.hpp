@@ -22,10 +22,10 @@ public:
   ClockController(char, double, long int = 500);
   ~ClockController();
   timex GetTimex();
-  void AdjustClock(std::string);
+  void AdjustClock(TimeboxReadout);
   std::vector<std::size_t> tick_history;
   std::vector<long> time_difference_history;
-  std::atomic<std::chrono::system_clock::time_point> last_call;
+  std::chrono::system_clock::time_point last_call;
 
 private:
   timex GetSystemTimex();

@@ -1,6 +1,6 @@
 #include "serialreader.hpp"
 
-SerialReader::SerialReader(const char *tty, std::size_t baud, std::function<void(std::string)> callback)
+SerialReader::SerialReader(const char *tty, std::size_t baud, std::function<void(TimeboxReadout)> callback)
   : ThreadWrapper::ThreadWrapper("SerialReader")
 {
   m_callback = callback;
@@ -51,8 +51,12 @@ void SerialReader::Work()
         BOOST_LOG_TRIVIAL(info) << "Reached port timeout value !";
       }
     }
-    m_callback(std::string(m_serial_buffer.begin(), m_serial_buffer.end()));
+    m_callback(
+      TimeboxReadout{ std::string(m_serial_buffer.begin(), m_serial_buffer.end()), std::chrono::system_clock::now() });
     m_conditon_variable.notify_one();
     WipeSerialBuffer();
+
+    // High CPU usage countermeasure
+    std::this_thread::sleep_for(std::chrono::milliseconds(m_pause_delay));
   }
 }

@@ -13,7 +13,7 @@
 class SerialReader : public ThreadWrapper
 {
 public:
-  SerialReader(const char *, std::size_t, std::function<void(std::string)>);
+  SerialReader(const char *, std::size_t, std::function<void(TimeboxReadout)>);
   ~SerialReader();
 
 private:
@@ -24,7 +24,7 @@ private:
   static constexpr std::size_t m_flush_delay{ 2 };
   static constexpr std::size_t m_buffer_size{ 256 };
   static constexpr std::size_t m_read_timeout{ 250 };
-  std::function<void(std::string)> m_callback = nullptr;
+  std::function<void(TimeboxReadout)> m_callback = nullptr;
   std::array<char, m_buffer_size> m_serial_buffer;
   LibSerial::SerialPort m_serial_port;
 };

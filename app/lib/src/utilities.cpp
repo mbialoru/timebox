@@ -72,7 +72,7 @@ void PrintTimex(timex &t)
   BOOST_LOG_TRIVIAL(debug) << "tai: " << t.tai;
 }
 
-std::chrono::system_clock::time_point ConvertTimepointToString(std::string time_str)
+std::chrono::system_clock::time_point ConvertStringToTimepoint(std::string time_str)
 {
   std::vector<std::string> tmp;
   time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -90,7 +90,7 @@ std::chrono::system_clock::time_point ConvertTimepointToString(std::string time_
   return res;
 }
 
-std::string ConvertStringToTimepoint(std::chrono::system_clock::time_point tp)
+std::string ConvertTimepointToString(std::chrono::system_clock::time_point tp)
 {
   time_t tmp = std::chrono::system_clock::to_time_t(tp);
   struct tm tm = *std::localtime(&tmp);

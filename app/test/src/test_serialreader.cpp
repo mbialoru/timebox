@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "defines.hpp"
+#include "utilities.hpp"
 
 #if USING_REAL_HARDWARE
 #include "serialreader.hpp"
@@ -36,7 +37,7 @@ TEST_F(Test_SerialReader, thread_callback)
 }
 
 int MyCallback_calls{ 0 };
-void MyCallback(std::string) { MyCallback_calls++; }
+void MyCallback(TimeboxReadout) { MyCallback_calls++; }
 
 TEST_F(Test_SerialReader, using_free_function_callback)
 {
