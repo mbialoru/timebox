@@ -24,8 +24,10 @@ ClockController::ClockController(char clock_mode, double resolution, long int mi
 
 ClockController::~ClockController()
 {
+  BOOST_LOG_TRIVIAL(debug) << "Rolling back kernel tick to original value";
   m_timex.tick = m_original_tick;
-  SetSystemTimex(&m_timex);
+  std::ignore =
+    std::async(std::launch::async, std::bind(&ClockController::SetSystemTimex, this, std::placeholders::_1), &m_timex);
 }
 
 timex ClockController::GetTimex() { return m_timex; }

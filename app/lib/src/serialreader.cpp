@@ -5,11 +5,13 @@ SerialReader::SerialReader(const char *tty, std::size_t baud, std::function<void
 {
   m_callback = callback;
   InitalizeSerial(tty, baud);
+  WipeSerialBuffer();
   m_is_paused = false;
 }
 
 SerialReader::~SerialReader()
 {
+  WipeSerialBuffer();
   m_callback = nullptr;
   m_is_paused = true;
   m_serial_port.Close();
@@ -25,6 +27,7 @@ void SerialReader::InitalizeSerial(const char *tty, std::size_t baud)
     BOOST_LOG_TRIVIAL(fatal) << "Failed to open connection on " << tty;
     throw e;
   }
+
   m_serial_port.SetBaudRate(static_cast<LibSerial::BaudRate>(ConvertBaudRate(baud)));
   m_serial_port.SetCharacterSize(LibSerial::CharacterSize::CHAR_SIZE_8);
   m_serial_port.SetFlowControl(LibSerial::FlowControl::FLOW_CONTROL_NONE);
@@ -32,11 +35,14 @@ void SerialReader::InitalizeSerial(const char *tty, std::size_t baud)
   m_serial_port.SetStopBits(LibSerial::StopBits::STOP_BITS_1);
 }
 
+void SerialReader::WipeSerialBuffer()
+{
+  for (size_t i = 0; i < m_buffer_size; i++) { m_serial_buffer[i] = '\0'; }
+}
+
 void SerialReader::Work()
 {
   while (m_serial_port.IsDataAvailable()) {
-    for (size_t i = 0; i < m_buffer_size; i++) { m_serial_buffer[i] = '\0'; }
-
     for (std::size_t i = 0; i < m_buffer_size; i++) {
       try {
         m_serial_port.ReadByte(m_serial_buffer[i], m_read_timeout);
@@ -47,5 +53,6 @@ void SerialReader::Work()
     }
     m_callback(std::string(m_serial_buffer.begin(), m_serial_buffer.end()));
     m_conditon_variable.notify_one();
+    WipeSerialBuffer();
   }
 }
