@@ -6,7 +6,7 @@ target_link_libraries(
                                     benchmark::benchmark)
 
 if(ipo_supported)
-  message(STATUS "IPO / LTO enabled for ${PROJECT_NAME}")
+  message(STATUS "IPO / LTO enabled for ${PROJECT_NAME}_benchmark")
   set_target_properties(${PROJECT_NAME}_benchmark
                         PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
 else()

@@ -88,9 +88,11 @@ int main(int argc, const char *argv[])
   // Variables for ImGui
   static const Uint32 max_fps{ 20 };
   static Uint32 last_frametime, this_frametime;
+
   static bool admin_privileges = CheckAdminPrivileges();
   static bool ntp_running = CheckNTPService();
   static bool using_docker = CheckIfUsingDocker();
+
   static bool disabled_warning_popup{ false };
   static bool display_connection_dialog{ false };
   static bool connected{ false };
@@ -136,7 +138,6 @@ int main(int argc, const char *argv[])
       window_flags |= ImGuiWindowFlags_NoCollapse;
       window_flags |= ImGuiWindowFlags_NoResize;
       window_flags |= ImGuiWindowFlags_NoMove;
-      // window_flags |= ImGuiWindowFlags_MenuBar;
 
       ImGui::Begin(window_title.c_str(), &app_run, window_flags);
       ImGui::SetWindowPos(ImVec2(0, 0));

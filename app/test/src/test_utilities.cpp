@@ -29,7 +29,7 @@ TEST(Test_utilities, timesync_service_running)
 TEST(Test_utilities, timepoint_from_string)
 {
   std::string test_str{ "9:31:10.0" };
-  auto res = ConvertTimepointToString(test_str);
+  auto res = ConvertStringToTimepoint(test_str);
   auto diff = res - std::chrono::system_clock::now();
   EXPECT_TRUE(diff.count() < 0);
 }
@@ -37,8 +37,8 @@ TEST(Test_utilities, timepoint_from_string)
 TEST(Test_utilities, string_from_timepoint)
 {
   std::string test_str{ "12:34:56.7" };
-  auto res = ConvertTimepointToString(test_str);
-  auto res_str = ConvertStringToTimepoint(res);
+  auto res = ConvertStringToTimepoint(test_str);
+  auto res_str = ConvertTimepointToString(res);
   EXPECT_EQ(res_str, "12:34:56");
 }
 

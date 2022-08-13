@@ -29,10 +29,10 @@ TEST_F(Test_PID, limited_output)
   for (std::size_t i = 0; i < 50; i++) {
     if (i >= 9) {
       pid.SetTarget(100);
-      pid.UpdateRaw(this->temperature(), 1);
+      pid.UpdateLimited(temperature(), 1);
     }
     if (pid.GetTarget() > 0) {
-      auto pid_output = pid.GetOutputRaw();
+      auto pid_output = pid.GetOutputLimited();
       EXPECT_TRUE((pid_output >= 10 && pid_output <= 30));
     }
   }
@@ -43,9 +43,9 @@ TEST_F(Test_PID, control_temperature)
   for (std::size_t i = 0; i < 50; i++) {
     if (i >= 9) {
       pid.SetTarget(100);
-      pid.UpdateRaw(this->temperature(), 1);
+      pid.UpdateRaw(temperature(), 1);
     }
-    if (pid.GetTarget() > 0) this->temperature(pid.GetOutputRaw() - 1 / i);
+    if (pid.GetTarget() > 0) temperature(pid.GetOutputRaw() - 1 / i);
   }
-  EXPECT_NEAR(this->temperature(), 100, 0.01);
+  EXPECT_NEAR(temperature(), 100, 0.01);
 }
