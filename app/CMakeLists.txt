@@ -3,7 +3,14 @@ add_subdirectory(test)
 add_subdirectory(benchmark)
 add_subdirectory(proto)
 
-add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+add_executable(
+  ${PROJECT_NAME}
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/application.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/application.hpp)
+target_include_directories(${PROJECT_NAME}
+                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE lib${PROJECT_NAME}
