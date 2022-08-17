@@ -10,6 +10,9 @@ add_executable(${PROJECT_NAME}_test ${HDRS} ${SRCS})
 target_include_directories(${PROJECT_NAME}_test
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+target_compile_options(${PROJECT_NAME}_test PRIVATE "--coverage")
+target_link_options(${PROJECT_NAME}_test PRIVATE "--coverage")
+
 target_link_libraries(
   ${PROJECT_NAME}_test
   PRIVATE lib${PROJECT_NAME}

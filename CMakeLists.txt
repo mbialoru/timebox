@@ -7,6 +7,7 @@ project(
   DESCRIPTION ""
   HOMEPAGE_URL "")
 
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -15,14 +16,73 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # compiling with PCH enabled
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}-march=native")
-set(CMAKE_CXX_FLAGS_DEBUG
-    "${CMAKE_CXX_FLAGS_DEBUG} -Wall -ggdb3 -DDEBUG -fno-omit-frame-pointer -fsanitize=address"
-)
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-set(CMAKE_LINKER_FLAGS_DEBUG
-    "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+# CMake utilities
+function(removeDuplicateSubstring stringIn stringOut)
+  separate_arguments(stringIn)
+  list(REMOVE_DUPLICATES stringIn)
+  string(REPLACE ";" " " stringIn "${stringIn}")
+  set(${stringOut}
+      "${stringIn}"
+      PARENT_SCOPE)
+endfunction()
+
+# Flags GCC
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" AND ${CMAKE_C_COMPILER_ID} MATCHES
+                                              "GNU")
+  string(APPEND CMAKE_CXX_FLAGS " -march=native")
+  string(
+    APPEND
+    CMAKE_CXX_FLAGS_DEBUG
+    " -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wold-style-cast -Wcast-align -Wunused -Woverloaded-virtual -Wconversion -Wsign-conversion -Wmisleading-indentation -ggdb3 -DDEBUG -fno-omit-frame-pointer -fsanitize=address -fdiagnostics-color=always"
+  )
+
+  string(APPEND CMAKE_C_FLAGS " -march=native")
+  string(
+    APPEND
+    CMAKE_C_FLAGS_DEBUG
+    " -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wold-style-cast -Wcast-align -Wunused -Woverloaded-virtual -Wconversion -Wsign-conversion -Wmisleading-indentation -ggdb3 -DDEBUG -fno-omit-frame-pointer -fsanitize=address -fdiagnostics-color=always"
+  )
+
+  if(${ENABLE_COVERAGE} MATCHES "YES")
+    message(STATUS "Globally enabled coverage flags")
+    string(APPEND CMAKE_CXX_FLAGS " --coverage")
+    string(APPEND CMAKE_CXX_FLAGS_DEBUG " --coverage")
+    string(APPEND CMAKE_C_FLAGS " --coverage")
+    string(APPEND CMAKE_C_FLAGS_DEBUG " --coverage")
+  endif()
+
+  if(${MASOCHISTIC} MATCHES "YES")
+    string(APPEND CMAKE_CXX_FLAGS_DEBUG " -Werror")
+    string(APPEND CMAKE_C_FLAGS_DEBUG " -Werror")
+  endif()
+endif()
+
+# Flags Clang
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" AND ${CMAKE_C_COMPILER_ID} MATCHES
+                                                "Clang")
+  # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+  # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wshadow
+  # -Wnon-virtual-dtor -pedantic -Wold-style-cast -Wcast-align -Wunused
+  # -Woverloaded-virtual -Wconversion -Wsign-conversion -Wmisleading-indentation
+  # -ggdb3 -DDEBUG -fno-omit-frame-pointer -fsanitize=address" )
+  # set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+  # set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG}
+  # -fno-omit-frame-pointer -fsanitize=address")
+endif()
+
+# Flags MSVC
+if(MSVC)
+  string(
+    APPEND
+    CMAKE_CXX_FLAGS_DEBUG
+    " /W4 /W44640 /w14242 /w14254 /w14263 /w14265 /w14287 /we4289 /w14296 /w14311 /w14545 /w14546 /w14547 /w14549 /w14555 /w14619 /w14640 /w14826 /w14905 /w14906 /w14928"
+  )
+
+  if(${MASOCHISTIC} MATCHES "YES")
+    string(APPEND CMAKE_CXX_FLAGS_DEBUG " -Wx")
+    string(APPEND CMAKE_C_FLAGS_DEBUG " -Wx")
+  endif()
+endif()
 
 # Output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -32,6 +92,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Add project_options v0.20.0
 # https://github.com/cpp-best-practices/project_options
 include(FetchContent)
+cmake_policy(SET CMP0135 "NEW")
 FetchContent_Declare(
   _project_options
   URL https://github.com/aminya/project_options/archive/refs/tags/v0.24.0.zip)
@@ -62,17 +123,16 @@ if(GIT_FOUND)
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   add_definitions(-DGIT_SHA=${GIT_SHA})
   add_definitions(-DGIT_BRANCH=${GIT_BRANCH})
+  string(SUBSTRING "${GIT_SHA}" 0 8 GIT_SHORT_SHA)
+  add_definitions(-DGIT_SHORT_SHA=${GIT_SHORT_SHA})
   message(STATUS "GIT_SHA = ${GIT_SHA}")
+  message(STATUS "GIT_SHORT_SHA = ${GIT_SHORT_SHA}")
   message(STATUS "GIT_BRANCH = ${GIT_BRANCH}")
 else(GIT_FOUND)
   add_definitions(-DGIT_SHA=none)
   add_definitions(-DGIT_BRANCH=none)
+  add_definitions(-DGIT_SHORT_SHA=none)
 endif(GIT_FOUND)
-
-set(GIT_SHORT_SHA
-    "Unknown"
-    CACHE STRING "SHA this build was generated from")
-string(SUBSTRING "${GIT_SHA}" 0 8 GIT_SHORT_SHA)
 
 include(${_project_options_SOURCE_DIR}/src/DynamicProjectOptions.cmake)
 # Initialize project_options variable related to this project This overwrites
@@ -133,7 +193,7 @@ if(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
     set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile)
     set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
     configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-    message("Doxygen build started")
+    message(STATUS "Doxygen build started")
     add_custom_target(
       doc_doxygen ALL
       COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
@@ -142,7 +202,8 @@ if(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
       VERBATIM)
   else(DOXYGEN_FOUND)
     message(
-      "Doxygen need to be installed to generate the doxygen documentation")
+      STATUS
+        "Doxygen need to be installed to generate the doxygen documentation")
   endif(DOXYGEN_FOUND)
 endif()
 

@@ -3,11 +3,9 @@ add_subdirectory(test)
 add_subdirectory(benchmark)
 add_subdirectory(proto)
 
-add_executable(
-  ${PROJECT_NAME}
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/application.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/application.hpp)
+file(GLOB_RECURSE SRCS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+
+add_executable(${PROJECT_NAME} ${SRCS})
 target_include_directories(${PROJECT_NAME}
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
