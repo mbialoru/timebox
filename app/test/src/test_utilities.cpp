@@ -4,6 +4,8 @@
 #include "defines.hpp"
 #include "utilities.hpp"
 
+using namespace TimeBox;
+
 int DummyFunctionA()
 {
   usleep(20000);

@@ -9,6 +9,7 @@
 #include "fakes.hpp"
 #endif
 
+using namespace TimeBox;
 
 class Test_Combined : public ::testing::Test
 {
