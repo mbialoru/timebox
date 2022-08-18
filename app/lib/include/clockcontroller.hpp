@@ -16,30 +16,34 @@
 #include "pid.hpp"
 #include "utilities.hpp"
 
+namespace TimeBox {
+
 class ClockController
 {
 public:
   ClockController(char, double, long int = 500);
   ~ClockController();
-  timex GetTimex();
+  timex GetTimex() const;
   void AdjustClock(TimeboxReadout);
   std::vector<std::size_t> tick_history;
   std::vector<long> time_difference_history;
   std::chrono::system_clock::time_point last_call;
 
 private:
-  timex GetSystemTimex();
+  timex GetSystemTimex() const;
   void SetSystemTimex(timex *);
-  bool OperateOnTimex(timex *);
+  bool OperateOnTimex(timex *) const;
   void AdjustKernelTick(std::size_t);
   std::size_t CalculateClockDifference();
 
   timex m_timex;
   char m_clock_mode;
-  std::size_t m_resolution_power;
   long int m_minimal_delay;
   std::size_t m_original_tick;
+  std::size_t m_resolution_power;
   std::unique_ptr<PID<double>> mp_pid;
 };
+
+}// namespace TimeBox
 
 #endif// CLOCKCONTROLLER_HPP

@@ -1,10 +1,12 @@
 #include "serialreader.hpp"
 
-SerialReader::SerialReader(const char *tty, std::size_t baud, std::function<void(TimeboxReadout)> callback)
+using namespace TimeBox;
+
+SerialReader::SerialReader(const char *t_tty, std::size_t t_baud, std::function<void(TimeboxReadout)> t_callback)
   : ThreadWrapper::ThreadWrapper("SerialReader")
 {
-  m_callback = callback;
-  InitalizeSerial(tty, baud);
+  m_callback = t_callback;
+  InitalizeSerial(t_tty, t_baud);
   WipeSerialBuffer();
   m_is_paused = false;
 }
@@ -17,18 +19,18 @@ SerialReader::~SerialReader()
   m_serial_port.Close();
 }
 
-void SerialReader::InitalizeSerial(const char *tty, std::size_t baud)
+void SerialReader::InitalizeSerial(const char *t_tty, const std::size_t t_baud)
 {
   try {
-    m_serial_port.Open(tty);
+    m_serial_port.Open(t_tty);
     std::this_thread::sleep_for(std::chrono::seconds(m_flush_delay));
     m_serial_port.FlushIOBuffers();
   } catch (const LibSerial::OpenFailed &e) {
-    BOOST_LOG_TRIVIAL(fatal) << "Failed to open connection on " << tty;
+    BOOST_LOG_TRIVIAL(fatal) << "Failed to open connection on " << t_tty;
     throw e;
   }
 
-  m_serial_port.SetBaudRate(static_cast<LibSerial::BaudRate>(ConvertBaudRate(baud)));
+  m_serial_port.SetBaudRate(static_cast<LibSerial::BaudRate>(ConvertBaudRate(t_baud)));
   m_serial_port.SetCharacterSize(LibSerial::CharacterSize::CHAR_SIZE_8);
   m_serial_port.SetFlowControl(LibSerial::FlowControl::FLOW_CONTROL_NONE);
   m_serial_port.SetParity(LibSerial::Parity::PARITY_NONE);

@@ -22,8 +22,8 @@
 * Each method / function name should begin with a verb, then same rules like for
   class names should be followed.
 
-* The first character of function / method argument names should be lower case.
-  All words starting after the first letter should be the upper case - camelCase
+* Arguments should be prepended with ‘t_’, rest of the name should follow
+  snake_case.
 
 * The variable name should begin with an alphabet ASCII character, rest should
   follow snake_case rule.
@@ -111,12 +111,10 @@
     int SolveEquation();
     ```
 
-    The first character of function / method argument names should be lower
-    case. All words starting after the first letter should be the upper case -
-    camelCase
+    Arguments should be prepended with ‘t_’, rest of the name should follow snake_case.
 
     ```cpp
-    int ConnectToDatabase(int accessMode, std::string databaseAddress);
+    int ConnectToDatabase(int t_access_mode, std::string t_database_address);
     ```
 
 * Variables

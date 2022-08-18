@@ -52,14 +52,23 @@ Vagrant.configure("2") do |config|
     export LLVM_VER=15
     apt-get install -y clang-$LLVM_VER lldb-$LLVM_VER lld-$LLVM_VER \
     clangd-$LLVM_VER llvm-$LLVM_VER-dev libclang-$LLVM_VER-dev \
-    clang-tidy-$LLVM_VER
+    clang-tidy-$LLVM_VER clang-format-$LLVM_VER clang-tools-$LLVM_VER
 
     update-alternatives --install /usr/bin/clang-tidy clang-tidy \
     $(which clang-tidy-$LLVM_VER) 1
+    update-alternatives --install /usr/bin/clang-format clang-format \
+    $(which clang-format-$LLVM_VER) 1
     update-alternatives --install /usr/bin/clang clang \
     $(which clang-$LLVM_VER) 100
     update-alternatives --install /usr/bin/clang++ clang++ \
     $(which clang++-$LLVM_VER) 100
+
+    # additional tools - not from repository
+    mkdir /tools && cd /tools
+    git clone https://github.com/namhyung/uftrace.git && cd uftrace
+    yes | misc/install-deps.sh
+    ./configure
+    make && make install
 
     # project dependencies
     apt-get install -y libboost-all-dev libgtest-dev libgmock-dev \

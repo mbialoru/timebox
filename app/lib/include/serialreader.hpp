@@ -10,6 +10,8 @@
 #include "threadwrapper.hpp"
 #include "utilities.hpp"
 
+namespace TimeBox {
+
 class SerialReader : public ThreadWrapper
 {
 public:
@@ -28,5 +30,7 @@ private:
   std::array<char, m_buffer_size> m_serial_buffer;
   LibSerial::SerialPort m_serial_port;
 };
+
+}// namespace TimeBox
 
 #endif// SERIALREADER_HPP

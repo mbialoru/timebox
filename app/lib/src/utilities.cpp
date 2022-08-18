@@ -1,6 +1,8 @@
 #include "utilities.hpp"
 
-bool CheckSudo()
+using namespace TimeBox;
+
+bool TimeBox::CheckSudo()
 {
   if (getuid() == geteuid())
     return false;
@@ -8,7 +10,7 @@ bool CheckSudo()
     return true;
 }
 
-bool CheckAdminPrivileges()
+bool TimeBox::CheckAdminPrivileges()
 {
   if (getuid() == 0 || geteuid() == 0)
     return true;
@@ -16,7 +18,7 @@ bool CheckAdminPrivileges()
     return false;
 }
 
-bool CheckIfUsingDocker()
+bool TimeBox::CheckIfUsingDocker()
 {
   if (std::filesystem::exists(std::filesystem::path("/.dockerenv")))
     return true;
@@ -24,13 +26,13 @@ bool CheckIfUsingDocker()
     return false;
 }
 
-bool CheckNTPService()
+bool TimeBox::CheckNTPService()
 {
   // For now it only detects systemd-timesyncd
   char line[100];
   FILE *f = popen("pidof systemd-timesyncd", "r");
   fgets(line, 100, f);
-  pid_t pid = strtoul(line, NULL, 10);
+  pid_t pid = int(strtol(line, NULL, 10));
   pclose(f);
 
   if (pid > 0)
@@ -39,46 +41,22 @@ bool CheckNTPService()
     return false;
 }
 
-std::size_t ConvertBaudRate(int baud)
+std::size_t TimeBox::ConvertBaudRate(const int t_baud)
 {
-  auto search = s_baud_conversion_map.find(baud);
+  auto search = s_baud_conversion_map.find(t_baud);
   if (search != s_baud_conversion_map.end())
-    return search->second;
+    return std::size_t(search->second);
   else
     throw std::invalid_argument("Invalid baud rate !");
 }
 
-void PrintTimex(timex &t)
-{
-  BOOST_LOG_TRIVIAL(debug) << "modes: " << t.modes;
-  BOOST_LOG_TRIVIAL(debug) << "offset: " << t.offset;
-  BOOST_LOG_TRIVIAL(debug) << "freq: " << t.freq;
-  BOOST_LOG_TRIVIAL(debug) << "maxerror: " << t.maxerror;
-  BOOST_LOG_TRIVIAL(debug) << "esterror: " << t.esterror;
-  BOOST_LOG_TRIVIAL(debug) << "status: " << t.status;
-  BOOST_LOG_TRIVIAL(debug) << "constant: " << t.constant;
-  BOOST_LOG_TRIVIAL(debug) << "precision: " << t.precision;
-  BOOST_LOG_TRIVIAL(debug) << "tolerance: " << t.tolerance;
-  BOOST_LOG_TRIVIAL(debug) << "timeval_sec: " << t.time.tv_sec;
-  BOOST_LOG_TRIVIAL(debug) << "timeval_usec: " << t.time.tv_usec;
-  BOOST_LOG_TRIVIAL(debug) << "tick: " << t.tick;
-  BOOST_LOG_TRIVIAL(debug) << "ppsfreq: " << t.ppsfreq;
-  BOOST_LOG_TRIVIAL(debug) << "jitter: " << t.jitter;
-  BOOST_LOG_TRIVIAL(debug) << "shift: " << t.shift;
-  BOOST_LOG_TRIVIAL(debug) << "stabil: " << t.stabil;
-  BOOST_LOG_TRIVIAL(debug) << "calcnt: " << t.calcnt;
-  BOOST_LOG_TRIVIAL(debug) << "errcnt: " << t.errcnt;
-  BOOST_LOG_TRIVIAL(debug) << "stbcnt: " << t.stbcnt;
-  BOOST_LOG_TRIVIAL(debug) << "tai: " << t.tai;
-}
-
-std::chrono::system_clock::time_point ConvertStringToTimepoint(std::string time_str)
+std::chrono::system_clock::time_point TimeBox::ConvertStringToTimepoint(const std::string t_time_string)
 {
   std::vector<std::string> tmp;
   time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   struct tm tm = *std::localtime(&now);
 
-  boost::split(tmp, time_str, boost::is_any_of(":."));
+  boost::split(tmp, t_time_string, boost::is_any_of(":."));
 
   tm.tm_hour = std::stoi(tmp[0]);
   tm.tm_min = std::stoi(tmp[1]);
@@ -90,16 +68,16 @@ std::chrono::system_clock::time_point ConvertStringToTimepoint(std::string time_
   return res;
 }
 
-std::string ConvertTimepointToString(std::chrono::system_clock::time_point tp)
+std::string TimeBox::ConvertTimepointToString(const std::chrono::system_clock::time_point t_timepoint)
 {
-  time_t tmp = std::chrono::system_clock::to_time_t(tp);
+  time_t tmp = std::chrono::system_clock::to_time_t(t_timepoint);
   struct tm tm = *std::localtime(&tmp);
   std::string res{ std::to_string(tm.tm_hour) + ":" + std::to_string(tm.tm_min) + ":" + std::to_string(tm.tm_sec) };
 
   return res;
 }
 
-std::vector<std::string> GetSerialDevicesList()
+std::vector<std::string> TimeBox::GetSerialDevicesList()
 {
   std::vector<std::string> port_names;
   const std::filesystem::path dev_directory{ "/dev/serial/by-id" };

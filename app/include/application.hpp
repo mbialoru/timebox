@@ -1,3 +1,8 @@
+#ifndef APPLICATION_HPP
+#define APPLICATION_HPP
+
+#pragma once
+
 #include <imgui.h>
 
 #include "clockcontroller.hpp"
@@ -5,33 +10,45 @@
 #include "serialreader.hpp"
 #include "utilities.hpp"
 
+namespace TimeBox {
+
 struct AppContext
 {
   // Application variables
-  static bool ntp_running;
-  static bool using_docker;
-  static bool admin_privileges;
+  bool ntp_running;
+  bool using_docker;
+  bool admin_privileges;
+
+  std::size_t baud_rate;
+  std::string serial_port;
+  std::string main_window_name;
 
   std::vector<std::string> baud_rate_list;
   std::vector<std::string> serial_port_list;
 
-  std::size_t baud_rate;
-  std::string serial_port;
-
-  std::unique_ptr<ClockController> p_clock_controller;
-  std::unique_ptr<SerialReader> p_serial_reader;
+  std::unique_ptr<TimeBox::ClockController> p_clock_controller;
+  std::unique_ptr<TimeBox::SerialReader> p_serial_reader;
 
   // ImGUI variables
-  static bool application_run;
-  static bool disabled_warning_popup;
-  static bool connection_established;
+  bool application_run;
+  bool disabled_warning_popup;
+  bool connection_established;
 
-  static bool display_about_dialog;
-  static bool display_connect_dialog;
+  bool display_about_dialog;
+  bool display_connect_dialog;
 };
 
 AppContext InitializeContext();
+void CleanupContext(AppContext &);
 
+void SaveHistoryToFile(std::unique_ptr<TimeBox::ClockController>);
+
+void CenterWindow(std::size_t, std::size_t);
 void MainDialog(AppContext &);
 void ConnectDialog(AppContext &);
-void InformationPopup(AppContext &);
+void WarningPopup(AppContext &);
+void AboutDialog(AppContext &);
+
+}// namespace TimeBox
+
+#endif// APPLICATION_HPP

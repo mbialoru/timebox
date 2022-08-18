@@ -4,7 +4,8 @@
 #pragma once
 
 #include <boost/log/trivial.hpp>
-#include <utility>
+
+namespace TimeBox {
 
 template<class T> class PID
 {
@@ -40,35 +41,35 @@ private:
   double m_pterm, m_iterm, m_dterm;
 };
 
-template<class T> PID<T>::PID(double p, double i, double d, T target)
+template<class T> PID<T>::PID(const double t_p, const double t_i, const double t_d, const T t_target)
 {
-  m_kp = p;
-  m_ki = i;
-  m_kd = d;
+  m_kp = t_p;
+  m_ki = t_i;
+  m_kd = t_d;
   m_pterm = 0;
   m_iterm = 0;
   m_dterm = 0;
   m_last_error = 0;
   m_error_guard = 20;
-  m_target = target;
+  m_target = t_target;
   m_lower_limit = static_cast<T>(0);
   m_upper_limit = static_cast<T>(0);
 }
 
 template<class T> T PID<T>::GetTarget() const { return m_target; }
 
-template<class T> void PID<T>::SetTarget(T target) { m_target = target; }
+template<class T> void PID<T>::SetTarget(const T t_target) { m_target = t_target; }
 
 template<class T> double PID<T>::GetErrorGuard() const { return m_error_guard; }
 
-template<class T> void PID<T>::SetErrorGuard(double errorGuard) { m_error_guard = errorGuard; }
+template<class T> void PID<T>::SetErrorGuard(const double t_error_guard) { m_error_guard = t_error_guard; }
 
 template<class T> std::pair<T, T> PID<T>::GetLimits() const { return std::pair<T, T>{ m_upper_limit, m_lower_limit }; }
 
-template<class T> void PID<T>::SetLimits(T lowerLimit, T upperLimit)
+template<class T> void PID<T>::SetLimits(const T t_lower_limit, const T t_upper_limit)
 {
-  m_lower_limit = lowerLimit;
-  m_upper_limit = upperLimit;
+  m_lower_limit = t_lower_limit;
+  m_upper_limit = t_upper_limit;
   m_limit_difference = (m_upper_limit - m_lower_limit) / 2;
   m_middle_limit = m_lower_limit + m_limit_difference;
 }
@@ -91,32 +92,31 @@ template<class T> T PID<T>::GetOutputLimited() const
   }
 }
 
-template<class T> void PID<T>::UpdateRaw(T feedback, double timeDelta)
+template<class T> void PID<T>::UpdateRaw(const T t_feedback, const double t_time_Delta)
 {
-  T error = m_target - feedback;
-  T errorDelta = error - m_last_error;
+  T error = m_target - t_feedback;
+  T error_delta = error - m_last_error;
   m_last_error = error;
   m_pterm = m_kp * error;
-  m_iterm += error * timeDelta;
+  m_iterm += error * t_time_Delta;
 
   if (m_iterm < -m_error_guard)
     m_iterm = -m_error_guard;
   else if (m_iterm > m_error_guard)
     m_iterm = m_error_guard;
 
-  m_dterm = errorDelta / timeDelta;
+  m_dterm = error_delta / t_time_Delta;
   m_output = m_pterm + (m_ki * m_iterm) + (m_kd * m_dterm);
 }
 
-template<class T> void PID<T>::UpdateLimited(T feedback, double timeDelta)
+template<class T> void PID<T>::UpdateLimited(const T t_feedback, const double t_time_Delta)
 {
-  if (feedback < (-m_limit_difference)) {
-    feedback = -m_limit_difference;
-  } else if (feedback > (m_limit_difference)) {
-    feedback = m_limit_difference;
+  if (t_feedback < (-m_limit_difference)) {
+    UpdateRaw(-m_limit_difference, t_time_Delta);
+  } else if (t_feedback > (m_limit_difference)) {
+    UpdateRaw(m_limit_difference, t_time_Delta);
   }
-
-  UpdateRaw(feedback, timeDelta);
 }
+}// namespace TimeBox
 
 #endif// PID_HPP

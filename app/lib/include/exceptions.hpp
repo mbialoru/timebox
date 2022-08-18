@@ -7,47 +7,51 @@
 #include <stdexcept>
 #include <string>
 
+namespace TimeBox {
+
 class NotImplementedException : public std::exception
 {
 public:
-  NotImplementedException(const char *msg = "Function or method not yet implemented")
+  NotImplementedException(const char *t_msg = "Function or method not yet implemented")
   {
-    this->msg = msg;
-    BOOST_LOG_TRIVIAL(error) << msg;
+    m_msg = t_msg;
+    BOOST_LOG_TRIVIAL(error) << m_msg;
   }
-  const char *what() const noexcept { return this->msg.c_str(); }
+  const char *what() const noexcept { return m_msg.c_str(); }
 
 private:
-  std::string msg{};
+  std::string m_msg{};
 };
 
 class TimexOperationError : public std::exception
 {
 public:
-  TimexOperationError(const char *msg = "Error during operation with timex struct")
+  TimexOperationError(const char *t_msg = "Error during operation with timex struct")
   {
-    this->msg = msg;
-    BOOST_LOG_TRIVIAL(error) << msg;
+    m_msg = t_msg;
+    BOOST_LOG_TRIVIAL(error) << m_msg;
     BOOST_LOG_TRIVIAL(error) << "errno " << errno;
   }
-  const char *what() const noexcept { return this->msg.c_str(); }
+  const char *what() const noexcept { return m_msg.c_str(); }
 
 private:
-  std::string msg{};
+  std::string m_msg{};
 };
 
 class InsufficientPermissionsError : public std::exception
 {
 public:
-  InsufficientPermissionsError(const char *msg = "Operation not permitted")
+  InsufficientPermissionsError(const char *t_msg = "Operation not permitted")
   {
-    this->msg = msg;
-    BOOST_LOG_TRIVIAL(error) << msg;
+    m_msg = t_msg;
+    BOOST_LOG_TRIVIAL(error) << m_msg;
   }
-  const char *what() const noexcept { return this->msg.c_str(); }
+  const char *what() const noexcept { return m_msg.c_str(); }
 
 private:
-  std::string msg{};
+  std::string m_msg{};
 };
+
+}// namespace TimeBox
 
 #endif// EXCEPTIONS_HPP

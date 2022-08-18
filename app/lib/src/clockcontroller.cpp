@@ -1,10 +1,12 @@
 #include "clockcontroller.hpp"
 
-ClockController::ClockController(char clock_mode, double resolution, long int minimalDelay)
+using namespace TimeBox;
+
+ClockController::ClockController(const char t_clock_mode, const double t_resolution, const long int t_minimal_delay)
 {
-  m_clock_mode = clock_mode;
-  m_resolution_power = std::floor(std::log10(resolution));
-  m_minimal_delay = minimalDelay;
+  m_clock_mode = t_clock_mode;
+  m_resolution_power = std::size_t(std::floor(std::log10(t_resolution)));
+  m_minimal_delay = t_minimal_delay;
 
   // 0 is the aimed value of difference between system clock and PPS
   mp_pid = std::make_unique<PID<double>>(2.0, 1.0, 0.001, 0);
@@ -14,7 +16,7 @@ ClockController::ClockController(char clock_mode, double resolution, long int mi
 
   std::future<timex> res = std::async(std::launch::async, std::bind(&ClockController::GetSystemTimex, this));
   m_timex = res.get();
-  m_original_tick = m_timex.tick;
+  m_original_tick = std::size_t(m_timex.tick);
 
   BOOST_LOG_TRIVIAL(debug) << "Success retrieving timex from kernel";
 
@@ -25,32 +27,32 @@ ClockController::ClockController(char clock_mode, double resolution, long int mi
 ClockController::~ClockController()
 {
   BOOST_LOG_TRIVIAL(debug) << "Rolling back kernel tick to original value";
-  m_timex.tick = m_original_tick;
+  m_timex.tick = long(m_original_tick);
   std::ignore =
     std::async(std::launch::async, std::bind(&ClockController::SetSystemTimex, this, std::placeholders::_1), &m_timex);
 }
 
-timex ClockController::GetTimex() { return m_timex; }
+timex ClockController::GetTimex() const { return m_timex; }
 
-void ClockController::SetSystemTimex(timex *t) { OperateOnTimex(t); }
+void ClockController::SetSystemTimex(timex *t_timex) { OperateOnTimex(t_timex); }
 
-void ClockController::AdjustKernelTick(std::size_t tick)
+void ClockController::AdjustKernelTick(const std::size_t t_tick)
 {
-  BOOST_LOG_TRIVIAL(debug) << "Adjusting kernel tick to " << tick;
-  tick_history.push_back(tick);
-  m_timex.tick = tick;
+  BOOST_LOG_TRIVIAL(debug) << "Adjusting kernel tick to " << t_tick;
+  tick_history.push_back(t_tick);
+  m_timex.tick = long(t_tick);
 
   if (not CheckAdminPrivileges()) throw InsufficientPermissionsError();
 
   std::ignore =
     std::async(std::launch::async, std::bind(&ClockController::SetSystemTimex, this, std::placeholders::_1), &m_timex);
 
-  BOOST_LOG_TRIVIAL(debug) << "Successfully changed kernel tick to " << tick;
+  BOOST_LOG_TRIVIAL(debug) << "Successfully changed kernel tick to " << t_tick;
 }
 
-void ClockController::AdjustClock(TimeboxReadout readout)
+void ClockController::AdjustClock(const TimeboxReadout t_readout)
 {
-  auto [time_string, time_stamp] = readout;
+  auto [time_string, time_stamp] = t_readout;
   auto now = std::chrono::system_clock::now();
   auto last_call_difference = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_call);
   if (last_call_difference.count() < m_minimal_delay) {
@@ -66,23 +68,23 @@ void ClockController::AdjustClock(TimeboxReadout readout)
   auto processing_time = std::chrono::system_clock::now() - time_stamp;
   BOOST_LOG_TRIVIAL(debug) << "Processing time was " << processing_time.count() << " nanoseconds";
 
-  mp_pid->UpdateLimited(diff.count(), 1);// For now we assume tick is always 1s (PPS)
+  mp_pid->UpdateLimited(double(diff.count()), 1);// For now we assume t_tick is always 1s (PPS)
   auto pid_output = mp_pid->GetOutputLimited();
   auto pid_output_raw = mp_pid->GetOutputRaw();
   BOOST_LOG_TRIVIAL(debug) << "PID output is " << pid_output;
   BOOST_LOG_TRIVIAL(debug) << "Raw PID output is " << pid_output_raw;
-  AdjustKernelTick(pid_output);
+  AdjustKernelTick(std::size_t(pid_output));
   last_call = now;
 }
 
-bool ClockController::OperateOnTimex(timex *tm)
+bool ClockController::OperateOnTimex(timex *t_tm) const
 {
   bool success{ false };
   std::size_t attempt{ 0 };
   while (not success) {
     if (attempt == 100) throw TimexOperationError();
 
-    success = !(bool)adjtimex(tm);
+    success = !bool(adjtimex(t_tm));
     attempt++;
 
     switch (errno) {
@@ -108,9 +110,9 @@ bool ClockController::OperateOnTimex(timex *tm)
   return success;
 }
 
-timex ClockController::GetSystemTimex()
+timex ClockController::GetSystemTimex() const
 {
-  timex ret{ 0 };
+  timex ret{};
   OperateOnTimex(&ret);
   return ret;
 }

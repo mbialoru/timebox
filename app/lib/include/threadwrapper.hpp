@@ -12,6 +12,8 @@
 #include <string>
 #include <thread>
 
+namespace TimeBox {
+
 class ThreadWrapper
 {
 public:
@@ -36,5 +38,7 @@ protected:
   std::atomic<bool> m_worker_on, m_is_paused;
   std::atomic<std::size_t> m_worker_tick;
 };
+
+}// namespace TimeBox
 
 #endif// THREADRUNNER_HPP

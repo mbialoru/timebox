@@ -1,13 +1,15 @@
 #include "threadwrapper.hpp"
 
-ThreadWrapper::ThreadWrapper(std::string name, std::size_t startupDelay, std::size_t pauseDelay)
+using namespace TimeBox;
+
+ThreadWrapper::ThreadWrapper(std::string t_name, std::size_t t_startup_delay, std::size_t t_pause_delay)
 {
-  BOOST_LOG_TRIVIAL(debug) << "Creating threads for " << name;
+  BOOST_LOG_TRIVIAL(debug) << "Creating threads for " << t_name;
   m_is_paused = true;
   m_worker_on = true;
-  m_startup_delay = startupDelay;
-  m_pause_delay = pauseDelay;
-  m_name = name;
+  m_startup_delay = t_startup_delay;
+  m_pause_delay = t_pause_delay;
+  m_name = t_name;
   std::unique_lock<std::mutex>(m_mutex).swap(m_lock);
 
   m_worker = std::thread(&ThreadWrapper::WorkLoop, this);

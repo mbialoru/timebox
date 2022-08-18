@@ -1,0 +1,185 @@
+[
+  {
+    "issues": [],
+    "issuesData": {},
+    "depGraphData": {
+      "schemaVersion": "1.2.0",
+      "pkgManager": {
+        "name": "cpp"
+      },
+      "pkgs": [
+        {
+          "id": "root-node@0.0.0",
+          "info": {
+            "name": "root-node",
+            "version": "0.0.0"
+          }
+        },
+        {
+          "id": "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.2.158.zip@1.2.158",
+          "info": {
+            "name": "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.2.158.zip",
+            "version": "1.2.158"
+          }
+        },
+        {
+          "id": "https://github.com/aminya/project_options/archive/v0.22.1.tar.gz@0.22.1",
+          "info": {
+            "name": "https://github.com/aminya/project_options/archive/v0.22.1.tar.gz",
+            "version": "0.22.1"
+          }
+        },
+        {
+          "id": "https://github.com/Chaphlagical/glad/archive/0.0.1.zip@0.0.1",
+          "info": {
+            "name": "https://github.com/Chaphlagical/glad/archive/0.0.1.zip",
+            "version": "0.0.1"
+          }
+        }
+      ],
+      "graph": {
+        "rootNodeId": "root-node",
+        "nodes": [
+          {
+            "nodeId": "root-node",
+            "pkgId": "root-node@0.0.0",
+            "deps": [
+              {
+                "nodeId": "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.2.158.zip@1.2.158"
+              },
+              {
+                "nodeId": "https://github.com/aminya/project_options/archive/v0.22.1.tar.gz@0.22.1"
+              },
+              {
+                "nodeId": "https://github.com/Chaphlagical/glad/archive/0.0.1.zip@0.0.1"
+              }
+            ]
+          },
+          {
+            "nodeId": "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.2.158.zip@1.2.158",
+            "pkgId": "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.2.158.zip@1.2.158",
+            "deps": []
+          },
+          {
+            "nodeId": "https://github.com/aminya/project_options/archive/v0.22.1.tar.gz@0.22.1",
+            "pkgId": "https://github.com/aminya/project_options/archive/v0.22.1.tar.gz@0.22.1",
+            "deps": []
+          },
+          {
+            "nodeId": "https://github.com/Chaphlagical/glad/archive/0.0.1.zip@0.0.1",
+            "pkgId": "https://github.com/Chaphlagical/glad/archive/0.0.1.zip@0.0.1",
+            "deps": []
+          }
+        ]
+      }
+    },
+    "depsFilePaths": {
+      "https://github.com/Chaphlagical/glad/archive/0.0.1.zip@0.0.1": [
+        "submodules/SDL/src/video/khronos/KHR/khrplatform.h"
+      ],
+      "https://github.com/aminya/project_options/archive/v0.22.1.tar.gz@0.22.1": [
+        "build/_deps/_project_options-src/test/conanfile.txt",
+        "build/_deps/_project_options-src/test/include/mylib/lib.hpp",
+        "build/_deps/_project_options-src/test/include/mylib2/lib.hpp",
+        "build/_deps/_project_options-src/test/src/main/main.cpp",
+        "build/_deps/_project_options-src/test/src/mylib2/lib.cpp",
+        "build/_deps/_project_options-src/test/vcpkg.json",
+        "build/_deps/_project_options-src/test_install/conanfile.txt"
+      ],
+      "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.2.158.zip@1.2.158": [
+        "submodules/SDL/src/video/khronos/vulkan/vk_icd.h",
+        "submodules/SDL/src/video/khronos/vulkan/vk_layer.h",
+        "submodules/SDL/src/video/khronos/vulkan/vk_platform.h",
+        "submodules/SDL/src/video/khronos/vulkan/vk_sdk_platform.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan.hpp",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_android.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_beta.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_core.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_directfb.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_fuchsia.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_ggp.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_ios.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_macos.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_metal.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_vi.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_wayland.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_win32.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_xcb.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_xlib.h",
+        "submodules/SDL/src/video/khronos/vulkan/vulkan_xlib_xrandr.h"
+      ]
+    },
+    "fileSignaturesDetails": {
+      "https://github.com/Chaphlagical/glad/archive/0.0.1.zip@0.0.1": {
+        "artifact": "glad",
+        "version": "0.0.1",
+        "author": "Chaphlagical",
+        "path": "submodules/SDL/src/video/khronos/KHR",
+        "id": "cee01eb3bc61e1c67cc43a4900000000",
+        "url": "https://github.com/Chaphlagical/glad/archive/0.0.1.zip",
+        "cves": {},
+        "filePaths": [
+          "submodules/SDL/src/video/khronos/KHR/khrplatform.h"
+        ],
+        "confidence": 0.3333333432674408
+      },
+      "https://github.com/aminya/project_options/archive/v0.22.1.tar.gz@0.22.1": {
+        "artifact": "project_options",
+        "version": "0.22.1",
+        "author": "aminya",
+        "path": "build/_deps/_project_options-src/test",
+        "id": "ba1a650b87fbaae5c084c52f00000000",
+        "url": "https://github.com/aminya/project_options/archive/v0.22.1.tar.gz",
+        "cves": {},
+        "filePaths": [
+          "build/_deps/_project_options-src/test/conanfile.txt",
+          "build/_deps/_project_options-src/test/include/mylib/lib.hpp",
+          "build/_deps/_project_options-src/test/include/mylib2/lib.hpp",
+          "build/_deps/_project_options-src/test/src/main/main.cpp",
+          "build/_deps/_project_options-src/test/src/mylib2/lib.cpp",
+          "build/_deps/_project_options-src/test/vcpkg.json",
+          "build/_deps/_project_options-src/test_install/conanfile.txt"
+        ],
+        "confidence": 0.800000011920929
+      },
+      "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.2.158.zip@1.2.158": {
+        "artifact": "Vulkan-Headers",
+        "version": "1.2.158",
+        "author": "KhronosGroup",
+        "path": "submodules/SDL/src/video/khronos/vulkan",
+        "id": "24accdcc111a17a1332ffa6b00000000",
+        "url": "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.2.158.zip",
+        "cves": {},
+        "filePaths": [
+          "submodules/SDL/src/video/khronos/vulkan/vk_icd.h",
+          "submodules/SDL/src/video/khronos/vulkan/vk_layer.h",
+          "submodules/SDL/src/video/khronos/vulkan/vk_platform.h",
+          "submodules/SDL/src/video/khronos/vulkan/vk_sdk_platform.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan.hpp",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_android.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_beta.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_core.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_directfb.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_fuchsia.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_ggp.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_ios.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_macos.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_metal.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_vi.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_wayland.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_win32.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_xcb.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_xlib.h",
+          "submodules/SDL/src/video/khronos/vulkan/vulkan_xlib_xrandr.h"
+        ],
+        "confidence": 1
+      }
+    },
+    "vulnerabilities": [],
+    "path": "/home/saligia/WorkCloud/nowe kursy/TimeBox/repository/timebox",
+    "dependencyCount": 3,
+    "packageManager": "Unmanaged (C/C++)"
+  }
+]

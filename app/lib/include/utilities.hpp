@@ -12,6 +12,8 @@
 #include <termios.h>
 #include <unistd.h>
 
+namespace TimeBox {
+
 static std::map<int, int> s_baud_conversion_map{ { 0, B0 },
   { 50, B50 },
   { 75, B75 },
@@ -34,7 +36,6 @@ bool CheckAdminPrivileges();
 bool CheckIfUsingDocker();
 bool CheckNTPService();
 std::vector<std::string> GetSerialDevicesList();
-void PrintTimex(timex &);
 std::size_t ConvertBaudRate(int);
 std::chrono::system_clock::time_point ConvertStringToTimepoint(std::string);
 std::string ConvertTimepointToString(std::chrono::system_clock::time_point);
@@ -83,5 +84,7 @@ template<typename T, typename... Args> auto WrapTimingDecorator(T (*function)(Ar
 {
   return TimingDecorator<T(Args...)>(std::function<T(Args...)>(function));
 }
+
+}// namespace TimeBox
 
 #endif// UTILITIES_HPP

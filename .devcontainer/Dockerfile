@@ -47,7 +47,7 @@ RUN update-alternatives --install /usr/bin/g++ g++ $(which g++-${GCC_VER}) 100
 ARG LLVM_VER="15"
 RUN apt-get install -y clang-${LLVM_VER} lldb-${LLVM_VER} lld-${LLVM_VER} \
     clangd-${LLVM_VER} llvm-${LLVM_VER}-dev libclang-${LLVM_VER}-dev \
-    clang-tidy-${LLVM_VER} clang-format-${LLVM_VER}
+    clang-tidy-${LLVM_VER} clang-format-${LLVM_VER} clang-tools-${LLVM_VER}
 
 # Set the default clang-tidy, so CMake can find it
 RUN update-alternatives --install /usr/bin/clang-tidy clang-tidy \
@@ -62,6 +62,16 @@ RUN update-alternatives --install /usr/bin/clang clang $(which \
     clang-${LLVM_VER}) 100
 RUN update-alternatives --install /usr/bin/clang++ clang++ $(which \
     clang++-${LLVM_VER}) 100
+
+# Install additional tools - not from repository
+RUN mkdir /tools
+WORKDIR /tools
+RUN git clone https://github.com/namhyung/uftrace.git
+WORKDIR /tools/uftrace
+RUN yes | misc/install-deps.sh
+RUN ./configure
+RUN make && make install
+WORKDIR /root
 
 # Install this project dependencies
 RUN apt-get install -y libboost-all-dev libgtest-dev libgmock-dev libbenchmark-dev \
