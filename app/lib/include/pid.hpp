@@ -115,8 +115,11 @@ template<class T> void PID<T>::UpdateLimited(const T t_feedback, const double t_
     UpdateRaw(-m_limit_difference, t_time_Delta);
   } else if (t_feedback > (m_limit_difference)) {
     UpdateRaw(m_limit_difference, t_time_Delta);
+  } else {
+    UpdateRaw(t_feedback, t_time_Delta);
   }
 }
+
 }// namespace TimeBox
 
 #endif// PID_HPP
