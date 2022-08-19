@@ -1,4 +1,5 @@
 #include "utilities.hpp"
+#include "exceptions.hpp"
 
 using namespace TimeBox;
 
@@ -82,12 +83,12 @@ std::vector<std::string> TimeBox::GetSerialDevicesList()
   std::vector<std::string> port_names;
   const std::filesystem::path dev_directory{ "/dev/serial/by-id" };
   const std::filesystem::path current_directory{ std::filesystem::current_path() };
-  std::filesystem::current_path(dev_directory);
 
   try {
     if (!exists(dev_directory)) {
-      throw std::runtime_error(dev_directory.generic_string() + " does not exist");
+      throw DeviceDirectoryNotExist();
     } else {
+      std::filesystem::current_path(dev_directory);
       for (auto const &path : std::filesystem::directory_iterator{ dev_directory }) {
         if (is_symlink(path)) {
           auto canonical_path = std::filesystem::canonical(std::filesystem::read_symlink(path));
@@ -96,7 +97,7 @@ std::vector<std::string> TimeBox::GetSerialDevicesList()
       }
     }
   } catch (const std::filesystem::filesystem_error &e) {
-    BOOST_LOG_TRIVIAL(error) << e.what();
+    BOOST_LOG_TRIVIAL(fatal) << "Error scanning for available ports " << e.what();
     throw e;
   }
 
