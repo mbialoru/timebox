@@ -40,7 +40,7 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" AND ${CMAKE_C_COMPILER_ID} MATCHES
   string(
     APPEND
     CMAKE_C_FLAGS_DEBUG
-    " -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wold-style-cast -Wcast-align -Wunused -Woverloaded-virtual -Wconversion -Wsign-conversion -Wmisleading-indentation -ggdb3 -DDEBUG -fno-omit-frame-pointer -fsanitize=address -fdiagnostics-color=always"
+    " -Wall -Wextra -Wshadow -pedantic -Wcast-align -Wunused -Wconversion -Wsign-conversion -Wmisleading-indentation -ggdb3 -DDEBUG -fno-omit-frame-pointer -fsanitize=address -fdiagnostics-color=always"
   )
 
   if(${ENABLE_COVERAGE} MATCHES "YES")
