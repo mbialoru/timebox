@@ -34,7 +34,7 @@ ClockController::~ClockController()
 
 timex ClockController::GetTimex() const { return m_timex; }
 
-void ClockController::SetSystemTimex(timex *t_timex) { OperateOnTimex(t_timex); }
+void ClockController::SetSystemTimex(timex *t_timex) const { OperateOnTimex(t_timex); }
 
 void ClockController::AdjustKernelTick(const std::size_t t_tick)
 {

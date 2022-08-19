@@ -31,7 +31,7 @@ public:
 
 private:
   timex GetSystemTimex() const;
-  void SetSystemTimex(timex *);
+  void SetSystemTimex(timex *) const;
   bool OperateOnTimex(timex *) const;
   void AdjustKernelTick(std::size_t);
   std::size_t CalculateClockDifference();
