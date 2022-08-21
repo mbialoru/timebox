@@ -10,5 +10,8 @@ for line in sys.stdin:
         print(f"ValueError ocurred")
 
 x = range(len(rawDataBuffer))
-plt.plot(x, rawDataBuffer, color = 'b')
+plt.plot(x, rawDataBuffer, color = 'bk')
+plt.legend()
+plt.xlabel("Tick [n]")
+plt.ylabel("Delta [ms]")
 plt.savefig(f"time_history.png")

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <boost/log/trivial.hpp>
+#include <tuple>
 
 namespace TimeBox {
 
@@ -12,6 +13,9 @@ template<class T> class PID
 public:
   PID(double, double, double, T);
   ~PID() = default;
+
+  std::tuple<double, double, double> GetTerms() const;
+  void SetTerms(double, double, double);
 
   T GetTarget() const;
   void SetTarget(T);
@@ -54,6 +58,18 @@ template<class T> PID<T>::PID(const double t_p, const double t_i, const double t
   m_target = t_target;
   m_lower_limit = static_cast<T>(0);
   m_upper_limit = static_cast<T>(0);
+}
+
+template<class T> std::tuple<double, double, double> PID<T>::GetTerms() const
+{
+  return std::make_tuple(m_kp, m_ki, m_kd);
+}
+
+template<class T> void PID<T>::SetTerms(const double t_p, const double t_i, const double t_d)
+{
+  m_kp = t_p;
+  m_ki = t_i;
+  m_kd = t_d;
 }
 
 template<class T> T PID<T>::GetTarget() const { return m_target; }

@@ -28,6 +28,7 @@ struct AppContext
 
   std::unique_ptr<TimeBox::ClockController> p_clock_controller;
   std::unique_ptr<TimeBox::SerialReader> p_serial_reader;
+  std::shared_ptr<TimeBox::PID<double>> p_pid;
 
   // ImGUI variables
   bool application_run;

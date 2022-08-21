@@ -2,15 +2,15 @@
 
 using namespace TimeBox;
 
-ClockController::ClockController(const char t_clock_mode, const double t_resolution, const long int t_minimal_delay)
+ClockController::ClockController(const double t_resolution,
+  const char t_clock_mode,
+  std::shared_ptr<PID<double>> t_pid,
+  const long int t_minimal_delay)
 {
+  mp_pid = t_pid;
   m_clock_mode = t_clock_mode;
   m_resolution_power = std::size_t(std::floor(std::log10(t_resolution)));
   m_minimal_delay = t_minimal_delay;
-
-  // 0 is the aimed value of difference between system clock and PPS
-  mp_pid = std::make_unique<PID<double>>(2.0, 1.0, 0.001, 0);
-  mp_pid->SetLimits(9000, 11000);
 
   BOOST_LOG_TRIVIAL(debug) << "Retrieving timex from kernel";
 

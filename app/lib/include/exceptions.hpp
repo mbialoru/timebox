@@ -12,7 +12,7 @@ namespace TimeBox {
 class NotImplementedException : public std::exception
 {
 public:
-  NotImplementedException(const char *t_msg = "Function or method not yet implemented")
+  NotImplementedException(const char *t_msg = "Function, method or feature not yet implemented")
   {
     m_msg = t_msg;
     BOOST_LOG_TRIVIAL(error) << m_msg;

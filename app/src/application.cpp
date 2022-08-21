@@ -21,6 +21,8 @@ AppContext TimeBox::InitializeContext()
 
   context.main_window_name = std::string(PROJECT_NAME);
 
+  std::make_shared<PID<double>>(0.0, 0.0, 0.0, 0.0).swap(context.p_pid);
+
   return context;
 }
 
@@ -45,6 +47,8 @@ void TimeBox::MainDialog(AppContext &t_context)
 {
   std::string window_title{ PROJECT_NAME };
   window_title[0] = toupper(window_title[0]);
+
+  static float term_p{ 0.0 }, term_i{ 0.0 }, term_d{ 0.0 };
 
   ImGuiWindowFlags window_flags = 0;
   window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
@@ -81,6 +85,29 @@ void TimeBox::MainDialog(AppContext &t_context)
     ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "disconnected");
     ImGui::Separator();
   }
+
+  // PID terms setting panel
+  ImGuiSliderFlags flags = ImGuiSliderFlags_AlwaysClamp;
+  ImGui::Text("PID Control");
+  ImGui::SliderFloat("P term", &term_p, -10.0f, 10.0f, "%.3f", flags);
+  ImGui::SliderFloat("I term", &term_i, -10.0f, 10.0f, "%.3f", flags);
+  ImGui::SliderFloat("D term", &term_d, -10.0f, 10.0f, "%.3f", flags);
+  if (ImGui::Button("Apply")) { t_context.p_pid->SetTerms(term_p, term_i, term_d); }
+  ImGui::SameLine();
+  if (ImGui::Button("Reset")) {
+    term_p = 0.0;
+    term_i = 0.0;
+    term_d = 0.0;
+    t_context.p_pid->SetTerms(term_p, term_i, term_d);
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Auto")) { throw NotImplementedException(); }
+  ImGui::SameLine();
+  ImGui::Spacing();
+  ImGui::SameLine();
+  auto [p, i, d] = t_context.p_pid->GetTerms();
+  ImGui::Text("P: %.3f I: %.3f D: %.3f", float(p), float(i), float(d));
+  ImGui::Separator();
 
   if (t_context.p_clock_controller != nullptr && t_context.p_clock_controller->time_difference_history.size() > 0) {
     if (ImGui::Button("Save History")) {
@@ -164,7 +191,7 @@ void TimeBox::ConnectDialog(AppContext &t_context)
         ImGui::Text(std::to_string(t_context.baud_rate).c_str());
 
         if (ImGui::Button("Connect")) {
-          t_context.p_clock_controller = std::make_unique<ClockController>(0, 0.001);
+          t_context.p_clock_controller = std::make_unique<ClockController>(0.001, 0, t_context.p_pid);
           t_context.p_serial_reader = std::make_unique<SerialReader>(t_context.serial_port.c_str(),
             t_context.baud_rate,
             std::bind(&ClockController::AdjustClock, t_context.p_clock_controller.get(), std::placeholders::_1));

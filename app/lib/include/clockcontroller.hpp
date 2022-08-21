@@ -21,7 +21,7 @@ namespace TimeBox {
 class ClockController
 {
 public:
-  ClockController(char, double, long int = 500);
+  ClockController(double, char, std::shared_ptr<PID<double>>, long int = 500);
   ~ClockController();
   timex GetTimex() const;
   void AdjustClock(TimeboxReadout);
@@ -41,7 +41,7 @@ private:
   long int m_minimal_delay;
   std::size_t m_original_tick;
   std::size_t m_resolution_power;
-  std::unique_ptr<PID<double>> mp_pid;
+  std::shared_ptr<PID<double>> mp_pid;
 };
 
 }// namespace TimeBox
