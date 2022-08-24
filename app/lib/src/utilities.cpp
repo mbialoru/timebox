@@ -33,7 +33,7 @@ bool TimeBox::CheckNTPService()
   char line[100];
   FILE *f = popen("pidof systemd-timesyncd", "r");
   fgets(line, 100, f);
-  pid_t pid = int(strtol(line, NULL, 10));
+  pid_t pid = static_cast<int>(strtol(line, NULL, 10));
   pclose(f);
 
   if (pid > 0)
@@ -46,7 +46,7 @@ std::size_t TimeBox::ConvertBaudRate(const int t_baud)
 {
   auto search = s_baud_conversion_map.find(t_baud);
   if (search != s_baud_conversion_map.end())
-    return std::size_t(search->second);
+    return static_cast<std::size_t>(search->second);
   else
     throw std::invalid_argument("Invalid baud rate !");
 }

@@ -27,7 +27,7 @@ TEST_F(Test_PID, limited_output)
 {
   pid.SetLimits(10, 30);
 
-  for (std::size_t i = 0; i < 50; i++) {
+  for (std::size_t i = 0; i < 50; ++i) {
     if (i >= 9) {
       pid.SetTarget(100);
       pid.UpdateLimited(temperature(), 1);
@@ -41,7 +41,7 @@ TEST_F(Test_PID, limited_output)
 
 TEST_F(Test_PID, control_temperature)
 {
-  for (std::size_t i = 0; i < 50; i++) {
+  for (std::size_t i = 0; i < 50; ++i) {
     if (i >= 9) {
       pid.SetTarget(100);
       pid.UpdateRaw(temperature(), 1);

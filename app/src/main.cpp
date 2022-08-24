@@ -123,7 +123,7 @@ int main(const int t_argc, const char *t_argv[])
 
     // Rendering - This is our Viewport
     ImGui::Render();
-    glViewport(0, 0, int(io.DisplaySize.x), int(io.DisplaySize.y));
+    glViewport(0, 0, static_cast<int>(io.DisplaySize.x), static_cast<int>(io.DisplaySize.y));
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SDL_GL_SwapWindow(window);
 

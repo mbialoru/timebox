@@ -15,7 +15,7 @@ Prototype to practice and explore usage of libserial to communicate with arduino
 unsigned long ContentLength(char *buf, std::size_t len)
 {
   unsigned short length{ 0 };
-  for (std::size_t i = 0; i < len; i++) {
+  for (std::size_t i = 0; i < len; ++i) {
     if (buf[i] != '*') {
       if (buf[i] != '\n')
         length++;
@@ -66,7 +66,7 @@ TEST(Proto_LibSerial, read_from_port)
   try {
     sp.Read(db, 0, ms_timeout);
   } catch (const LibSerial::ReadTimeout &) {
-    for (size_t i = 0; i < db.size(); i++) { std::cout << db.at(i) << std::flush; }
+    for (size_t i = 0; i < db.size(); ++i) { std::cout << db.at(i) << std::flush; }
     std::cerr << "Timeout has been reached waiting for data" << std::endl;
   }
 }
@@ -96,16 +96,16 @@ TEST(Proto_LibSerial, read_from_stream)
 
   for (std::size_t i = 0; i < 20;) {
     while (serial_stream.IsDataAvailable()) {
-      for (size_t i = 0; i < 32; i++) { serial_buffer[i] = '*'; }
+      for (size_t i = 0; i < 32; ++i) { serial_buffer[i] = '*'; }
 
-      for (std::size_t i = 0; i < 32; i++) {
+      for (std::size_t i = 0; i < 32; ++i) {
         serial_stream.get(serial_buffer[i]);
         if (serial_buffer[i] == '\n') { break; }
       }
 
       // Here check if data makes sense
       unsigned short length{ 0 };
-      for (std::size_t i = 0; i < 32; i++) {
+      for (std::size_t i = 0; i < 32; ++i) {
         if (serial_buffer[i] == '*') { continue; }
 
         if (serial_buffer[i] != '\n') {
@@ -118,7 +118,7 @@ TEST(Proto_LibSerial, read_from_stream)
 
       if (length < 7 || length > 12) std::cout << "Invalid format" << std::endl;
 
-      for (size_t i = 0; i < 32; i++) {
+      for (size_t i = 0; i < 32; ++i) {
         std::cout << serial_buffer[i];
         if (serial_buffer[i] == '\n') {
           std::cout << serial_buffer[i];
@@ -152,9 +152,9 @@ TEST(Proto_LibSerial, read_with_callback)
 
   for (std::size_t i = 0; i < 20;) {
     while (serial_stream.IsDataAvailable()) {
-      for (size_t i = 0; i < 32; i++) serial_buffer[i] = '*';
+      for (size_t i = 0; i < 32; ++i) serial_buffer[i] = '*';
 
-      for (std::size_t i = 0; i < 32; i++) {
+      for (std::size_t i = 0; i < 32; ++i) {
         serial_stream.get(serial_buffer[i]);
         if (serial_buffer[i] == '\n') break;
       }

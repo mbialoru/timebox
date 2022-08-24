@@ -74,7 +74,7 @@ void TimeBox::MainDialog(AppContext &t_context)
       ImGui::Text("Clock difference %ld ms", t_context.p_clock_controller->time_difference_history.back());
       ImGui::Text("Kernel tick %lu (%.3f %%speed)",
         t_context.p_clock_controller->tick_history.back(),
-        (double(t_context.p_clock_controller->tick_history.back()) - 10000) / 100 + 100);
+        (static_cast<double>(t_context.p_clock_controller->tick_history.back()) - 10000) / 100 + 100);
       ImGui::Separator();
     }
   }
@@ -106,7 +106,7 @@ void TimeBox::MainDialog(AppContext &t_context)
   ImGui::Spacing();
   ImGui::SameLine();
   auto [p, i, d] = t_context.p_pid->GetTerms();
-  ImGui::Text("P: %.3f I: %.3f D: %.3f", float(p), float(i), float(d));
+  ImGui::Text("P: %.3f I: %.3f D: %.3f", static_cast<float>(p), static_cast<float>(i), static_cast<float>(d));
   ImGui::Separator();
 
   if (t_context.p_clock_controller != nullptr && t_context.p_clock_controller->time_difference_history.size() > 0) {
@@ -152,7 +152,7 @@ void TimeBox::ConnectDialog(AppContext &t_context)
       const char *preview_value_baud = t_context.baud_rate_list[current_item_index_baud].c_str();
       t_context.baud_rate = std::stoul(t_context.baud_rate_list[current_item_index_baud]);
       if (ImGui::BeginCombo("Baud rate", preview_value_baud)) {
-        for (std::size_t i{ 0 }; i < t_context.baud_rate_list.size(); i++) {
+        for (std::size_t i{ 0 }; i < t_context.baud_rate_list.size(); ++i) {
           const bool is_selected = (current_item_index_baud == i);
           if (ImGui::Selectable(t_context.baud_rate_list[i].c_str(), is_selected)) { current_item_index_baud = i; }
           if (is_selected) {
@@ -170,7 +170,7 @@ void TimeBox::ConnectDialog(AppContext &t_context)
         const char *preview_value_port = t_context.serial_port_list[current_item_index_port].c_str();
         t_context.serial_port = t_context.serial_port_list[current_item_index_port];
         if (ImGui::BeginCombo("##", preview_value_port)) {
-          for (std::size_t i{ 0 }; i < t_context.serial_port_list.size(); i++) {
+          for (std::size_t i{ 0 }; i < t_context.serial_port_list.size(); ++i) {
             const bool is_selected = (current_item_index_port == i);
             if (ImGui::Selectable(t_context.serial_port_list[i].c_str(), is_selected)) { current_item_index_port = i; }
             if (is_selected) {
@@ -221,7 +221,7 @@ void TimeBox::WarningPopup(AppContext &t_context)
     window_flags |= ImGuiWindowFlags_NoMove;
 
     ImGui::SetNextWindowBgAlpha(0.35f);
-    ImGui::Begin("Warning", (bool *)NULL, window_flags);
+    ImGui::Begin("Warning", static_cast<bool *>(NULL), window_flags);
     ImGui::SetWindowSize(ImVec2(WINDOW_WIDTH / 2, 200));
     ImGui::SetWindowPos(ImVec2(WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2 - 100));
 
@@ -251,7 +251,7 @@ void TimeBox::AboutDialog(AppContext &t_context)
     window_flags |= ImGuiWindowFlags_NoDecoration;
     window_flags |= ImGuiWindowFlags_NoFocusOnAppearing;
 
-    ImGui::Begin("About", (bool *)NULL, window_flags);
+    ImGui::Begin("About", static_cast<bool *>(NULL), window_flags);
     ImGui::Text("About");
     ImGui::Separator();
 
