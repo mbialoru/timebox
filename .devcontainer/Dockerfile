@@ -26,7 +26,7 @@ RUN apt-get install -y apt-utils wget file zip software-properties-common
 # Install needed tools, packages and libraries
 RUN apt-get install -y build-essential binutils autoconf automake cmake \
     cmake-curses-gui meson ninja-build git ruby graphviz doxygen moreutils \
-    cppcheck ccache gdb
+    cppcheck ccache gdb valgrind
 
 # Install Python
 RUN apt-get install -y python2 python3 python3-pip python3-venv

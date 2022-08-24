@@ -33,7 +33,7 @@ Vagrant.configure("2") do |config|
     # install needed tools, packages and libs
     apt-get install -y build-essential binutils autoconf automake cmake \
     cmake-curses-gui meson ninja-build git ruby graphviz doxygen moreutils \
-    cppcheck ccache gdb adjtimex
+    cppcheck ccache gdb valgrind adjtimex
 
     # install python
     apt-get install -y python3 python3-pip python3-venv
