@@ -3,9 +3,8 @@
 using namespace TimeBox;
 
 SerialReader::SerialReader(const char *t_tty, std::size_t t_baud, std::function<void(TimeboxReadout)> t_callback)
-  : ThreadWrapper::ThreadWrapper("SerialReader")
+  : ThreadWrapper::ThreadWrapper("SerialReader"), m_callback(t_callback)
 {
-  m_callback = t_callback;
   InitalizeSerial(t_tty, t_baud);
   WipeSerialBuffer();
   m_is_paused = false;
@@ -39,13 +38,13 @@ void SerialReader::InitalizeSerial(const char *t_tty, const std::size_t t_baud)
 
 void SerialReader::WipeSerialBuffer()
 {
-  for (size_t i = 0; i < m_buffer_size; i++) { m_serial_buffer[i] = '\0'; }
+  for (size_t i = 0; i < m_buffer_size; ++i) { m_serial_buffer[i] = '\0'; }
 }
 
 void SerialReader::Work()
 {
   while (m_serial_port.IsDataAvailable()) {
-    for (std::size_t i = 0; i < m_buffer_size; i++) {
+    for (std::size_t i = 0; i < m_buffer_size; ++i) {
       try {
         m_serial_port.ReadByte(m_serial_buffer[i], m_read_timeout);
         if (m_serial_buffer[i] == '\n') break;

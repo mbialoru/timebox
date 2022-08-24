@@ -40,22 +40,17 @@ private:
   T m_upper_limit;
   T m_middle_limit;
   T m_limit_difference;
-  double m_error_guard;
   double m_kp, m_ki, m_kd;
-  double m_pterm, m_iterm, m_dterm;
+  double m_error_guard{ 0 };
+  double m_pterm{ 0 }, m_iterm{ 0 }, m_dterm{ 0 };
 };
 
-template<class T> PID<T>::PID(const double t_p, const double t_i, const double t_d, const T t_target)
+template<class T>
+PID<T>::PID(const double t_p, const double t_i, const double t_d, const T t_target)
+  : m_kp(t_p), m_ki(t_i), m_kd(t_d), m_target(t_target)
 {
-  m_kp = t_p;
-  m_ki = t_i;
-  m_kd = t_d;
-  m_pterm = 0;
-  m_iterm = 0;
-  m_dterm = 0;
-  m_last_error = 0;
   m_error_guard = 20;
-  m_target = t_target;
+  m_last_error = static_cast<T>(0);
   m_lower_limit = static_cast<T>(0);
   m_upper_limit = static_cast<T>(0);
 }
@@ -115,6 +110,7 @@ template<class T> void PID<T>::UpdateRaw(const T t_feedback, const double t_time
   m_last_error = error;
   m_pterm = m_kp * error;
   m_iterm += error * t_time_Delta;
+
 
   if (m_iterm < -m_error_guard)
     m_iterm = -m_error_guard;
