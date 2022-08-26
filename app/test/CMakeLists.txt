@@ -15,20 +15,14 @@ target_link_options(${PROJECT_NAME}_test PRIVATE "--coverage")
 
 target_link_libraries(
   ${PROJECT_NAME}_test
-  PRIVATE lib${PROJECT_NAME}
+  PRIVATE project_options
+          project_warnings
+          lib${PROJECT_NAME}
           LibSerial::serial
           gtest
           gtest_main
           gmock
           gmock_main
           Boost::log)
-
-if(ipo_supported)
-  message(STATUS "IPO / LTO enabled for ${PROJECT_NAME}_test")
-  set_target_properties(${PROJECT_NAME}_test
-                        PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-else()
-  message(STATUS "IPO / LTO not supported: <${error}>")
-endif()
 
 gtest_discover_tests(${PROJECT_NAME}_test)

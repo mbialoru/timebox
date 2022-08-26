@@ -20,9 +20,8 @@ private:
 
 public:
   FakeSerialReader(const char *, std::size_t, std::function<void(TimeBox::TimeboxReadout)> t_callback)
-    : TimeBox::ThreadWrapper::ThreadWrapper("FakeSerialReader")
+    : TimeBox::ThreadWrapper::ThreadWrapper("FakeSerialReader"), m_callback(t_callback)
   {
-    m_callback = t_callback;
     m_is_paused = false;
   };
   ~FakeSerialReader() = default;

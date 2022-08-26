@@ -6,7 +6,7 @@ ClockController::ClockController(const double t_resolution,
   const char t_clock_mode,
   std::shared_ptr<PID<double>> t_pid,
   const long int t_minimal_delay)
-  : mp_pid(t_pid), m_clock_mode(t_clock_mode), m_minimal_delay(t_minimal_delay)
+  : m_clock_mode(t_clock_mode), m_minimal_delay(t_minimal_delay), mp_pid(t_pid)
 {
   m_resolution_power = static_cast<std::size_t>(std::floor(std::log10(t_resolution)));
 

@@ -18,12 +18,4 @@ target_link_libraries(
           SDL2
           LibSerial::serial)
 
-if(ipo_supported)
-  message(STATUS "IPO / LTO enabled for ${PROJECT_NAME}_proto")
-  set_target_properties(${PROJECT_NAME}_proto
-                        PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-else()
-  message(STATUS "IPO / LTO not supported: <${error}>")
-endif()
-
 gtest_discover_tests(${PROJECT_NAME}_proto)

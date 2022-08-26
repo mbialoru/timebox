@@ -17,7 +17,7 @@ namespace TimeBox {
 class ThreadWrapper
 {
 public:
-  ThreadWrapper(std::string, std::size_t = 250, std::size_t = 500);
+  explicit ThreadWrapper(std::string, std::size_t = 250, std::size_t = 500);
   virtual ~ThreadWrapper();
 
   void Resume();

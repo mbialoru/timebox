@@ -1,113 +1,62 @@
-cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+
+# Not ideal to use this global variable, but necessary to make sure that tooling
+# and projects use the same version
+set(CMAKE_CXX_STANDARD 20)
+
+# strongly encouraged to enable this globally to avoid conflicts between
+# -Wpedantic being enabled and -std=c++20 and -std=gnu++20 for example when
+# compiling with PCH enabled
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Note: by default ENABLE_DEVELOPER_MODE is True This means that all analysis
+# (sanitizers, static analysis) is enabled and all warnings are treated as
+# errors if you want to switch this behavior, change TRUE to FALSE
+set(ENABLE_DEVELOPER_MODE
+    TRUE
+    CACHE BOOL "Enable 'developer mode'")
+
+# Change this to false if you want to disable warnings_as_errors in developer
+# mode
+set(OPT_WARNINGS_AS_ERRORS_DEVELOPER_DEFAULT FALSE)
+
+# uncomment to enable vcpkg: # Setup vcpkg - should be called before defining
+# project() run_vcpkg()
 
 project(
   timebox
   VERSION 0.1.0
   LANGUAGES C CXX
-  DESCRIPTION ""
-  HOMEPAGE_URL "")
-
-set(CMAKE_C_STANDARD 17)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Strongly encouraged to enable this globally to avoid conflicts between
-# -Wpedantic being enabled and -std=c++20 and -std=gnu++20 for example when
-# compiling with PCH enabled
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-# CMake utilities
-function(removeDuplicateSubstring stringIn stringOut)
-  separate_arguments(stringIn)
-  list(REMOVE_DUPLICATES stringIn)
-  string(REPLACE ";" " " stringIn "${stringIn}")
-  set(${stringOut}
-      "${stringIn}"
-      PARENT_SCOPE)
-endfunction()
-
-# Flags GCC
-if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" AND ${CMAKE_C_COMPILER_ID} MATCHES
-                                              "GNU")
-  string(APPEND CMAKE_CXX_FLAGS " -march=native")
-  string(
-    APPEND
-    CMAKE_CXX_FLAGS_DEBUG
-    " -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wold-style-cast -Wcast-align -Wunused -Woverloaded-virtual -Wconversion -Wsign-conversion -Wmisleading-indentation -ggdb3 -DDEBUG -fno-omit-frame-pointer -fsanitize=address -fdiagnostics-color=always"
-  )
-
-  string(APPEND CMAKE_C_FLAGS " -march=native")
-  string(
-    APPEND
-    CMAKE_C_FLAGS_DEBUG
-    " -Wall -Wextra -Wshadow -pedantic -Wcast-align -Wunused -Wconversion -Wsign-conversion -Wmisleading-indentation -ggdb3 -DDEBUG -fno-omit-frame-pointer -fsanitize=address -fdiagnostics-color=always"
-  )
-
-  if(${ENABLE_COVERAGE} MATCHES "YES")
-    message(STATUS "Globally enabled coverage flags")
-    string(APPEND CMAKE_CXX_FLAGS " --coverage")
-    string(APPEND CMAKE_CXX_FLAGS_DEBUG " --coverage")
-    string(APPEND CMAKE_C_FLAGS " --coverage")
-    string(APPEND CMAKE_C_FLAGS_DEBUG " --coverage")
-  endif()
-
-  if(${MASOCHISTIC} MATCHES "YES")
-    string(APPEND CMAKE_CXX_FLAGS_DEBUG " -Werror")
-    string(APPEND CMAKE_C_FLAGS_DEBUG " -Werror")
-  endif()
-endif()
-
-# Flags Clang
-if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" AND ${CMAKE_C_COMPILER_ID} MATCHES
-                                                "Clang")
-  # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-  # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wshadow
-  # -Wnon-virtual-dtor -pedantic -Wold-style-cast -Wcast-align -Wunused
-  # -Woverloaded-virtual -Wconversion -Wsign-conversion -Wmisleading-indentation
-  # -ggdb3 -DDEBUG -fno-omit-frame-pointer -fsanitize=address" )
-  # set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-  # set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG}
-  # -fno-omit-frame-pointer -fsanitize=address")
-endif()
-
-# Flags MSVC
-if(MSVC)
-  string(
-    APPEND
-    CMAKE_CXX_FLAGS_DEBUG
-    " /W4 /W44640 /w14242 /w14254 /w14263 /w14265 /w14287 /we4289 /w14296 /w14311 /w14545 /w14546 /w14547 /w14549 /w14555 /w14619 /w14640 /w14826 /w14905 /w14906 /w14928"
-  )
-
-  if(${MASOCHISTIC} MATCHES "YES")
-    string(APPEND CMAKE_CXX_FLAGS_DEBUG " -Wx")
-    string(APPEND CMAKE_C_FLAGS_DEBUG " -Wx")
-  endif()
-endif()
+  DESCRIPTION
+    "Synchronize system clock with hardware GPS interface attached by USB"
+  HOMEPAGE_URL "https://gitlab.sudobash.pl/Au5m8btpUaUS5t3dpixE/time-box")
 
 # Output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# Add project_options v0.20.0
-# https://github.com/cpp-best-practices/project_options
+# Add project_options
+# https://github.com/aminya/project_options
 include(FetchContent)
-cmake_policy(SET CMP0135 "NEW")
 FetchContent_Declare(
   _project_options
-  URL https://github.com/aminya/project_options/archive/refs/tags/v0.24.0.zip)
+  URL https://github.com/aminya/project_options/archive/refs/tags/v0.24.1.zip)
 FetchContent_MakeAvailable(_project_options)
 include(${_project_options_SOURCE_DIR}/Index.cmake)
 
-# Libraries we use here, generate errors in their unitests when including ctest
-# in top level!
+# # This variable is set by project() in CMake 3.21+
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
+               PROJECT_IS_TOP_LEVEL)
 
-# # This variable is set by project() in CMake 3.21+ string(COMPARE EQUAL
-# "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}" PROJECT_IS_TOP_LEVEL)
-# if(PROJECT_IS_TOP_LEVEL) # Consider the CTest module, which creates targets
-# and options! # Only needed if you want to enable submissions to a CDash
-# server. include(CTest) endif()
+if(PROJECT_IS_TOP_LEVEL)
+  # Consider the CTest module, which creates targets and options! Only needed if
+  # you want to enable submissions to a CDash server.
+  include(CTest)
+endif()
 
+# Add Git SHA
 find_package(Git)
 find_program(GIT_FOUND git)
 if(GIT_FOUND)
@@ -121,50 +70,57 @@ if(GIT_FOUND)
     COMMAND git -C ${CMAKE_SOURCE_DIR} branch --show-current
     OUTPUT_VARIABLE GIT_BRANCH
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-  add_definitions(-DGIT_SHA=${GIT_SHA})
-  add_definitions(-DGIT_BRANCH=${GIT_BRANCH})
   string(SUBSTRING "${GIT_SHA}" 0 8 GIT_SHORT_SHA)
-  add_definitions(-DGIT_SHORT_SHA=${GIT_SHORT_SHA})
-  message(STATUS "GIT_SHA = ${GIT_SHA}")
-  message(STATUS "GIT_SHORT_SHA = ${GIT_SHORT_SHA}")
-  message(STATUS "GIT_BRANCH = ${GIT_BRANCH}")
-else(GIT_FOUND)
-  add_definitions(-DGIT_SHA=none)
-  add_definitions(-DGIT_BRANCH=none)
-  add_definitions(-DGIT_SHORT_SHA=none)
-endif(GIT_FOUND)
+  set(GIT_BRANCH ${GIT_BRANCH})
+  set(GIT_SHORT_SHA ${GIT_SHORT_SHA})
+  message(STATUS "GIT SHA = ${GIT_SHA}")
+  message(STATUS "GIT SHORT SHA = ${GIT_SHORT_SHA}")
+  message(STATUS "GIT BRANCH = ${GIT_BRANCH}")
+else()
+  message(WARNING "Git not found !")
+endif()
+
+get_property(BUILDING_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(BUILDING_MULTI_CONFIG)
+  if(NOT CMAKE_BUILD_TYPE)
+    # Make sure that all supported configuration types have their associated
+    # conan packages available. You can reduce this list to only the
+    # configuration types you use, but only if one is not forced-set on the
+    # command line for VS
+    message(TRACE "Setting up multi-config build types")
+    set(CMAKE_CONFIGURATION_TYPES
+        Debug Release RelWithDebInfo MinSizeRel
+        CACHE STRING "Enabled build types" FORCE)
+  else()
+    message(TRACE "User chose a specific build type, so we are using that")
+    set(CMAKE_CONFIGURATION_TYPES
+        ${CMAKE_BUILD_TYPE}
+        CACHE STRING "Enabled build types" FORCE)
+  endif()
+endif()
 
 include(${_project_options_SOURCE_DIR}/src/DynamicProjectOptions.cmake)
-# Initialize project_options variable related to this project This overwrites
-# `project_options` and sets `project_warnings` uncomment the options to enable
-# them:
 dynamic_project_options(
-  # This is a list of headers to pre-compile, here are some common ones
+  ENABLE_INTERPROCEDURAL_OPTIMIZATION
+  ENABLE_NATIVE_OPTIMIZATION
+  ENABLE_DOXYGEN
+  ENABLE_SANITIZER_ADDRESS
+  ENABLE_CPPCHECK
+  ENABLE_PCH
+  PCH_HEADERS
   <vector>
   <string>
-  # ENABLE_CONAN     # Enable when ready to package CONAN_OPTIONS    # Extra
-  # options to pass to conan MSVC_WARNINGS    # Override the defaults for the
-  # MSVC warnings CLANG_WARNINGS   # Override the defaults for the CLANG
-  # warnings GCC_WARNINGS     # Override the defaults for the GCC warnings
   CPPCHECK_OPTIONS
   --enable=style,performance,warning,portability
   --inline-suppr
-  # We cannot act on a bug/missing feature of cppcheck
   --suppress=cppcheckError
   --suppress=internalAstError
-  # if a file does not have an internalAstError, we get an unmatchedSuppression
-  # error
   --suppress=unmatchedSuppression
   --suppress=passedByValue
   --suppress=syntaxError
   --inconclusive)
 
 target_compile_features(project_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
-add_library(myproject::project_options INTERFACE IMPORTED)
-add_library(myproject::project_warnings INTERFACE IMPORTED)
-
-include(CheckIPOSupported)
-check_ipo_supported(RESULT ipo_supported OUTPUT error)
 
 # add file to find libserial with cmake
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules")
@@ -186,26 +142,26 @@ set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
 add_subdirectory(app)
 add_subdirectory(submodules)
 
-if(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
-  option(BUILD_DOC "Build documentation" ON)
-  find_package(Doxygen)
-  if(DOXYGEN_FOUND)
-    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile)
-    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-    message(STATUS "Doxygen build started")
-    add_custom_target(
-      doc_doxygen ALL
-      COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-      COMMENT "Generating API documentation with Doxygen"
-      VERBATIM)
-  else(DOXYGEN_FOUND)
-    message(
-      STATUS
-        "Doxygen need to be installed to generate the doxygen documentation")
-  endif(DOXYGEN_FOUND)
+# If MSVC is being used, and ASAN is enabled, we need to set the debugger environment
+# so that it behaves well with MSVC's debugger, and we can run the target from visual studio
+if(MSVC)
+  get_all_installable_targets(all_targets)
+  message("all_targets=${all_targets}")
+  set_target_properties(${all_targets} PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=$(VC_ExecutablePath_x64);%PATH%")
 endif()
+
+# set the startup project for the "play" button in MSVC
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT intro)
+
+if(CMAKE_SKIP_INSTALL_RULES)
+  return()
+elseif(NOT PROJECT_IS_TOP_LEVEL)
+  return()
+endif()
+
+# Add other targets that you want installed here, be default we just package the
+# one executable we know we want to ship
+package_project(TARGETS timebox project_options project_warnings)
 
 set(CPACK_PACKAGE_FILE_NAME
     "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"

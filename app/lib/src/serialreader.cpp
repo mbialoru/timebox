@@ -26,10 +26,10 @@ void SerialReader::InitalizeSerial(const char *t_tty, const std::size_t t_baud)
     m_serial_port.FlushIOBuffers();
   } catch (const LibSerial::OpenFailed &e) {
     BOOST_LOG_TRIVIAL(fatal) << "Failed to open connection on " << t_tty;
-    throw e;
+    throw;
   }
 
-  m_serial_port.SetBaudRate(static_cast<LibSerial::BaudRate>(ConvertBaudRate(t_baud)));
+  m_serial_port.SetBaudRate(static_cast<LibSerial::BaudRate>(ConvertBaudRate(static_cast<int>(t_baud))));
   m_serial_port.SetCharacterSize(LibSerial::CharacterSize::CHAR_SIZE_8);
   m_serial_port.SetFlowControl(LibSerial::FlowControl::FLOW_CONTROL_NONE);
   m_serial_port.SetParity(LibSerial::Parity::PARITY_NONE);

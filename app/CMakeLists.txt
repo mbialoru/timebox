@@ -11,18 +11,12 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(
   ${PROJECT_NAME}
-  PRIVATE lib${PROJECT_NAME}
+  PRIVATE project_options
+          project_warnings
+          lib${PROJECT_NAME}
           SDL2
           IMGUI
           Threads::Threads
           LibSerial::serial
           Boost::log
           Boost::log_setup)
-
-if(ipo_supported)
-  message(STATUS "IPO / LTO enabled for ${PROJECT_NAME}")
-  set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION
-                                                   TRUE)
-else()
-  message(STATUS "IPO / LTO not supported: <${error}>")
-endif()

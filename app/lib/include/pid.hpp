@@ -47,12 +47,15 @@ private:
 
 template<class T>
 PID<T>::PID(const double t_p, const double t_i, const double t_d, const T t_target)
-  : m_kp(t_p), m_ki(t_i), m_kd(t_d), m_target(t_target)
+  : m_target(t_target), m_kp(t_p), m_ki(t_i), m_kd(t_d)
 {
   m_error_guard = 20;
+  m_output = static_cast<T>(0);
   m_last_error = static_cast<T>(0);
   m_lower_limit = static_cast<T>(0);
   m_upper_limit = static_cast<T>(0);
+  m_middle_limit = static_cast<T>(0);
+  m_limit_difference = static_cast<T>(0);
 }
 
 template<class T> std::tuple<double, double, double> PID<T>::GetTerms() const

@@ -45,7 +45,7 @@ typedef std::pair<std::string, std::chrono::system_clock::time_point> TimeboxRea
 template<typename T> struct TimingDecorator;// Yes, this is necessary.
 template<typename... Args> struct TimingDecorator<void(Args...)>
 {
-  TimingDecorator(std::function<void(Args...)> function) : m_function{ function } {}
+  explicit TimingDecorator(std::function<void(Args...)> function) : m_function{ function } {}
 
   long int operator()(Args... args)
   {
@@ -61,7 +61,7 @@ template<typename... Args> struct TimingDecorator<void(Args...)>
 
 template<typename T, typename... Args> struct TimingDecorator<T(Args...)>
 {
-  TimingDecorator(std::function<T(Args...)> function) : m_function{ function } {}
+  explicit TimingDecorator(std::function<T(Args...)> function) : m_function{ function } {}
 
   std::pair<T, long int> operator()(Args... args)
   {

@@ -12,9 +12,8 @@ namespace TimeBox {
 class NotImplementedException : public std::exception
 {
 public:
-  NotImplementedException(const char *t_msg = "Function, method or feature not yet implemented")
+  NotImplementedException(const char *t_msg = "Function, method or feature not yet implemented") : m_msg(t_msg)
   {
-    m_msg = t_msg;
     BOOST_LOG_TRIVIAL(error) << m_msg;
   }
   const char *what() const noexcept { return m_msg.c_str(); }
@@ -26,9 +25,8 @@ private:
 class TimexOperationError : public std::exception
 {
 public:
-  TimexOperationError(const char *t_msg = "Error during operation with timex struct")
+  TimexOperationError(const char *t_msg = "Error during operation with timex struct") : m_msg(t_msg)
   {
-    m_msg = t_msg;
     BOOST_LOG_TRIVIAL(error) << m_msg;
     BOOST_LOG_TRIVIAL(error) << "errno " << errno;
   }
@@ -41,9 +39,8 @@ private:
 class InsufficientPermissionsError : public std::exception
 {
 public:
-  InsufficientPermissionsError(const char *t_msg = "Operation not permitted")
+  InsufficientPermissionsError(const char *t_msg = "Operation not permitted") : m_msg(t_msg)
   {
-    m_msg = t_msg;
     BOOST_LOG_TRIVIAL(error) << m_msg;
   }
   const char *what() const noexcept { return m_msg.c_str(); }
@@ -57,8 +54,8 @@ class DeviceDirectoryNotExist : public std::exception
 public:
   DeviceDirectoryNotExist(
     const char *t_msg = "Device directory doesn't exist - check platform and do not run in docker.")
+    : m_msg(t_msg)
   {
-    m_msg = t_msg;
     BOOST_LOG_TRIVIAL(error) << m_msg;
   }
   const char *what() const noexcept { return m_msg.c_str(); }
