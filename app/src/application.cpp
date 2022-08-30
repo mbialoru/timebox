@@ -10,6 +10,7 @@ AppContext TimeBox::InitializeContext()
   context.using_docker = CheckIfUsingDocker();
   context.ntp_running = CheckNTPService();
 
+  context.baud_rate = 0;
   for (const auto &[key, value] : s_baud_conversion_map) { context.baud_rate_list.push_back(std::to_string(key)); }
 
   context.application_run = true;
@@ -48,7 +49,9 @@ void TimeBox::MainDialog(AppContext &t_context)
   std::string window_title{ PROJECT_NAME };
   window_title[0] = toupper(window_title[0]);
 
-  static float term_p{ 0.0 }, term_i{ 0.0 }, term_d{ 0.0 };
+  static float term_p{ 0.0 };
+  static float term_i{ 0.0 };
+  static float term_d{ 0.0 };
 
   ImGuiWindowFlags window_flags = 0;
   window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
@@ -69,8 +72,8 @@ void TimeBox::MainDialog(AppContext &t_context)
     ImGui::Text(t_context.serial_port.c_str());
     ImGui::Separator();
 
-    if (t_context.p_clock_controller->time_difference_history.size() > 0
-        && t_context.p_clock_controller->tick_history.size() > 0) {
+    if (!t_context.p_clock_controller->time_difference_history.empty()
+        && !t_context.p_clock_controller->tick_history.empty()) {
       ImGui::Text("Clock difference %ld ms", t_context.p_clock_controller->time_difference_history.back());
       ImGui::Text("Kernel tick %lu (%.3f %%speed)",
         t_context.p_clock_controller->tick_history.back(),
@@ -106,10 +109,10 @@ void TimeBox::MainDialog(AppContext &t_context)
   ImGui::Spacing();
   ImGui::SameLine();
   auto [p, i, d] = t_context.p_pid->GetTerms();
-  ImGui::Text("P: %.3f I: %.3f D: %.3f", static_cast<float>(p), static_cast<float>(i), static_cast<float>(d));
+  ImGui::Text("P: %.3f I: %.3f D: %.3f", p, i, d);
   ImGui::Separator();
 
-  if (t_context.p_clock_controller != nullptr && t_context.p_clock_controller->time_difference_history.size() > 0) {
+  if (t_context.p_clock_controller != nullptr && !t_context.p_clock_controller->time_difference_history.empty()) {
     if (ImGui::Button("Save History")) {
       std::fstream output_file;
       output_file.open("timebox_history.log", std::ios::out);
@@ -166,7 +169,7 @@ void TimeBox::ConnectDialog(AppContext &t_context)
       // Serial port choosing combo
       if (ImGui::Button("Scan ports")) { t_context.serial_port_list = GetSerialDevicesList(); }
       ImGui::SameLine();
-      if (t_context.serial_port_list.size() > 0) {
+      if (!t_context.serial_port_list.empty()) {
         const char *preview_value_port = t_context.serial_port_list[current_item_index_port].c_str();
         t_context.serial_port = t_context.serial_port_list[current_item_index_port];
         if (ImGui::BeginCombo("##", preview_value_port)) {
@@ -233,7 +236,7 @@ void TimeBox::WarningPopup(AppContext &t_context)
     if (t_context.using_docker) { ImGui::TextWrapped("Application is running in docker container"); }
 
     if (ImGui::BeginPopupContextWindow()) {
-      if (ImGui::MenuItem("Disable warning")) t_context.disabled_warning_popup = true;
+      if (ImGui::MenuItem("Disable warning")) { t_context.disabled_warning_popup = true; }
       ImGui::EndPopup();
     }
     ImGui::End();
@@ -255,13 +258,14 @@ void TimeBox::AboutDialog(AppContext &t_context)
     ImGui::Text("About");
     ImGui::Separator();
 
-    ImGui::TextWrapped(
-      "Frametime %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::TextWrapped("Frametime %.3f ms/frame (%.1f FPS)",
+      static_cast<double>(1000.0f / ImGui::GetIO().Framerate),
+      static_cast<double>(ImGui::GetIO().Framerate));
     ImGui::TextWrapped(std::string(BUILD_INFO).c_str());
     ImGui::TextWrapped("dear imgui says hello! (%s) (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
 
     if (ImGui::BeginPopupContextWindow()) {
-      if (ImGui::MenuItem("Close")) t_context.display_about_dialog = false;
+      if (ImGui::MenuItem("Close")) { t_context.display_about_dialog = false; }
       ImGui::EndPopup();
     }
     ImGui::End();

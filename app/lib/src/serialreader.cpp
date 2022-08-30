@@ -2,8 +2,8 @@
 
 using namespace TimeBox;
 
-SerialReader::SerialReader(const char *t_tty, std::size_t t_baud, std::function<void(TimeboxReadout)> t_callback)
-  : ThreadWrapper::ThreadWrapper("SerialReader"), m_callback(t_callback)
+SerialReader::SerialReader(const char *t_tty, const std::size_t t_baud, std::function<void(TimeboxReadout)> t_callback)
+  : ThreadWrapper::ThreadWrapper("SerialReader"), m_callback(std::move(t_callback)), m_serial_buffer{}
 {
   InitalizeSerial(t_tty, t_baud);
   WipeSerialBuffer();
@@ -38,7 +38,7 @@ void SerialReader::InitalizeSerial(const char *t_tty, const std::size_t t_baud)
 
 void SerialReader::WipeSerialBuffer()
 {
-  for (size_t i = 0; i < m_buffer_size; ++i) { m_serial_buffer[i] = '\0'; }
+  for (size_t i = 0; i < m_buffer_size; ++i) { m_serial_buffer.at(i) = '\0'; }
 }
 
 void SerialReader::Work()
@@ -46,8 +46,8 @@ void SerialReader::Work()
   while (m_serial_port.IsDataAvailable()) {
     for (std::size_t i = 0; i < m_buffer_size; ++i) {
       try {
-        m_serial_port.ReadByte(m_serial_buffer[i], m_read_timeout);
-        if (m_serial_buffer[i] == '\n') break;
+        m_serial_port.ReadByte(m_serial_buffer.at(i), m_read_timeout);
+        if (m_serial_buffer.at(i) == '\n') { break; }
       } catch (const LibSerial::ReadTimeout &) {
         BOOST_LOG_TRIVIAL(info) << "Reached port timeout value !";
       }

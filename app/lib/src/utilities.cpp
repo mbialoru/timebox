@@ -5,26 +5,29 @@ using namespace TimeBox;
 
 bool TimeBox::CheckSudo()
 {
-  if (getuid() == geteuid())
+  if (getuid() == geteuid()) {
     return false;
-  else
+  } else {
     return true;
+  }
 }
 
 bool TimeBox::CheckAdminPrivileges()
 {
-  if (getuid() == 0 || geteuid() == 0)
+  if (getuid() == 0 || geteuid() == 0) {
     return true;
-  else
+  } else {
     return false;
+  }
 }
 
 bool TimeBox::CheckIfUsingDocker()
 {
-  if (std::filesystem::exists(std::filesystem::path("/.dockerenv")))
+  if (std::filesystem::exists(std::filesystem::path("/.dockerenv"))) {
     return true;
-  else
+  } else {
     return false;
+  }
 }
 
 bool TimeBox::CheckNTPService()
@@ -33,22 +36,24 @@ bool TimeBox::CheckNTPService()
   char line[100];
   FILE *f = popen("pidof systemd-timesyncd", "r");
   fgets(line, 100, f);
-  pid_t pid = static_cast<int>(strtol(line, NULL, 10));
+  auto pid = static_cast<int>(strtol(line, NULL, 10));
   pclose(f);
 
-  if (pid > 0)
+  if (pid > 0) {
     return true;
-  else
+  } else {
     return false;
+  }
 }
 
 std::size_t TimeBox::ConvertBaudRate(const int t_baud)
 {
   auto search = s_baud_conversion_map.find(t_baud);
-  if (search != s_baud_conversion_map.end())
+  if (search != s_baud_conversion_map.end()) {
     return static_cast<std::size_t>(search->second);
-  else
+  } else {
     throw std::invalid_argument("Invalid baud rate !");
+  }
 }
 
 std::chrono::system_clock::time_point TimeBox::ConvertStringToTimepoint(const std::string t_time_string)

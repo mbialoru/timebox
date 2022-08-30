@@ -33,7 +33,6 @@ RUN apt-get install -y python2 python3 python3-pip python3-venv
 
 # Python packages
 RUN pip install --upgrade pip setuptools autopep8 conan cmakelang cppclean
-RUN conan --version
 
 # Install GCC
 ARG GCC_VER="12"
@@ -65,12 +64,24 @@ RUN update-alternatives --install /usr/bin/clang++ clang++ $(which \
 
 # Install additional tools - not from repository
 RUN mkdir /tools
+
+# uftrace
 WORKDIR /tools
 RUN git clone https://github.com/namhyung/uftrace.git
 WORKDIR /tools/uftrace
 RUN yes | misc/install-deps.sh
 RUN ./configure
 RUN make && make install
+
+# include-what-you-use
+WORKDIR /tools
+RUN git clone https://github.com/include-what-you-use/include-what-you-use.git
+WORKDIR /tools/include-what-you-use
+RUN mkdir build
+WORKDIR /tools/include-what-you-use/build
+RUN cmake ../ && cmake --build . && cmake --install .
+
+# go back to default directory
 WORKDIR /root
 
 # Install this project dependencies

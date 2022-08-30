@@ -6,7 +6,7 @@ ClockController::ClockController(const double t_resolution,
   const char t_clock_mode,
   std::shared_ptr<PID<double>> t_pid,
   const long int t_minimal_delay)
-  : m_clock_mode(t_clock_mode), m_minimal_delay(t_minimal_delay), mp_pid(t_pid)
+  : m_clock_mode(t_clock_mode), m_minimal_delay(t_minimal_delay), mp_pid(std::move(t_pid))
 {
   m_resolution_power = static_cast<std::size_t>(std::floor(std::log10(t_resolution)));
 
@@ -40,7 +40,7 @@ void ClockController::AdjustKernelTick(const std::size_t t_tick)
   tick_history.push_back(t_tick);
   m_timex.tick = static_cast<long>(t_tick);
 
-  if (not CheckAdminPrivileges()) throw InsufficientPermissionsError();
+  if (not CheckAdminPrivileges()) { throw InsufficientPermissionsError(); }
 
   std::ignore =
     std::async(std::launch::async, std::bind(&ClockController::SetSystemTimex, this, std::placeholders::_1), &m_timex);
@@ -80,7 +80,7 @@ bool ClockController::OperateOnTimex(timex *t_tm) const
   bool success{ false };
   std::size_t attempt{ 0 };
   while (not success) {
-    if (attempt == 100) throw TimexOperationError();
+    if (attempt == 100) { throw TimexOperationError(); }
 
     success = !static_cast<bool>(adjtimex(t_tm));
     attempt++;

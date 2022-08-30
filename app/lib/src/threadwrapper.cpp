@@ -3,7 +3,7 @@
 using namespace TimeBox;
 
 ThreadWrapper::ThreadWrapper(std::string t_name, std::size_t t_startup_delay, std::size_t t_pause_delay)
-  : m_startup_delay(t_startup_delay), m_pause_delay(t_pause_delay), m_name(t_name)
+  : m_name(t_name), m_startup_delay(t_startup_delay), m_pause_delay(t_pause_delay)
 {
   BOOST_LOG_TRIVIAL(debug) << "Creating threads for " << t_name;
   m_is_paused = true;
@@ -19,8 +19,8 @@ ThreadWrapper::~ThreadWrapper()
   BOOST_LOG_TRIVIAL(debug) << "Cancelling threads for " << m_name;
   m_worker_on = false;
   m_conditon_variable.notify_one();
-  if (m_worker.joinable()) m_worker.join();
-  if (m_tester.joinable()) m_tester.join();
+  if (m_worker.joinable()) { m_worker.join(); }
+  if (m_tester.joinable()) { m_tester.join(); }
   m_lock.unlock();
   BOOST_LOG_TRIVIAL(debug) << "Stopped threads for " << m_name;
 }
@@ -32,8 +32,9 @@ void ThreadWrapper::WorkLoop()
     if (not m_is_paused) {
       Work();
       m_worker_tick++;
-    } else
+    } else {
       std::this_thread::sleep_for(std::chrono::milliseconds(m_pause_delay));
+    }
   }
 }
 
