@@ -1,7 +1,8 @@
 #include <benchmark/benchmark.h>
 #include <fmt/core.h>
-#include <iomanip>
 #include <limits>
+
+#include "utilities.hpp"
 
 class LinuxClockResolution : public benchmark::Fixture
 {
@@ -35,19 +36,10 @@ protected:
   double m_best;
   double m_average;
 
-  void SetMask(int t_mask = 0)
-  {
-    int rc{ 0 };
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    CPU_SET(t_mask, &mask);
-    m_number_of_cpus = CPU_COUNT(&mask);
-    assert((rc = sched_setaffinity(0, sizeof(mask), &mask)) == 0);
-  }
-
   void ProbeClock(std::size_t iterations, unsigned mode)
   {
     int err{ clock_getcpuclockid(0, &m_cpu_clock_id) };
+
     for (std::size_t i = 0; i < iterations; i++) {
       err = clock_gettime(mode, &m_timespec_history.at(i));
       if (err != 0) {
@@ -64,31 +56,39 @@ protected:
       if (diff < m_best) { m_best = diff; }
       m_diff_history.at(i) = diff;
     }
-
-    double sum{ 0.0 };
-    for (std::size_t i = 0; i < m_diff_history.size(); i++) { sum += m_diff_history.at(i); }
-    m_average = sum / m_diff_history.size();
   }
 };
 
 BENCHMARK_DEFINE_F(LinuxClockResolution, Clock_RealTime)(benchmark::State &st)
 {
-  for (auto _ : st) { ProbeClock(st.range(0), 0); }
+  for (auto _ : st) {
+    ProbeClock(st.range(0), 0);
+    m_average = ComputeVectorAverage<double>(m_diff_history);
+  }
 }
 
 BENCHMARK_DEFINE_F(LinuxClockResolution, Clock_Monotonic)(benchmark::State &st)
 {
-  for (auto _ : st) { ProbeClock(st.range(0), 1); }
+  for (auto _ : st) {
+    ProbeClock(st.range(0), 1);
+    m_average = ComputeVectorAverage<double>(m_diff_history);
+  }
 }
 
 BENCHMARK_DEFINE_F(LinuxClockResolution, Clock_Process_CpuTime)(benchmark::State &st)
 {
-  for (auto _ : st) { ProbeClock(st.range(0), 2); }
+  for (auto _ : st) {
+    ProbeClock(st.range(0), 2);
+    m_average = ComputeVectorAverage<double>(m_diff_history);
+  }
 }
 
 BENCHMARK_DEFINE_F(LinuxClockResolution, Clock_Thread_CpuTime)(benchmark::State &st)
 {
-  for (auto _ : st) { ProbeClock(st.range(0), 3); }
+  for (auto _ : st) {
+    ProbeClock(st.range(0), 3);
+    m_average = ComputeVectorAverage<double>(m_diff_history);
+  }
 }
 
 BENCHMARK_REGISTER_F(LinuxClockResolution, Clock_RealTime)->Arg(10000)->UseRealTime();

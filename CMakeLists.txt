@@ -184,7 +184,7 @@ endif()
 
 # Add other targets that you want installed here, be default we just package the
 # one executable we know we want to ship
-package_project(TARGETS timebox project_options project_warnings)
+package_project(TARGETS ${PROJECT_NAME} project_options project_warnings)
 
 set(CPACK_PACKAGE_FILE_NAME
     "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
