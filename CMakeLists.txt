@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 set(CMAKE_POLICY_DEFAULT_CMP0135 NEW) # Disable CMP0135 warning
 
 # Not ideal to use this global variable, but necessary to make sure that tooling
@@ -23,9 +23,6 @@ set(ENABLE_DEVELOPER_MODE
 # mode
 set(WARNINGS_AS_ERRORS_DEVELOPER_DEFAULT FALSE)
 
-# uncomment to enable vcpkg: # Setup vcpkg - should be called before defining
-# project() run_vcpkg()
-
 # Add project_options
 # https://github.com/aminya/project_options
 include(FetchContent)
@@ -36,6 +33,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(project_options)
 include(${project_options_SOURCE_DIR}/Index.cmake)
 include(${project_options_SOURCE_DIR}/src/DynamicProjectOptions.cmake)
+
+# Setup vcpkg - should be called before defining project()
+run_vcpkg()
 
 project(
   timebox
@@ -57,15 +57,14 @@ string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
 if(PROJECT_IS_TOP_LEVEL)
   # Consider the CTest module, which creates targets and options! Only needed if
   # you want to enable submissions to a CDash server.
-  include(CTest)
+  # include(CTest)
 endif()
 
 # Add Git SHA
-find_package(Git)
-find_program(GIT_FOUND git)
-if(GIT_FOUND)
+find_package(Git QUIET)
+if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
   message(
-    STATUS "Found Git (${GIT_FOUND}), executable will get SHA and branch used")
+    STATUS "Found Git, executable will get SHA and branch used")
   execute_process(
     COMMAND git -C ${CMAKE_SOURCE_DIR} rev-parse HEAD
     OUTPUT_VARIABLE GIT_SHA
@@ -77,9 +76,9 @@ if(GIT_FOUND)
   string(SUBSTRING "${GIT_SHA}" 0 8 GIT_SHORT_SHA)
   set(GIT_BRANCH ${GIT_BRANCH})
   set(GIT_SHORT_SHA ${GIT_SHORT_SHA})
-  message(STATUS "GIT SHA = ${GIT_SHA}")
-  message(STATUS "GIT SHORT SHA = ${GIT_SHORT_SHA}")
-  message(STATUS "GIT BRANCH = ${GIT_BRANCH}")
+  message(STATUS "GIT SHA: ${GIT_SHA}")
+  message(STATUS "GIT SHORT SHA: ${GIT_SHORT_SHA}")
+  message(STATUS "GIT BRANCH: ${GIT_BRANCH}")
 else()
   message(WARNING "Git not found !")
 endif()
@@ -109,7 +108,6 @@ dynamic_project_options(
   ENABLE_NATIVE_OPTIMIZATION
   ENABLE_SANITIZER_ADDRESS
   ENABLE_SANITIZER_UNDEFINED_BEHAVIOR
-  ENABLE_INCLUDE_WHAT_YOU_USE
   ENABLE_CACHE
   ENABLE_CPPCHECK
   ENABLE_CLANG_TIDY
@@ -145,6 +143,27 @@ set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
 
 add_subdirectory(app)
 add_subdirectory(submodules)
+
+# profile guided optimization
+set(ENABLE_PROFILE_GENERATE OFF CACHE BOOL "Enable profile generation")
+set(ENABLE_PROFILE_USE OFF CACHE BOOL "Enable profile usage")
+
+set(PROFILE_DIR "prof" CACHE STRING "Profile directory" FORCE)
+
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
+    if(ENABLE_PROFILE_GENERATE)
+        add_compile_options(-fprofile-generate=${PROFILE_DIR})
+        add_link_options(-fprofile-generate=${PROFILE_DIR})
+        if(ENABLE_PROFILE_USE)
+            message(WARNING "Both profile generate and profile use enabled")
+        endif()
+    elseif(ENABLE_PROFILE_USE)
+        add_compile_options(-fprofile-use=${PROFILE_DIR})
+        add_link_options(-fprofile-use=${PROFILE_DIR})
+    endif()
+elseif(ENABLE_PROFILE_GENERATE OR ENABLE_PROFILE_USE)
+    message(WARNING "Profile Guided Optimization implemented only for GCC")
+endif()
 
 # If MSVC is being used, and ASAN is enabled, we need to set the debugger environment
 # so that it behaves well with MSVC's debugger, and we can run the target from visual studio

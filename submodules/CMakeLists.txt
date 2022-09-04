@@ -1,5 +1,17 @@
 add_subdirectory(SDL)
 
+target_disable_cpp_check(SDL2)
+target_disable_vs_analysis(SDL2)
+target_disable_clang_tidy(SDL2)
+target_disable_static_analysis(SDL2)
+
+add_subdirectory(fmt)
+
+target_disable_cpp_check(fmt)
+target_disable_vs_analysis(fmt)
+target_disable_clang_tidy(fmt)
+target_disable_static_analysis(fmt)
+
 project(IMGUI)
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
 add_library(IMGUI STATIC)
@@ -33,3 +45,8 @@ target_include_directories( IMGUI
         ${IMGUI_DIR}/backends
         ${SDL2_DIR}/include
 )
+
+target_disable_cpp_check(IMGUI)
+target_disable_vs_analysis(IMGUI)
+target_disable_clang_tidy(IMGUI)
+target_disable_static_analysis(IMGUI)

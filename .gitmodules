@@ -5,3 +5,7 @@
 [submodule "submodules/SDL"]
 	path = submodules/SDL
 	url = https://github.com/libsdl-org/SDL
+
+[submodule "submodules/fmt"]
+	path = submodules/fmt
+	url = https://github.com/fmtlib/fmt.git

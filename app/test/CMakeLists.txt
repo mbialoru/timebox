@@ -14,15 +14,17 @@ target_compile_options(${PROJECT_NAME}_test PRIVATE "--coverage")
 target_link_options(${PROJECT_NAME}_test PRIVATE "--coverage")
 
 target_link_libraries(
+  ${PROJECT_NAME}_test PRIVATE project_options project_warnings
+                               lib${PROJECT_NAME})
+
+target_link_system_libraries(
   ${PROJECT_NAME}_test
-  PRIVATE project_options
-          project_warnings
-          lib${PROJECT_NAME}
-          LibSerial::serial
-          gtest
-          gtest_main
-          gmock
-          gmock_main
-          Boost::log)
+  PRIVATE
+  LibSerial::serial
+  gtest
+  gtest_main
+  gmock
+  gmock_main
+  Boost::log)
 
 gtest_discover_tests(${PROJECT_NAME}_test)
