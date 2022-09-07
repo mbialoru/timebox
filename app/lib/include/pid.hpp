@@ -8,10 +8,10 @@
 
 namespace TimeBox {
 
-template<class T> class PID
+template<typename T> class PID
 {
 public:
-  PID(double, double, double, T);
+  PID(double, double, double, T) noexcept(std::is_arithmetic<T>::value);
   ~PID() = default;
 
   std::tuple<double, double, double> GetTerms() const;
@@ -45,8 +45,9 @@ private:
   double m_pterm{ 0 }, m_iterm{ 0 }, m_dterm{ 0 };
 };
 
-template<class T>
-PID<T>::PID(const double t_p, const double t_i, const double t_d, const T t_target)
+template<typename T>
+PID<T>::PID(const double t_p, const double t_i, const double t_d, const T t_target) noexcept(
+  std::is_arithmetic<T>::value)
   : m_target(t_target), m_kp(t_p), m_ki(t_i), m_kd(t_d)
 {
   m_error_guard = 20;
@@ -58,29 +59,32 @@ PID<T>::PID(const double t_p, const double t_i, const double t_d, const T t_targ
   m_limit_difference = static_cast<T>(0);
 }
 
-template<class T> std::tuple<double, double, double> PID<T>::GetTerms() const
+template<typename T> std::tuple<double, double, double> PID<T>::GetTerms() const
 {
   return std::make_tuple(m_kp, m_ki, m_kd);
 }
 
-template<class T> void PID<T>::SetTerms(const double t_p, const double t_i, const double t_d)
+template<typename T> void PID<T>::SetTerms(const double t_p, const double t_i, const double t_d)
 {
   m_kp = t_p;
   m_ki = t_i;
   m_kd = t_d;
 }
 
-template<class T> T PID<T>::GetTarget() const { return m_target; }
+template<typename T> T PID<T>::GetTarget() const { return m_target; }
 
-template<class T> void PID<T>::SetTarget(const T t_target) { m_target = t_target; }
+template<typename T> void PID<T>::SetTarget(const T t_target) { m_target = t_target; }
 
-template<class T> double PID<T>::GetErrorGuard() const { return m_error_guard; }
+template<typename T> double PID<T>::GetErrorGuard() const { return m_error_guard; }
 
-template<class T> void PID<T>::SetErrorGuard(const double t_error_guard) { m_error_guard = t_error_guard; }
+template<typename T> void PID<T>::SetErrorGuard(const double t_error_guard) { m_error_guard = t_error_guard; }
 
-template<class T> std::pair<T, T> PID<T>::GetLimits() const { return std::pair<T, T>{ m_upper_limit, m_lower_limit }; }
+template<typename T> std::pair<T, T> PID<T>::GetLimits() const
+{
+  return std::pair<T, T>{ m_upper_limit, m_lower_limit };
+}
 
-template<class T> void PID<T>::SetLimits(const T t_lower_limit, const T t_upper_limit)
+template<typename T> void PID<T>::SetLimits(const T t_lower_limit, const T t_upper_limit)
 {
   m_lower_limit = t_lower_limit;
   m_upper_limit = t_upper_limit;
@@ -88,9 +92,9 @@ template<class T> void PID<T>::SetLimits(const T t_lower_limit, const T t_upper_
   m_middle_limit = m_lower_limit + m_limit_difference;
 }
 
-template<class T> T PID<T>::GetOutputRaw() const { return m_output; }
+template<typename T> T PID<T>::GetOutputRaw() const { return m_output; }
 
-template<class T> T PID<T>::GetOutputLimited() const
+template<typename T> T PID<T>::GetOutputLimited() const
 {
   if (m_upper_limit == static_cast<T>(0) && m_lower_limit == static_cast<T>(0)) {
     BOOST_LOG_TRIVIAL(warning) << "Using limited PID output when limits are not set !";
@@ -106,7 +110,7 @@ template<class T> T PID<T>::GetOutputLimited() const
   }
 }
 
-template<class T> void PID<T>::UpdateRaw(const T t_feedback, const double t_time_Delta)
+template<typename T> void PID<T>::UpdateRaw(const T t_feedback, const double t_time_Delta)
 {
   T error = m_target - t_feedback;
   T error_delta = error - m_last_error;
@@ -124,7 +128,7 @@ template<class T> void PID<T>::UpdateRaw(const T t_feedback, const double t_time
   m_output = m_pterm + (m_ki * m_iterm) + (m_kd * m_dterm);
 }
 
-template<class T> void PID<T>::UpdateLimited(const T t_feedback, const double t_time_Delta)
+template<typename T> void PID<T>::UpdateLimited(const T t_feedback, const double t_time_Delta)
 {
   if (t_feedback < (-m_limit_difference)) {
     UpdateRaw(-m_limit_difference, t_time_Delta);

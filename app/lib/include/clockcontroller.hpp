@@ -13,7 +13,7 @@ namespace TimeBox {
 class ClockController
 {
 public:
-  ClockController(std::size_t);
+  ClockController(std::size_t) noexcept;
   virtual ~ClockController() = default;
   virtual void AdjustClock(TimeboxReadout) = 0;
   virtual std::chrono::system_clock::duration CalculateClockDifference() = 0;

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <iomanip>
+#include <cassert>
 
 unsigned SetCpuMask(int t_mask = 0)
 {
@@ -17,7 +18,7 @@ unsigned SetCpuMask(int t_mask = 0)
   return number_of_cpus;
 }
 
-template<class T> T ComputeVectorAverage(std::vector<T> data)
+template<typename T> T ComputeVectorAverage(std::vector<T> data)
 {
   T sum{ 0.0 };
   for (std::size_t i = 0; i < data.size(); ++i) { sum += data.at(i); }
