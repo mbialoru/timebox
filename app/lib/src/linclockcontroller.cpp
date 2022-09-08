@@ -105,6 +105,8 @@ void LinClockController::AdjustClock(const TimeboxReadout t_readout)
   m_last_call = now;
 }
 
+std::chrono::system_clock::duration LinClockController::CalculateClockDifference() { throw NotImplementedException(); }
+
 timex LinClockController::GetSystemTimex() const
 {
   timex ret{};

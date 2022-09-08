@@ -19,8 +19,8 @@ class LinClockController : public ClockController
 public:
   LinClockController(char, std::shared_ptr<PID<double>>, double, std::size_t = 500);
   ~LinClockController();
-  void AdjustClock(TimeboxReadout);
-  std::chrono::system_clock::duration CalculateClockDifference();
+  void AdjustClock(TimeboxReadout) override;
+  std::chrono::system_clock::duration CalculateClockDifference() override;
 
 private:
   timex GetTimex() const;

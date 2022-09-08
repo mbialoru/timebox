@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <iomanip>
 #include <cassert>
+#include <iomanip>
 
 unsigned SetCpuMask(int t_mask = 0)
 {
