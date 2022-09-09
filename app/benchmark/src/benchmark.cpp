@@ -1,5 +1,4 @@
 #include <benchmark/benchmark.h>
-#include <fmt/core.h>
 #include <limits>
 
 #include "utilities.hpp"
