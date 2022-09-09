@@ -25,6 +25,7 @@ target_link_system_libraries(
   gtest_main
   gmock
   gmock_main
-  Boost::log)
+  Boost::log
+  Boost::log_setup)
 
 gtest_discover_tests(${PROJECT_NAME}_test)

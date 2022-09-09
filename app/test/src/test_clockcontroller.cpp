@@ -3,12 +3,12 @@
 #include "defines.hpp"
 #include "utilities.hpp"
 
-#ifdef __unix__
+#if defined(__unix__)
 #include "linclockcontroller.hpp"
 #include "pid.hpp"
 #include <sys/timex.h>
 
-#elif defined _WIN64
+#elif defined(_WIN64) && !defined(__CYGWIN__)
 #include "winclockconroller.hpp"
 #endif
 
@@ -26,7 +26,7 @@ public:
   void TearDown() override{};
 };
 
-#ifdef __unix__
+#if defined(__unix__)
 
 TEST_F(Test_ClockController, linux_adjust_clock)
 {
@@ -61,7 +61,7 @@ TEST_F(Test_ClockController, linux_adjust_clock)
   EXPECT_EQ(pre_tick, post_tick) << "Failed to reset tick to original value !";
 }
 
-#elif defined _WIN64
+#elif defined(_WIN64) && !defined(__CYGWIN__)
 
 TEST_F(Test_ClockController, windows_adjust_clock) {}
 

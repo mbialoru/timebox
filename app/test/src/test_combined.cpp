@@ -3,18 +3,18 @@
 #include "defines.hpp"
 
 #if USING_REAL_HARDWARE
-#ifdef __unix__
+#if defined(__unix__)
 #include "serialreader.hpp"
 
-#elif defined _WIN64
+#elif defined(_WIN64) && !defined(__CYGWIN__)
 #endif
 
 #else
-#ifdef __unix__
+#if defined(__unix__)
 #include "linclockcontroller.hpp"
 #include "pid.hpp"
 
-#elif defined _WIN64
+#elif defined(_WIN64) && !defined(__CYGWIN__)
 #endif
 
 #include "fakes.hpp"
@@ -29,7 +29,7 @@ public:
   void TearDown() override{};
 };
 
-#ifdef __unix__
+#if defined(__unix__)
 
 TEST_F(Test_Combined, linux_combined_test)
 {
@@ -45,7 +45,7 @@ TEST_F(Test_Combined, linux_combined_test)
   std::this_thread::sleep_for(std::chrono::seconds(10));
 }
 
-#elif defined _WIN64
+#elif defined(_WIN64) && !defined(__CYGWIN__)
 
 TEST_F(Test_Combined, windows_combined_test) {}
 

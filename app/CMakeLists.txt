@@ -17,6 +17,7 @@ target_link_system_libraries(
   PRIVATE
   SDL2
   IMGUI
+  fmt::fmt
   Threads::Threads
   LibSerial::serial
   Boost::log
