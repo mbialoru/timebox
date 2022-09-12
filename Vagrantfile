@@ -11,10 +11,10 @@
   end
 end
 
-Vagrant.configure("2") do |config|
-  config.vm.box = "generic/debian11"
-  config.vm.synced_folder ".", "/vagrant", mount_options: ["vers=3,tcp"]
-  config.vm.provision "shell", inline: <<-SHELL
+Vagrant.configure("2") do |lincfg|
+  lincfg.vm.box = "generic/debian11"
+  lincfg.vm.synced_folder ".", "/vagrant", mount_options: ["vers=3,tcp"]
+  lincfg.vm.provision "shell", inline: <<-SHELL
 
     # prevent interactive prompts (i.e. to restart services)
     export DEBIAN_FRONTEND=noninteractive
@@ -91,5 +91,9 @@ Vagrant.configure("2") do |config|
   SHELL
 
   # reboot after provisioning
-  config.vm.provision :reload
+  lincfg.vm.provision :reload
+end
+
+Vagrant.configure("2") do |wincfg|
+
 end
