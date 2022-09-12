@@ -9,7 +9,7 @@
 
 namespace TimeBox {
 
-class WinClockConroller : public ClockController
+class WinClockConroller final : public ClockController
 {
 public:
   WinClockConroller(std::size_t);

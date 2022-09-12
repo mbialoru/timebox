@@ -10,7 +10,7 @@
 
 namespace TimeBox {
 
-class LinSerialReader : public SerialReader
+class LinSerialReader final : public SerialReader
 {
 public:
   LinSerialReader(const char *, std::size_t, std::function<void(TimeboxReadout)>);

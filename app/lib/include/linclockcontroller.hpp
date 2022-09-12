@@ -14,13 +14,12 @@
 
 namespace TimeBox {
 
-class LinClockController : public ClockController
+class LinClockController final : public ClockController
 {
 public:
   LinClockController(char, std::shared_ptr<PID<double>>, double, std::size_t = 500);
   ~LinClockController();
   void AdjustClock(TimeboxReadout) override;
-  std::chrono::system_clock::duration CalculateClockDifference() override;
 
 private:
   timex GetTimex() const;

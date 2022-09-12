@@ -16,7 +16,6 @@ public:
   ClockController(std::size_t) noexcept;
   virtual ~ClockController() = default;
   virtual void AdjustClock(TimeboxReadout) = 0;
-  virtual std::chrono::system_clock::duration CalculateClockDifference() = 0;
 
 protected:
   std::size_t m_minimal_delay;
