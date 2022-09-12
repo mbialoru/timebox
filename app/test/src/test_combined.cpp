@@ -33,7 +33,7 @@ TEST_F(Test_Combined, fake_combined_test)
 {
   FakeClockController cc;
   FakeSerialReader sr{ "/dev/ttyACM0", 9600, std::bind(&FakeClockController::AdjustClock, &cc, std::placeholders::_1) };
-  std::this_thread::sleep_for(std::chrono::seconds(10));
+  std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 
 #if defined(__unix__)
