@@ -1,0 +1,89 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Check for required plugins
+[
+  { :name => "vagrant-reload", :version => ">= 0.0.1" },
+  { :name => "vagrant-libvirt", :version => ">= 0.4.1" },
+  { :name => "vagrant-windows-sysprep", :version => ">= 0.0.10" },
+].each do |plugin|
+  if not Vagrant.has_plugin?(plugin[:name], plugin[:version])
+    raise "#{plugin[:name]} #{plugin[:version]} is required. Please run `vagrant plugin install #{plugin[:name]}`"
+  end
+end
+
+Vagrant.configure("2") do |config|
+
+  VM_MEMORY_MB = 4*1024
+  VM_CPUS = 2
+
+  config.vm.define "dev_linux" do |dev_linux|
+    dev_linux.vm.box = "generic/debian11"
+
+    dev_linux.vm.provider 'libvirt' do |lv, config|
+      lv.default_prefix = "#{File.basename(File.dirname(File.dirname(__FILE__)))}_dev_linux_"
+      lv.memory = VM_MEMORY_MB
+      lv.cpus = VM_CPUS
+      lv.cpu_mode = 'host-passthrough'
+      lv.keymap = 'pt'
+      lv.nested = true
+      lv.disk_bus = 'scsi'
+      lv.disk_device = 'sda'
+      lv.disk_driver :discard => 'unmap', :cache => 'unsafe'
+    end
+
+    dev_linux.vm.synced_folder "..", "/vagrant", mount_options: ["vers=3,tcp"]
+    dev_linux.vm.provision "shell", path: "linux_provision.sh"
+
+    # reboot after provisioning
+    dev_linux.vm.provision :reload
+  end
+
+  config.vm.define "dev_windows" do |dev_windows|
+    # this is needed to modify the libvirt domain scsi controller model to
+    # virtio-scsi for windows.
+    ENV['VAGRANT_EXPERIMENTAL'] = 'typed_triggers'
+
+    # Here name of your built vagrant box
+    dev_windows.vm.box = 'windows-10-20h2-amd64'
+
+    dev_windows.vm.provider 'libvirt' do |lv, config|
+      lv.default_prefix = "#{File.basename(File.dirname(File.dirname(__FILE__)))}_dev_windows_"
+      lv.memory = VM_MEMORY_MB
+      lv.cpus = VM_CPUS
+      lv.cpu_mode = 'host-passthrough'
+      lv.keymap = 'pt'
+      lv.nested = true
+      lv.disk_bus = 'scsi'
+      lv.disk_device = 'sda'
+      lv.disk_driver :discard => 'unmap', :cache => 'unsafe'
+    end
+
+    # Vagrant does __not__ support SMB folder sync when linux is host
+    # https://www.vagrantup.com/docs/synced-folders/smb
+    # if necessary, consider using "vagrant rsync-auto" for two-way
+    dev_windows.vm.synced_folder '..', '/vagrant', type: "rsync",
+      rsync__exclude: [".git/", ".devcontainer/"]
+
+    dev_windows.trigger.before :'VagrantPlugins::ProviderLibvirt::Action::StartDomain', type: :action do |trigger|
+      trigger.ruby do |env, machine|
+        # modify the scsi controller model to virtio-scsi.
+        # see https://github.com/vagrant-libvirt/vagrant-libvirt/pull/692
+        # see https://github.com/vagrant-libvirt/vagrant-libvirt/issues/999
+        require 'open3'
+        stdout, stderr, status = Open3.capture3(
+          'virt-xml', machine.id,
+          '--edit', 'type=scsi',
+          '--controller', 'model=virtio-scsi')
+        if status.exitstatus != 0
+          raise "failed to run virt-xml to modify the scsi controller model. status=#{status.exitstatus} stdout=#{stdout} stderr=#{stderr}"
+        end
+      end
+    end
+
+    dev_linux.vm.provision "shell", path: "windows_provision.ps1"
+
+    # reboot after provisioning
+    dev_linux.vm.provision :reload
+  end
+end
