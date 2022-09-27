@@ -16,16 +16,27 @@ target_link_options(${PROJECT_NAME}_test PRIVATE "--coverage")
 target_link_libraries(
   ${PROJECT_NAME}_test PRIVATE project_options project_warnings
                                lib${PROJECT_NAME})
-
-target_link_system_libraries(
-  ${PROJECT_NAME}_test
-  PRIVATE
-  LibSerial::serial
-  gtest
-  gtest_main
-  gmock
-  gmock_main
-  Boost::log
-  Boost::log_setup)
+if(UNIX)
+  target_link_system_libraries(
+    ${PROJECT_NAME}_test
+    PRIVATE
+    LibSerial::serial
+    gtest
+    gtest_main
+    gmock
+    gmock_main
+    Boost::log
+    Boost::log_setup)
+elseif(WIN32)
+  target_link_system_libraries(
+    ${PROJECT_NAME}_test
+    PRIVATE
+    gtest
+    gtest_main
+    gmock
+    gmock_main
+    Boost::log
+    Boost::log_setup)
+endif()
 
 gtest_discover_tests(${PROJECT_NAME}_test)

@@ -12,13 +12,23 @@ target_include_directories(lib${PROJECT_NAME}
 
 target_link_libraries(lib${PROJECT_NAME} PRIVATE project_options
                                                  project_warnings)
-
-target_link_system_libraries(
-  lib${PROJECT_NAME}
-  PRIVATE
-  fmt::fmt
-  Threads::Threads
-  Boost::log
-  Boost::log_setup
-  Boost::date_time
-  LibSerial::serial)
+if(UNIX)
+  target_link_system_libraries(
+    lib${PROJECT_NAME}
+    PRIVATE
+    fmt::fmt
+    Threads::Threads
+    Boost::log
+    Boost::log_setup
+    Boost::date_time
+    LibSerial::serial)
+elseif(WIN32)
+  target_link_system_libraries(
+    lib${PROJECT_NAME}
+    PRIVATE
+    fmt::fmt
+    Threads::Threads
+    Boost::log
+    Boost::log_setup
+    Boost::date_time)
+endif()

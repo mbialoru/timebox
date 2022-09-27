@@ -16,8 +16,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # (sanitizers, static analysis) is enabled and all warnings are treated as
 # errors if you want to switch this behavior, change TRUE to FALSE
 set(ENABLE_DEVELOPER_MODE
-    TRUE
-    CACHE BOOL "Enable 'developer mode'")
+  TRUE
+  CACHE BOOL "Enable 'developer mode'")
 
 # Change this to FALSE if you want to disable warnings_as_errors in developer
 # mode
@@ -62,23 +62,29 @@ endif()
 
 # Add Git SHA
 find_package(Git QUIET)
-if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-  message(
-    STATUS "Found Git, executable will get SHA and branch used")
-  execute_process(
-    COMMAND git -C ${CMAKE_SOURCE_DIR} rev-parse HEAD
-    OUTPUT_VARIABLE GIT_SHA
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process(
-    COMMAND git -C ${CMAKE_SOURCE_DIR} branch --show-current
-    OUTPUT_VARIABLE GIT_BRANCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  string(SUBSTRING "${GIT_SHA}" 0 8 GIT_SHORT_SHA)
-  set(GIT_BRANCH ${GIT_BRANCH})
-  set(GIT_SHORT_SHA ${GIT_SHORT_SHA})
-  message(STATUS "GIT SHA: ${GIT_SHA}")
-  message(STATUS "GIT SHORT SHA: ${GIT_SHORT_SHA}")
-  message(STATUS "GIT BRANCH: ${GIT_BRANCH}")
+if(GIT_FOUND)
+  message(STATUS "Found git")
+  if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
+    message(
+    STATUS "Executable will get SHA and branch used")
+    execute_process(
+      COMMAND git -C ${CMAKE_SOURCE_DIR} rev-parse HEAD
+      OUTPUT_VARIABLE GIT_SHA
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(
+      COMMAND git -C ${CMAKE_SOURCE_DIR} branch --show-current
+      OUTPUT_VARIABLE GIT_BRANCH
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(SUBSTRING "${GIT_SHA}" 0 8 GIT_SHORT_SHA)
+    set(GIT_BRANCH ${GIT_BRANCH})
+    set(GIT_SHORT_SHA ${GIT_SHORT_SHA})
+    message(STATUS "GIT SHA: ${GIT_SHA}")
+    message(STATUS "GIT SHORT SHA: ${GIT_SHORT_SHA}")
+    message(STATUS "GIT BRANCH: ${GIT_BRANCH}")
+  else()
+    message(WARNING ".git directory not found !")
+    message(WARNING "Have you cloned/synced everything ?")
+  endif()
 else()
   message(WARNING "Git not found !")
 endif()
@@ -92,13 +98,13 @@ if(BUILDING_MULTI_CONFIG)
     # command line for VS
     message(TRACE "Setting up multi-config build types")
     set(CMAKE_CONFIGURATION_TYPES
-        Debug Release RelWithDebInfo MinSizeRel
-        CACHE STRING "Enabled build types" FORCE)
+      Debug Release RelWithDebInfo MinSizeRel
+      CACHE STRING "Enabled build types" FORCE)
   else()
     message(TRACE "User chose a specific build type, so we are using that")
     set(CMAKE_CONFIGURATION_TYPES
-        ${CMAKE_BUILD_TYPE}
-        CACHE STRING "Enabled build types" FORCE)
+      ${CMAKE_BUILD_TYPE}
+      CACHE STRING "Enabled build types" FORCE)
   endif()
 endif()
 
@@ -130,19 +136,20 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules")
 # required packages
 find_package(Threads REQUIRED)
 find_package(Boost REQUIRED COMPONENTS log log_setup date_time)
-find_package(GTest REQUIRED)
-find_package(benchmark REQUIRED)
-find_package(LibSerial REQUIRED)
-find_package(PkgConfig REQUIRED)
 
-# Boost vars
+if (UNIX)
+  find_package(LibSerial REQUIRED) # this can be moved into submodules
+  find_package(PkgConfig REQUIRED)
+endif()
+
+# boost vars
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
 
-add_subdirectory(app)
 add_subdirectory(submodules)
+add_subdirectory(app)
 
 # profile guided optimization
 set(ENABLE_PROFILE_GENERATE OFF CACHE BOOL "Enable profile generation")
@@ -151,22 +158,22 @@ set(ENABLE_PROFILE_USE OFF CACHE BOOL "Enable profile usage")
 set(PROFILE_DIR "prof" CACHE STRING "Profile directory" FORCE)
 
 if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
-    if(ENABLE_PROFILE_GENERATE)
-        add_compile_options(-fprofile-generate=${PROFILE_DIR})
-        add_link_options(-fprofile-generate=${PROFILE_DIR})
-        if(ENABLE_PROFILE_USE)
-            message(WARNING "Both profile generate and profile use enabled")
-        endif()
-    elseif(ENABLE_PROFILE_USE)
-        add_compile_options(-fprofile-use=${PROFILE_DIR})
-        add_link_options(-fprofile-use=${PROFILE_DIR})
+  if(ENABLE_PROFILE_GENERATE)
+    add_compile_options(-fprofile-generate=${PROFILE_DIR})
+    add_link_options(-fprofile-generate=${PROFILE_DIR})
+    if(ENABLE_PROFILE_USE)
+      message(WARNING "Both profile generate and profile use enabled")
     endif()
+  elseif(ENABLE_PROFILE_USE)
+    add_compile_options(-fprofile-use=${PROFILE_DIR})
+    add_link_options(-fprofile-use=${PROFILE_DIR})
+  endif()
 elseif(ENABLE_PROFILE_GENERATE OR ENABLE_PROFILE_USE)
-    message(WARNING "Profile Guided Optimization implemented only for GCC")
+  message(WARNING "Profile Guided Optimization implemented only for GCC")
 endif()
 
-# If MSVC is being used, and ASAN is enabled, we need to set the debugger environment
-# so that it behaves well with MSVC's debugger, and we can run the target from visual studio
+# when MSVC is being used, and ASAN is enabled, we need to set the debugger env
+# so that it behaves well with MSVC's debugger, and we can run the target in VS
 if(MSVC)
   get_all_installable_targets(all_targets)
   message("all_targets=${all_targets}")
@@ -182,12 +189,12 @@ elseif(NOT PROJECT_IS_TOP_LEVEL)
   return()
 endif()
 
-# Add other targets that you want installed here, be default we just package the
+# add other targets that you want installed here, be default we just package the
 # one executable we know we want to ship
 package_project(TARGETS ${PROJECT_NAME} project_options project_warnings)
 
 set(CPACK_PACKAGE_FILE_NAME
-    "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
+  "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
 )
 
 include(CPack)

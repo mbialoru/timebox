@@ -12,3 +12,9 @@
 [submodule "submodules/windows-vagrant"]
 	path = submodules/windows-vagrant
 	url = https://github.com/rgl/windows-vagrant
+[submodule "submodules/benchmark"]
+	path = submodules/benchmark
+	url = https://github.com/google/benchmark.git
+[submodule "submodules/googletest"]
+	path = submodules/googletest
+	url = https://github.com/google/googletest.git
