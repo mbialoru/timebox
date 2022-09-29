@@ -46,9 +46,9 @@ bool TimeBox::CheckNTPService()
   }
 }
 
-std::size_t TimeBox::ConvertBaudRate(const int t_baud)
+std::size_t TimeBox::ConvertBaudRate(const std::size_t t_baud)
 {
-  auto search = s_baud_conversion_map.find(t_baud);
+  auto search = s_baud_conversion_map.find(static_cast<int>(t_baud));
   if (search != s_baud_conversion_map.end()) {
     return static_cast<std::size_t>(search->second);
   } else {
