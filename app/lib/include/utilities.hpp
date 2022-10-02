@@ -4,7 +4,6 @@
 #pragma once
 
 #include <boost/algorithm/string.hpp>
-#include <boost/asio.hpp>
 #include <boost/log/trivial.hpp>
 #include <chrono>
 #include <filesystem>
@@ -59,6 +58,7 @@ static std::map<int, int> s_baud_conversion_map{ { 110, CBR_110 },
 bool CheckSudo();
 bool CheckIfUsingDocker();
 #endif
+
 bool CheckAdminPrivileges();
 bool CheckNTPService();
 std::vector<std::string> GetSerialDevicesList();
