@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <array>
 #include <boost/log/trivial.hpp>
 #include <functional>
 

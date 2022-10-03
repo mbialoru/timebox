@@ -3,21 +3,13 @@
 
 using namespace TimeBox;
 
+#if defined(__unix__)
 bool TimeBox::CheckSudo()
 {
   if (getuid() == geteuid()) {
     return false;
   } else {
     return true;
-  }
-}
-
-bool TimeBox::CheckAdminPrivileges()
-{
-  if (getuid() == 0 || geteuid() == 0) {
-    return true;
-  } else {
-    return false;
   }
 }
 
@@ -29,14 +21,44 @@ bool TimeBox::CheckIfUsingDocker()
     return false;
   }
 }
+#endif
+
+bool TimeBox::CheckAdminPrivileges()
+{
+#if defined(__unix__)
+  if (getuid() == 0 || geteuid() == 0) {
+    return true;
+  } else {
+    return false;
+  }
+#elif defined(_WIN64) && !defined(__CYGWIN__)
+  PSID administrator_group{ NULL };
+  SID_IDENTIFIER_AUTHORITY nt_authority{ SECURITY_NT_AUTHORITY };
+  BOOL result{ AllocateAndInitializeSid(
+    &nt_authority, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &administrator_group) };
+  BOOL is_user_admin{ false };
+  if (result) {
+    CheckTokenMembership(NULL, administrator_group, &is_user_admin);
+    FreeSid(administrator_group);
+    if (is_user_admin) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  BOOST_LOG_TRIVIAL(error) << "Unable to determine if user is an administrator";
+  return false;
+#endif
+}
 
 bool TimeBox::CheckNTPService()
 {
+#if defined(__unix__)
   // For now it only detects systemd-timesyncd
   char line[100];
-  FILE *f = popen("pidof systemd-timesyncd", "r");
+  FILE *f{ popen("pidof systemd-timesyncd", "r") };
   fgets(line, 100, f);
-  auto pid = static_cast<int>(strtol(line, NULL, 10));
+  auto pid{ static_cast<int>(strtol(line, NULL, 10)) };
   pclose(f);
 
   if (pid > 0) {
@@ -44,6 +66,25 @@ bool TimeBox::CheckNTPService()
   } else {
     return false;
   }
+#elif defined(_WIN64) && !defined(__CYGWIN__)
+  // NOTE: AFAIK W32Time is the name of service we are looking for
+  BOOL ntp_running{ false };
+  SC_HANDLE manager_handle{ OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS) };
+  if (manager_handle == NULL) { BOOST_LOG_TRIVIAL(error) << "OpenSCManager failed"; }
+
+  SC_HANDLE service_handle{ OpenService(manager_handle, "W32Time", SC_MANAGER_ALL_ACCESS) };
+  if (service_handle == NULL) { BOOST_LOG_TRIVIAL(error) << "OpenService failed"; }
+
+  SERVICE_STATUS_PROCESS status;
+  DWORD bytes_needed{ 0 };
+  BOOL result{ QueryServiceStatusEx(service_handle, SC_STATUS_PROCESS_INFO, (BYTE *)&status, sizeof(status), &bytes_needed) };
+  if (result == 0) { BOOST_LOG_TRIVIAL(error) << "QueryServiceStatusEx failed"; }
+
+  if (status.dwCurrentState == SERVICE_RUNNING) { ntp_running = true; }
+  CloseServiceHandle(service_handle);
+  CloseServiceHandle(manager_handle);
+  return ntp_running;
+#endif
 }
 
 std::size_t TimeBox::ConvertBaudRate(const std::size_t t_baud)
@@ -85,6 +126,7 @@ std::string TimeBox::ConvertTimepointToString(const std::chrono::system_clock::t
 
 std::vector<std::string> TimeBox::GetSerialDevicesList()
 {
+#if defined(__unix__)
   std::vector<std::string> port_names;
   const std::filesystem::path dev_directory{ "/dev/serial/by-id" };
   const std::filesystem::path current_directory{ std::filesystem::current_path() };
@@ -110,4 +152,8 @@ std::vector<std::string> TimeBox::GetSerialDevicesList()
   std::filesystem::current_path(current_directory);
 
   return port_names;
+#elif defined(_WIN64) && !defined(__CYGWIN__)
+// TODO: Available Serial (COM) ports detection for Windows
+  throw NotImplementedException();
+#endif
 }

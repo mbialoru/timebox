@@ -19,7 +19,9 @@ class Test_ClockController : public ::testing::Test
 public:
   void SetUp() override
   {
+    #if defined(__unix__)
     if (CheckIfUsingDocker()) { GTEST_SKIP() << "Cannot run from Docker container !"; }
+    #endif
     if (not CheckAdminPrivileges()) { GTEST_SKIP() << "Cannot run without admin privileges !"; }
   };
 

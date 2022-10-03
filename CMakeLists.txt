@@ -129,9 +129,21 @@ dynamic_project_options(
   --inconclusive)
 
 target_compile_features(project_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+add_compile_options(/fsanitize=address)
 
 # add file to find libserial with cmake
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules")
+
+# boost vars
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+if (UNIX)
+  set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
+  set(Boost_USE_STATIC_LIBS OFF)
+elseif(WIN32)
+  set(BOOST_ALL_DYN_LINK OFF)
+  set(Boost_USE_STATIC_LIBS ON)
+endif()
 
 # required packages
 find_package(Threads REQUIRED)
@@ -141,12 +153,6 @@ if (UNIX)
   find_package(LibSerial REQUIRED) # this can be moved into submodules
   find_package(PkgConfig REQUIRED)
 endif()
-
-# boost vars
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
 
 add_subdirectory(submodules)
 add_subdirectory(app)

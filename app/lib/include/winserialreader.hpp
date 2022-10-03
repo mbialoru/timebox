@@ -13,7 +13,7 @@ namespace TimeBox {
 class WinSerialReader final : public SerialReader
 {
 public:
-  WinSerialReader();
+  WinSerialReader(const char *, std::size_t, std::function<void(TimeboxReadout)>);
   ~WinSerialReader() = default;
 
 private:
