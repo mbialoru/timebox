@@ -3,12 +3,11 @@ file(GLOB_RECURSE HDRS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 
 # Exclude platform specific files from build
 if(UNIX)
-list(FILTER HDRS EXCLUDE REGEX "win.*\\.hpp$")
-list(FILTER SRCS EXCLUDE REGEX "win.*\\.cpp$")
+  list(FILTER HDRS EXCLUDE REGEX "win.*\\.hpp$")
+  list(FILTER SRCS EXCLUDE REGEX "win.*\\.cpp$")
 elseif(WIN32)
-list(FILTER HDRS EXCLUDE REGEX "lin.*\\.hpp$")
-list(FILTER SRCS EXCLUDE REGEX "lin.*\\.cpp$")
-message("${HDRS}")
+  list(FILTER HDRS EXCLUDE REGEX "lin.*\\.hpp$")
+  list(FILTER SRCS EXCLUDE REGEX "lin.*\\.cpp$")
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in

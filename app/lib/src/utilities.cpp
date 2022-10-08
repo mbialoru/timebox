@@ -72,12 +72,13 @@ bool TimeBox::CheckNTPService()
   SC_HANDLE manager_handle{ OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS) };
   if (manager_handle == NULL) { BOOST_LOG_TRIVIAL(error) << "OpenSCManager failed"; }
 
-  SC_HANDLE service_handle{ OpenService(manager_handle, "W32Time", SC_MANAGER_ALL_ACCESS) };
+  SC_HANDLE service_handle{ OpenService(manager_handle, L"W32Time", SC_MANAGER_ALL_ACCESS) };
   if (service_handle == NULL) { BOOST_LOG_TRIVIAL(error) << "OpenService failed"; }
 
   SERVICE_STATUS_PROCESS status;
   DWORD bytes_needed{ 0 };
-  BOOL result{ QueryServiceStatusEx(service_handle, SC_STATUS_PROCESS_INFO, (BYTE *)&status, sizeof(status), &bytes_needed) };
+  BOOL result{ QueryServiceStatusEx(
+    service_handle, SC_STATUS_PROCESS_INFO, (BYTE *)&status, sizeof(status), &bytes_needed) };
   if (result == 0) { BOOST_LOG_TRIVIAL(error) << "QueryServiceStatusEx failed"; }
 
   if (status.dwCurrentState == SERVICE_RUNNING) { ntp_running = true; }
@@ -153,7 +154,11 @@ std::vector<std::string> TimeBox::GetSerialDevicesList()
 
   return port_names;
 #elif defined(_WIN64) && !defined(__CYGWIN__)
-// TODO: Available Serial (COM) ports detection for Windows
+  // TODO: Available Serial (COM) ports detection for Windows
   throw NotImplementedException();
 #endif
 }
+
+#if defined(_WIN64) && !defined(__CYGWIN__)
+wchar_t *ConvertCharArrayToLPCWSTR(const char *t_char_array) {}
+#endif

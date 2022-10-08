@@ -21,20 +21,20 @@ if(UNIX)
     ${PROJECT_NAME}_test
     PRIVATE
     LibSerial::serial
-    gtest
-    gtest_main
-    gmock
-    gmock_main
+    GTest::gtest
+    GTest::gtest_main
+    GTest::gmock
+    GTest::gmock_main
     Boost::log
     Boost::log_setup)
 elseif(WIN32)
   target_link_system_libraries(
     ${PROJECT_NAME}_test
     PRIVATE
-    gtest
-    gtest_main
-    gmock
-    gmock_main
+    GTest::gtest
+    GTest::gtest_main
+    GTest::gmock
+    GTest::gmock_main
     Boost::log
     Boost::log_setup)
 endif()

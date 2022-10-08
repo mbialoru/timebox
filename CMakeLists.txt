@@ -108,37 +108,58 @@ if(BUILDING_MULTI_CONFIG)
   endif()
 endif()
 
-dynamic_project_options(
-  ENABLE_INTERPROCEDURAL_OPTIMIZATION
-  ENABLE_BUILD_WITH_TIME_TRACE
-  ENABLE_NATIVE_OPTIMIZATION
-  ENABLE_SANITIZER_ADDRESS
-  ENABLE_SANITIZER_UNDEFINED_BEHAVIOR
-  ENABLE_CACHE
-  ENABLE_CPPCHECK
-  ENABLE_CLANG_TIDY
-  ENABLE_DOXYGEN
-  CPPCHECK_OPTIONS
-  --enable=style,performance,warning,portability
-  --inline-suppr
-  --suppress=cppcheckError
-  --suppress=internalAstError
-  --suppress=unmatchedSuppression
-  --suppress=passedByValue
-  --suppress=syntaxError
-  --inconclusive)
+if (UNIX)
+  dynamic_project_options(
+    ENABLE_INTERPROCEDURAL_OPTIMIZATION
+    ENABLE_BUILD_WITH_TIME_TRACE
+    ENABLE_NATIVE_OPTIMIZATION
+    ENABLE_SANITIZER_ADDRESS
+    ENABLE_SANITIZER_UNDEFINED_BEHAVIOR
+    ENABLE_CACHE
+    ENABLE_CPPCHECK
+    ENABLE_CLANG_TIDY
+    ENABLE_DOXYGEN
+    CPPCHECK_OPTIONS
+    --enable=style,performance,warning,portability
+    --inline-suppr
+    --suppress=cppcheckError
+    --suppress=internalAstError
+    --suppress=unmatchedSuppression
+    --suppress=passedByValue
+    --suppress=syntaxError
+    --inconclusive)
+elseif(WIN32)
+    dynamic_project_options(
+    ENABLE_INTERPROCEDURAL_OPTIMIZATION
+    ENABLE_BUILD_WITH_TIME_TRACE
+    ENABLE_NATIVE_OPTIMIZATION
+    ENABLE_CACHE
+    ENABLE_CPPCHECK
+    ENABLE_CLANG_TIDY
+    ENABLE_DOXYGEN
+    CPPCHECK_OPTIONS
+    --enable=style,performance,warning,portability
+    --inline-suppr
+    --suppress=cppcheckError
+    --suppress=internalAstError
+    --suppress=unmatchedSuppression
+    --suppress=passedByValue
+    --suppress=syntaxError
+    --inconclusive)
+endif()
 
 target_compile_features(project_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
-add_compile_options(/fsanitize=address)
 
-# add file to find libserial with cmake
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules")
+if(UNIX)
+  # add file to find libserial with cmake
+  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules")
+endif()
 
 # boost vars
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 if (UNIX)
-  set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
+  set(BOOST_ALL_DYN_LINK ON)
   set(Boost_USE_STATIC_LIBS OFF)
 elseif(WIN32)
   set(BOOST_ALL_DYN_LINK OFF)
@@ -150,7 +171,7 @@ find_package(Threads REQUIRED)
 find_package(Boost REQUIRED COMPONENTS log log_setup date_time)
 
 if (UNIX)
-  find_package(LibSerial REQUIRED) # this can be moved into submodules
+  find_package(LibSerial REQUIRED)
   find_package(PkgConfig REQUIRED)
 endif()
 
@@ -160,7 +181,6 @@ add_subdirectory(app)
 # profile guided optimization
 set(ENABLE_PROFILE_GENERATE OFF CACHE BOOL "Enable profile generation")
 set(ENABLE_PROFILE_USE OFF CACHE BOOL "Enable profile usage")
-
 set(PROFILE_DIR "prof" CACHE STRING "Profile directory" FORCE)
 
 if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
@@ -177,17 +197,6 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
 elseif(ENABLE_PROFILE_GENERATE OR ENABLE_PROFILE_USE)
   message(WARNING "Profile Guided Optimization implemented only for GCC")
 endif()
-
-# when MSVC is being used, and ASAN is enabled, we need to set the debugger env
-# so that it behaves well with MSVC's debugger, and we can run the target in VS
-if(MSVC)
-  get_all_installable_targets(all_targets)
-  message("all_targets=${all_targets}")
-  set_target_properties(${all_targets} PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=$(VC_ExecutablePath_x64);%PATH%")
-endif()
-
-# set the startup project for the "play" button in MSVC
-set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT intro)
 
 if(CMAKE_SKIP_INSTALL_RULES)
   return()
