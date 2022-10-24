@@ -21,6 +21,47 @@ bool TimeBox::CheckIfUsingDocker()
     return false;
   }
 }
+#elif defined(_WIN64) && !defined(__CYGWIN__)
+void WindowsErrorDebugLog(const char *t_message)
+{
+  std::string error_message{ std::string(t_message, " failed: ") };
+  auto error_code{ GetLastError() };
+
+  switch (error_code) {
+  case ERROR_ACCESS_DENIED:
+    error_message.append("Access denied");
+    break;
+  case ERROR_DATABASE_DOES_NOT_EXIST:
+    error_message.append("Database does not exist");
+    break;
+  case ERROR_INVALID_HANDLE:
+    error_message.append("Invalid handle");
+    break;
+  case ERROR_INVALID_NAME:
+    error_message.append("Invalid name");
+    break;
+  case ERROR_SERVICE_DOES_NOT_EXIST:
+    error_message.append("Service does not exist");
+    break;
+  case ERROR_INSUFFICIENT_BUFFER:
+    error_message.append("Insufficient buffer");
+    break;
+  case ERROR_INVALID_PARAMETER:
+    error_message.append("Invalid parameter");
+    break;
+  case ERROR_INVALID_LEVEL:
+    error_message.append("Invalid level");
+    break;
+  case ERROR_SHUTDOWN_IN_PROGRESS:
+    error_message.append("Shutdown in progress");
+    break;
+  default:
+    error_message.append("Unknown error, code: ");
+    error_message.append(std::to_string(error_code));
+    break;
+  }
+  BOOST_LOG_TRIVIAL(error) << error_message;
+}
 #endif
 
 bool TimeBox::CheckAdminPrivileges()
@@ -67,89 +108,19 @@ bool TimeBox::CheckNTPService()
     return false;
   }
 #elif defined(_WIN64) && !defined(__CYGWIN__)
-  // TODO: Separate verbose case-based error logging into a separate function
   // NOTE: AFAIK W32Time is the name of service we are looking for
   BOOL ntp_running{ false };
   SC_HANDLE manager_handle{ OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT) };
-  if (manager_handle == NULL) {
-    auto error_code{ GetLastError() };
-    std::string error_message{ "OpenSCManager failed: " };
-
-    switch (error_code) {
-    case ERROR_ACCESS_DENIED:
-      error_message.append("Access denied");
-      break;
-    case ERROR_DATABASE_DOES_NOT_EXIST:
-      error_message.append("Database does not exist");
-      break;
-    default:
-      error_message.append("Unknown error, code: ");
-      error_message.append(std::to_string(error_code));
-      break;
-    }
-    BOOST_LOG_TRIVIAL(error) << error_message;
-  }
+  if (manager_handle == NULL) { WindowsErrorDebugLog("OpenSCManager"); }
 
   SC_HANDLE service_handle{ OpenService(manager_handle, L"W32Time", SERVICE_QUERY_STATUS) };
-  if (service_handle == NULL) {
-    auto error_code{ GetLastError() };
-    std::string error_message{ "OpenService failed: " };
-
-    switch (error_code) {
-    case ERROR_ACCESS_DENIED:
-      error_message.append("Access denied");
-      break;
-    case ERROR_INVALID_HANDLE:
-      error_message.append("Invalid handle");
-      break;
-    case ERROR_INVALID_NAME:
-      error_message.append("Invalid name");
-      break;
-    case ERROR_SERVICE_DOES_NOT_EXIST:
-      error_message.append("Service does not exist");
-      break;
-    default:
-      error_message.append("Unknown error, code: ");
-      error_message.append(std::to_string(error_code));
-      break;
-    }
-    BOOST_LOG_TRIVIAL(error) << error_message;
-  }
+  if (service_handle == NULL) { WindowsErrorDebugLog("OpenService"); }
 
   SERVICE_STATUS_PROCESS status;
   DWORD bytes_needed{ 0 };
   BOOL result{ QueryServiceStatusEx(
     service_handle, SC_STATUS_PROCESS_INFO, (BYTE *)&status, sizeof(status), &bytes_needed) };
-  if (result == 0) {
-    auto error_code{ GetLastError() };
-    std::string error_message{ "QueryServiceStatusEx failed: " };
-
-    switch (error_code) {
-    case ERROR_INVALID_HANDLE:
-      error_message.append("Invalid handle");
-      break;
-    case ERROR_ACCESS_DENIED:
-      error_message.append("Access denied");
-      break;
-    case ERROR_INSUFFICIENT_BUFFER:
-      error_message.append("Insufficient buffer");
-      break;
-    case ERROR_INVALID_PARAMETER:
-      error_message.append("Invalid parameter");
-      break;
-    case ERROR_INVALID_LEVEL:
-      error_message.append("Invalid level");
-      break;
-    case ERROR_SHUTDOWN_IN_PROGRESS:
-      error_message.append("Shutdown in progress");
-      break;
-    default:
-      error_message.append("Unknown error, code: ");
-      error_message.append(std::to_string(error_code));
-      break;
-    }
-    BOOST_LOG_TRIVIAL(error) << error_message;
-  }
+  if (result == 0) { WindowsErrorDebugLog("QueryServiceStatusEx"); }
 
   if (status.dwCurrentState == SERVICE_RUNNING) { ntp_running = true; }
   CloseServiceHandle(service_handle);
