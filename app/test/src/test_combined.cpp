@@ -1,3 +1,6 @@
+#include <boost/log/core.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/trivial.hpp>
 #include <gtest/gtest.h>
 
 #include "defines.hpp"
@@ -25,6 +28,7 @@ public:
   void SetUp() override
   {
     if (not LONG_TESTS) { GTEST_SKIP() << "Skipping, LONG_TESTS = " << LONG_TESTS; }
+    boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::warning);
   };
   void TearDown() override{};
 };

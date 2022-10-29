@@ -1,3 +1,6 @@
+#include <boost/log/core.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/trivial.hpp>
 #include <gtest/gtest.h>
 
 #include "defines.hpp"
@@ -33,6 +36,7 @@ void MyCallback(TimeboxReadout) { MyCallback_calls++; }
 
 TEST_F(Test_SerialReader, thread_callback)
 {
+  boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::warning);
   if (!LONG_TESTS) GTEST_SKIP() << "Skipping, LONG_TESTS = " << LONG_TESTS;
 
 #if USING_REAL_HARDWARE
@@ -51,6 +55,7 @@ TEST_F(Test_SerialReader, thread_callback)
 
 TEST_F(Test_SerialReader, using_free_function_callback)
 {
+  boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::warning);
   if (!LONG_TESTS) GTEST_SKIP() << "Skipping, LONG_TESTS = " << LONG_TESTS;
 
 #if USING_REAL_HARDWARE
