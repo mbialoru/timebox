@@ -22,9 +22,9 @@ bool TimeBox::CheckIfUsingDocker()
   }
 }
 #elif defined(_WIN64) && !defined(__CYGWIN__)
-void WindowsErrorDebugLog(const char *t_message)
+void TimeBox::WindowsErrorDebugLog(const char *t_method_name, const char *t_addendum)
 {
-  std::string error_message{ std::string(t_message, " failed: ") };
+  std::string error_message{ std::string(t_method_name, " failed: ") };
   auto error_code{ GetLastError() };
 
   switch (error_code) {
@@ -60,8 +60,41 @@ void WindowsErrorDebugLog(const char *t_message)
     error_message.append(std::to_string(error_code));
     break;
   }
+
+  if (t_addendum != NULL) {
+    error_message.append(" Addendum: ");
+    error_message.append(t_addendum);
+  }
+
   BOOST_LOG_TRIVIAL(error) << error_message;
 }
+
+TCHAR *GetUsbComPort(TCHAR *t_vid, TCHAR *t_pid)
+{
+  DWORD device_index{ 0 };
+  SP_DEVINFO_DATA device_info_data;
+  PCWSTR device_enum{ L"USB" };
+  TCHAR expected_id[80]{ 0 };
+  BYTE buffer[1024]{ 0 };
+  DEVPROPTYPE property_type;
+  DWORD size{ 0 };
+  DWORD error{ 0 };
+
+  wcscpy_s(expected_id, L"vid_");
+  wcscpy_s(expected_id, t_vid);
+  wcscpy_s(expected_id, L"&pid_");
+  wcscpy_s(expected_id, t_pid);
+
+  auto device_info{ SetupDiGetClassDevs(NULL, device_enum, NULL, DIGCF_ALLCLASSES | DIGCF_PRESENT) };
+
+  if (device_info == INVALID_HANDLE_VALUE) { WindowsErrorDebugLog("SetupDiGetClassDevs"); }
+
+  ZeroMemory(&device_info_data, sizeof(SP_DEVINFO_DATA));
+  device_info_data.cbSize = sizeof(SP_DEVINFO_DATA);
+
+  while (SetupDiEnumDevi) { /* code */ }
+}
+
 #endif
 
 bool TimeBox::CheckAdminPrivileges()
@@ -166,10 +199,11 @@ std::string TimeBox::ConvertTimepointToString(const std::chrono::system_clock::t
   return res;
 }
 
+
 std::vector<std::string> TimeBox::GetSerialDevicesList()
 {
-#if defined(__unix__)
   std::vector<std::string> port_names;
+#if defined(__unix__)
   const std::filesystem::path dev_directory{ "/dev/serial/by-id" };
   const std::filesystem::path current_directory{ std::filesystem::current_path() };
 
@@ -196,6 +230,58 @@ std::vector<std::string> TimeBox::GetSerialDevicesList()
   return port_names;
 #elif defined(_WIN64) && !defined(__CYGWIN__)
   // TODO: Available Serial (COM) ports detection for Windows
-  throw NotImplementedException();
+  UINT available_devices;
+  GetRawInputDeviceList(NULL, &available_devices, sizeof(RAWINPUTDEVICELIST));
+
+  if (available_devices == 0) {
+    WindowsErrorDebugLog("GetRawInputDeviceList", "No available valid devices found");
+    throw ListSerialDevicesError();
+  }
+
+  PRAWINPUTDEVICELIST devices_list = new RAWINPUTDEVICELIST[sizeof(RAWINPUTDEVICELIST) * available_devices];
+  if (devices_list == NULL) {
+    WindowsErrorDebugLog("GetRawInputDeviceList", "Failed to allocate memory for devices list");
+    throw ListSerialDevicesError();
+  }
+
+  int result{ GetRawInputDeviceList(devices_list, &available_devices, sizeof(RAWINPUTDEVICELIST)) };
+  if (result < 0) {
+    delete[] devices_list;
+    WindowsErrorDebugLog("GetRawInputDeviceList", "Failed to acquire devices list");
+    throw ListSerialDevicesError();
+  }
+
+  for (UINT i = 0; i < available_devices; i++) {
+    UINT buffer_size{ 0 };
+    result = GetRawInputDeviceInfo(devices_list[i].hDevice, RIDI_DEVICENAME, NULL, &buffer_size);
+    if (result < 0) {
+      WindowsErrorDebugLog("GetRawInputDeviceInfo", "Failed to acquire device information, skipping ...");
+      continue;
+    }
+
+    WCHAR *device_name = new WCHAR[buffer_size + 1];
+    if (device_name == NULL) {
+      WindowsErrorDebugLog("new operator", "Failed to allocate memory for device name, skipping ...");
+      continue;
+    }
+
+    result = GetRawInputDeviceInfo(devices_list[i].hDevice, RIDI_DEVICENAME, device_name, &buffer_size);
+    if (result < 0) {
+      delete[] device_name;
+      WindowsErrorDebugLog("GetRawInputDeviceInfo", "Failed to get device name, skipping ...");
+      continue;
+    }
+
+    RID_DEVICE_INFO rid_device_info;
+    rid_device_info.cbSize = sizeof(RID_DEVICE_INFO);
+    buffer_size = rid_device_info.cbSize;
+
+    result = GetRawInputDeviceInfo(devices_list[i].hDevice, RIDI_DEVICEINFO, &rid_device_info, &buffer_size);
+    if (result < 0) {
+      WindowsErrorDebugLog("GetRawInputDeviceInfo", "Failed to get device info, skipping ...");
+      continue;
+    }
+  }
+  return port_names;
 #endif
 }

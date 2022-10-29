@@ -64,6 +64,19 @@ private:
   std::string m_msg{};
 };
 
+class ListSerialDevicesError : public std::exception
+{
+public:
+  explicit ListSerialDevicesError(const char *t_msg = "Failed to get list of serial available devices") : m_msg(t_msg)
+  {
+    BOOST_LOG_TRIVIAL(error) << m_msg;
+  }
+  const char *what() const noexcept { return m_msg.c_str(); }
+
+private:
+  std::string m_msg{};
+};
+
 }// namespace TimeBox
 
 #endif// EXCEPTIONS_HPP
