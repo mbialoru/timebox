@@ -14,7 +14,6 @@
 #include <unistd.h>
 #elif defined(_WIN64) && !defined(__CYGWIN__)
 #include <initguid.h>
-#include <setupapi.h>
 #include <windows.h>
 #endif
 
@@ -61,6 +60,7 @@ bool CheckSudo();
 bool CheckIfUsingDocker();
 #elif defined(_WIN64) && !defined(__CYGWIN__)
 void WindowsErrorDebugLog(const char *, const char * = NULL);
+void GetAvailableComPorts();
 #endif
 
 bool CheckAdminPrivileges();
@@ -71,6 +71,10 @@ std::chrono::system_clock::time_point ConvertStringToTimepoint(std::string);
 std::string ConvertTimepointToString(std::chrono::system_clock::time_point);
 
 typedef std::pair<std::string, std::chrono::system_clock::time_point> TimeboxReadout;
+
+#if defined(_WIN64) && !defined(__CYGWIN__)
+typedef std::basic_string<TCHAR> tstring;
+#endif
 
 template<typename T> struct TimingDecorator;// Yes, this is necessary.
 template<typename... Args> struct TimingDecorator<void(Args...)>

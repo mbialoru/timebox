@@ -64,10 +64,10 @@ TEST(Test_Utilities, serial_devices_list)
 {
 #if defined(__unix__)
   if (CheckIfUsingDocker()) { GTEST_SKIP() << "Cannot run from Docker container !"; }
-  for (const auto &val : GetSerialDevicesList()) { BOOST_LOG_TRIVIAL(debug) << val; }
-#elif defined(_WIN64) && !defined(__CYGWIN__)
-  EXPECT_NO_THROW(GetSerialDevicesList());
 #endif
+  EXPECT_NO_THROW({
+    for (const auto &val : GetSerialDevicesList()) { BOOST_LOG_TRIVIAL(debug) << val; }
+  });
 }
 
 TEST(Test_Utilities, timing_decorator)
