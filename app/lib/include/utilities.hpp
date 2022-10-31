@@ -9,6 +9,8 @@
 #include <filesystem>
 #include <map>
 
+#include "exceptions.hpp"
+
 #if defined(__unix__)
 #include <termios.h>
 #include <unistd.h>

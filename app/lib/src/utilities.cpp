@@ -1,5 +1,4 @@
 #include "utilities.hpp"
-#include "exceptions.hpp"
 
 using namespace TimeBox;
 
@@ -78,7 +77,6 @@ void TimeBox::GetAvailableComPorts()
     if (query_result != 0) { BOOST_LOG_TRIVIAL(debug) << port_name; }
   }
 }
-
 #endif
 
 bool TimeBox::CheckAdminPrivileges()
@@ -104,7 +102,7 @@ bool TimeBox::CheckAdminPrivileges()
       return false;
     }
   }
-  BOOST_LOG_TRIVIAL(error) << "Unable to determine if user is an administrator";
+  WindowsErrorDebugLog("AllocateAndInitializeSid");
   return false;
 #endif
 }
@@ -210,13 +208,13 @@ std::vector<std::string> TimeBox::GetSerialDevicesList()
   std::sort(port_names.begin(), port_names.end());
   std::filesystem::current_path(current_directory);
 
-  return port_names;
 #elif defined(_WIN64) && !defined(__CYGWIN__)
   wchar_t target_path[8192];
-  // We just simply iterate though all possible COM ports
-  for (int i{ 0 }; i < 255; i++) {
+
+  for (int i{ 0 }; i < 255; i++) {// We just simply iterate though all possible COM ports
     std::wstring port_name{ L"COM" + std::to_wstring(i) };
     DWORD query_result{ QueryDosDevice(port_name.c_str(), target_path, 8192) };
+
     if (query_result != 0) {
       port_names.push_back(std::string(port_name.begin(), port_name.end()));
     } else {
@@ -224,6 +222,6 @@ std::vector<std::string> TimeBox::GetSerialDevicesList()
       continue;
     }
   }
-  return port_names;
 #endif
+  return port_names;
 }

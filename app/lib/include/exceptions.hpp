@@ -53,7 +53,7 @@ class DeviceDirectoryNotExist : public std::exception
 {
 public:
   explicit DeviceDirectoryNotExist(
-    const char *t_msg = "Device directory doesn't exist - check platform and do not run in docker.")
+    const char *t_msg = "Device directory doesn't exist - check platform and do not run in docker")
     : m_msg(t_msg)
   {
     BOOST_LOG_TRIVIAL(error) << m_msg;
@@ -64,10 +64,10 @@ private:
   std::string m_msg{};
 };
 
-class ListSerialDevicesError : public std::exception
+class NTPServiceOperationError : public std::exception
 {
 public:
-  explicit ListSerialDevicesError(const char *t_msg = "Failed to get list of serial available devices") : m_msg(t_msg)
+  explicit NTPServiceOperationError(const char *t_msg = "Could not perform operation with NTP Service") : m_msg(t_msg)
   {
     BOOST_LOG_TRIVIAL(error) << m_msg;
   }
