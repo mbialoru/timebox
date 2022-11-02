@@ -168,7 +168,7 @@ endif()
 
 # required packages
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED COMPONENTS log log_setup date_time)
+find_package(Boost REQUIRED COMPONENTS headers log log_setup date_time)
 
 if (UNIX)
   find_package(LibSerial REQUIRED)

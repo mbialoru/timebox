@@ -9,7 +9,7 @@
 #include <sys/timex.h>
 
 #elif defined(_WIN64) && !defined(__CYGWIN__)
-#include "winclockconroller.hpp"
+#include "winclockcontroller.hpp"
 #endif
 
 using namespace TimeBox;
@@ -19,9 +19,9 @@ class Test_ClockController : public ::testing::Test
 public:
   void SetUp() override
   {
-    #if defined(__unix__)
+#if defined(__unix__)
     if (CheckIfUsingDocker()) { GTEST_SKIP() << "Cannot run from Docker container !"; }
-    #endif
+#endif
     if (not CheckAdminPrivileges()) { GTEST_SKIP() << "Cannot run without admin privileges !"; }
   };
 
