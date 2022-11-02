@@ -6,7 +6,6 @@
 #include "clockcontroller.hpp"
 #include <boost/log/trivial.hpp>
 #include <windows.h>
-#include <winsvc.h>
 
 
 namespace TimeBox {
@@ -18,8 +17,6 @@ public:
   ~WinClockController();
 
 private:
-  void StartNTPService();
-  void PauseNTPService();
 };
 
 }// namespace TimeBox

@@ -144,6 +144,48 @@ bool TimeBox::CheckNTPService()
 #endif
 }
 
+void TimeBox::PauseNTPService()
+{
+#if defined(__unix__)
+  throw NotImplementedException();
+#elif defined(_WIN64) && !defined(__CYGWIN__)
+  SC_HANDLE manager_handle{ OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT) };
+  if (manager_handle == NULL) { WindowsErrorDebugLog("OpenSCManager"); }
+  SC_HANDLE service_handle{ OpenService(manager_handle, L"W32Time", SERVICE_CONTROL_PAUSE) };
+  if (service_handle == NULL) { WindowsErrorDebugLog("OpenService"); }
+
+  SERVICE_CONTROL_STATUS_REASON_PARAMS status;
+  BOOL result{ ControlServiceEx(service_handle, SERVICE_CONTROL_PAUSE, 1, &status) };
+  if (result == 0) { WindowsErrorDebugLog("ControlServiceEx"); }
+
+  CloseServiceHandle(service_handle);
+  CloseServiceHandle(manager_handle);
+
+  if (CheckNTPService()) { throw NTPServiceOperationError("Could not pause NTP service"); }
+#endif
+}
+
+void TimeBox::StartNTPService()
+{
+#if defined(__unix__)
+  throw NotImplementedException();
+#elif defined(_WIN64) && !defined(__CYGWIN__)
+  SC_HANDLE manager_handle{ OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT) };
+  if (manager_handle == NULL) { WindowsErrorDebugLog("OpenSCManager"); }
+  SC_HANDLE service_handle{ OpenService(manager_handle, L"W32Time", SERVICE_CONTROL_CONTINUE) };
+  if (service_handle == NULL) { WindowsErrorDebugLog("OpenService"); }
+
+  SERVICE_CONTROL_STATUS_REASON_PARAMS status;
+  BOOL result{ ControlServiceEx(service_handle, SERVICE_CONTROL_CONTINUE, 1, &status) };
+  if (result == 0) { WindowsErrorDebugLog("ControlServiceEx"); }
+
+  CloseServiceHandle(service_handle);
+  CloseServiceHandle(manager_handle);
+
+  if (CheckNTPService()) { throw NTPServiceOperationError("Could not resume NTP service"); }
+#endif
+}
+
 std::size_t TimeBox::ConvertBaudRate(const std::size_t t_baud)
 {
   auto search = s_baud_conversion_map.find(static_cast<int>(t_baud));

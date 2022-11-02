@@ -67,16 +67,14 @@ void GetAvailableComPorts();
 
 bool CheckAdminPrivileges();
 bool CheckNTPService();
+void PauseNTPService();
+void StartNTPService();
 std::vector<std::string> GetSerialDevicesList();
 std::size_t ConvertBaudRate(std::size_t);
 std::chrono::system_clock::time_point ConvertStringToTimepoint(std::string);
 std::string ConvertTimepointToString(std::chrono::system_clock::time_point);
 
 typedef std::pair<std::string, std::chrono::system_clock::time_point> TimeboxReadout;
-
-#if defined(_WIN64) && !defined(__CYGWIN__)
-typedef std::basic_string<TCHAR> tstring;
-#endif
 
 template<typename T> struct TimingDecorator;// Yes, this is necessary.
 template<typename... Args> struct TimingDecorator<void(Args...)>
