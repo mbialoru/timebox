@@ -27,6 +27,7 @@ elseif(WIN32)
   target_link_system_libraries(
     ${PROJECT_NAME}_proto
     PRIVATE
+    Boost::headers
     Threads::Threads
     gtest
     gtest_main
