@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "clockcontroller.hpp"
 #include <boost/log/trivial.hpp>
 #include <windows.h>
 
+#include "clockcontroller.hpp"
 
 namespace TimeBox {
 
@@ -15,6 +15,8 @@ class WinClockController final : public ClockController
 public:
   WinClockController(std::size_t);
   ~WinClockController();
+
+  void AdjustClock(TimeboxReadout) override;
 
 private:
 };

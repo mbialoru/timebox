@@ -9,4 +9,5 @@
 #define PROTO_TIMEFROMSTR false
 #define PROTO_EXPERIMENT false
 #define PROTO_COMBINED false
-#define PROTO_BOOSTPROCESS true
+#define PROTO_BOOSTPROCESS false
+#define PROTO_WINCLOCKCONTROL true

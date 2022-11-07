@@ -5,7 +5,7 @@
 boost::process as an alternative to less secure popen
 ==============
 */
-#ifdef PROTO_BOOSTPROCESS
+#if PROTO_BOOSTPROCESS
 
 #include <boost/process.hpp>
 #include <boost/process/async.hpp>
@@ -14,7 +14,7 @@ boost::process as an alternative to less secure popen
 #include <string>
 
 #if defined(__unix__)
-TEST(Proto_boostprocess, example_name)
+TEST(Proto_boostprocess, capture_output)
 {
   // NOTE: Do not launch in docker container
   boost::asio::io_context ios;
@@ -28,8 +28,9 @@ TEST(Proto_boostprocess, example_name)
   }
 }
 #elif defined(_WIN64) && !defined(__CYGWIN__)
-TEST(Proto_boostprocess, example_name)
+TEST(Proto_boostprocess, capture_output)
 {
+  // NOTE: First launch cmd/powershell and pass command as argument to it
   boost::asio::io_context ios;
   std::future<std::string> output;
   boost::process::system("cmd /c dir", boost::process::std_out > output, ios);
@@ -37,5 +38,4 @@ TEST(Proto_boostprocess, example_name)
   std::cout << res;
 }
 #endif
-
 #endif
