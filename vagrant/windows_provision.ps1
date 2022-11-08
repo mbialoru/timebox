@@ -8,10 +8,9 @@ Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
 New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
 
 # Install packages via chocolatey
-choco install -y git
-choco install -y visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools;includeRecommended;includeOptional --passive --locale en-US"
-choco install -y boost-msvc-14.3
-choco install -y doxygen.install
+choco install -y git ccache mingw cppcheck ninja python cmake cmake.install doxygen.install
+# choco install -y visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools;includeRecommended;includeOptional --passive --locale en-US"
+# choco install -y boost-msvc-14.3
 
 # Make Developer Powershell environent setup on powershell open by default
 # NOTE: Ouput redirection to null keeps rsync working

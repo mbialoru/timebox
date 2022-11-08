@@ -9,7 +9,7 @@ namespace TimeBox {
 static constexpr std::string_view PROJECT_NAME{ "timebox" };
 static constexpr std::string_view PROJECT_VERSION{ "0.1.0" };
 static constexpr std::string_view BUILD_INFO{
-  "timebox-0.1.0-f1383d04-Windows-Debug"
+  "timebox-0.1.0-e8dd5055-Windows-Debug"
   "-GNU-12.2.0"
 };
 
