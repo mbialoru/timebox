@@ -12,7 +12,6 @@ struct BuildInformation
   static constexpr std::string_view PROJECT_VERSION{ "@PROJECT_VERSION@" };
   static constexpr std::string_view PROJECT_VERSION_ADDENDUM{ "@PROJECT_VERSION_ADDENDUM@" };
   static constexpr std::string_view GIT_BRANCH{ "@GIT_BRANCH@" };
-  static constexpr std::string_view GIT_BRANCH_STATE{ "@GIT_BRANCH_STATE@" };
   static constexpr std::string_view GIT_SHORT_SHA{ "@GIT_SHORT_SHA@" };
   static constexpr std::string_view BUILD_TYPE{ "@CMAKE_BUILD_TYPE@" };
   static constexpr std::string_view PLATFORM{ "@CMAKE_SYSTEM_NAME@" };
@@ -20,14 +19,6 @@ struct BuildInformation
   static constexpr std::string_view COMPILER_VERSION{ "@CMAKE_CXX_COMPILER_VERSION@" };
   static constexpr std::string_view BUILD_DATE{ "@BUILD_TIME@" };
   static constexpr std::string_view BUILD_HASH{ "@BUILD_HASH@" };
-};
-
-static constexpr std::string_view PROJECT_NAME{ "@PROJECT_NAME@" };
-static constexpr std::string_view PROJECT_VERSION{ "@PROJECT_VERSION@" };
-
-static constexpr std::string_view BUILD_INFO{
-  "@CMAKE_PROJECT_NAME@-@CMAKE_PROJECT_VERSION@-@GIT_SHORT_SHA@-@CMAKE_SYSTEM_NAME@-@CMAKE_BUILD_TYPE@"
-  "-@CMAKE_CXX_COMPILER_ID@-@CMAKE_CXX_COMPILER_VERSION@"
 };
 
 static constexpr std::size_t WINDOW_HEIGHT{ 600 };

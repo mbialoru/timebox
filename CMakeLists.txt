@@ -85,27 +85,6 @@ if(GIT_FOUND)
     message(STATUS "GIT SHORT SHA: ${GIT_SHORT_SHA}")
     message(STATUS "GIT BRANCH: ${GIT_BRANCH}")
     message(STATUS "Checking if branch is clean")
-    if(UNIX)
-      execute_process(
-        COMMAND git status -s | wc -c
-        OUTPUT_VARIABLE GIT_STATUS_LENGTH
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-      if("${GIT_STATUS_LENGTH}" EQUAL "0")
-        set(GIT_BRANCH_STATE CLEAN)
-      else()
-        set(GIT_BRANCH_STATE DIRTY)
-      endif()
-    elseif(WIN32)
-      execute_process(
-        COMMAND (git status -s | Measure-Object -Character).characters
-        OUTPUT_VARIABLE GIT_STATUS_LENGTH
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-      if("${GIT_STATUS_LENGTH}" STREQUAL "0")
-        set(GIT_BRANCH_STATE CLEAN)
-      else()
-        set(GIT_BRANCH_STATE DIRTY)
-      endif()
-    endif()
   else()
     message(WARNING ".git directory not found !")
     message(WARNING "Have you cloned/synced everything ?")
