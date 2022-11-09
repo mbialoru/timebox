@@ -39,11 +39,14 @@ run_vcpkg()
 
 project(
   timebox
-  VERSION 0.1.0
+  VERSION 0.0.15
   LANGUAGES C CXX
   DESCRIPTION
     "Synchronize system clock with hardware GPS interface attached by USB"
   HOMEPAGE_URL "https://gitlab.sudobash.pl/Au5m8btpUaUS5t3dpixE/time-box")
+
+set(PROJECT_VERSION_ADDENDUM "InDev" CACHE STRING "Addendum to project version (i.e. RC)" FORCE)
+string(TIMESTAMP BUILD_TIME "%Y-%m-%d %H:%M:%S UTC" UTC)
 
 # Output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -81,6 +84,28 @@ if(GIT_FOUND)
     message(STATUS "GIT SHA: ${GIT_SHA}")
     message(STATUS "GIT SHORT SHA: ${GIT_SHORT_SHA}")
     message(STATUS "GIT BRANCH: ${GIT_BRANCH}")
+    message(STATUS "Checking if branch is clean")
+    if(UNIX)
+      execute_process(
+        COMMAND git status -s | wc -c
+        OUTPUT_VARIABLE GIT_STATUS_LENGTH
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+      if("${GIT_STATUS_LENGTH}" EQUAL "0")
+        set(GIT_BRANCH_STATE CLEAN)
+      else()
+        set(GIT_BRANCH_STATE DIRTY)
+      endif()
+    elseif(WIN32)
+      execute_process(
+        COMMAND (git status -s | Measure-Object -Character).characters
+        OUTPUT_VARIABLE GIT_STATUS_LENGTH
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+      if("${GIT_STATUS_LENGTH}" STREQUAL "0")
+        set(GIT_BRANCH_STATE CLEAN)
+      else()
+        set(GIT_BRANCH_STATE DIRTY)
+      endif()
+    endif()
   else()
     message(WARNING ".git directory not found !")
     message(WARNING "Have you cloned/synced everything ?")
@@ -88,6 +113,8 @@ if(GIT_FOUND)
 else()
   message(WARNING "Git not found !")
 endif()
+
+string(SHA256 BUILD_HASH ${GIT_SHORT_SHA})
 
 get_property(BUILDING_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(BUILDING_MULTI_CONFIG)
