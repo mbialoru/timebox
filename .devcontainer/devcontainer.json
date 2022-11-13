@@ -19,7 +19,9 @@
 		"aaron-bond.better-comments",
 		"maptz.camelcasenavigation",
 		"cschlosser.doxdocgen",
-		"xaver.clang-format"
+		"xaver.clang-format",
+		"zchrissirhcz.cmake-highlight",
+		"ms-dotnettools.vscode-dotnet-runtime"
 	],
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     // "forwardPorts": [],

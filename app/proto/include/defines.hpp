@@ -8,4 +8,6 @@
 #define PROTO_LIBSERIAL false
 #define PROTO_TIMEFROMSTR false
 #define PROTO_EXPERIMENT false
-#define PROTO_COMBINED true
+#define PROTO_COMBINED false
+#define PROTO_BOOSTPROCESS false
+#define PROTO_WINCLOCKCONTROL true

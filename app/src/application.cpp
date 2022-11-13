@@ -20,7 +20,7 @@ AppContext TimeBox::InitializeContext()
   context.display_about_dialog = false;
   context.display_connect_dialog = false;
 
-  context.main_window_name = std::string(PROJECT_NAME);
+  context.main_window_name = std::string(BuildInformation().PROJECT_NAME);
 
   std::make_shared<PID<double>>(0.0, 0.0, 0.0, 0.0).swap(context.p_pid);
 
@@ -46,7 +46,7 @@ void TimeBox::CenterWindow(std::size_t t_height, std::size_t t_width)
 
 void TimeBox::MainDialog(AppContext &t_context)
 {
-  std::string window_title{ PROJECT_NAME };
+  std::string window_title{ BuildInformation().PROJECT_NAME };
   window_title[0] = toupper(window_title[0]);
 
   static float term_p{ 0.0 };
@@ -261,7 +261,23 @@ void TimeBox::AboutDialog(AppContext &t_context)
     ImGui::TextWrapped("Frametime %.3f ms/frame (%.1f FPS)",
       static_cast<double>(1000.0f / ImGui::GetIO().Framerate),
       static_cast<double>(ImGui::GetIO().Framerate));
-    ImGui::TextWrapped(std::string(BUILD_INFO).c_str());
+    ImGui::TextWrapped(std::string(BuildInformation().PROJECT_NAME).c_str());
+    ImGui::TextWrapped("Version: ",
+      std::string(BuildInformation().PROJECT_VERSION).c_str(),
+      " ",
+      std::string(BuildInformation().PROJECT_VERSION_ADDENDUM).c_str());
+    ImGui::TextWrapped("Branch: ", std::string(BuildInformation().GIT_BRANCH).c_str());
+    ImGui::TextWrapped("Commit: ", std::string(BuildInformation().GIT_SHORT_SHA).c_str());
+    ImGui::TextWrapped("Compiler: ",
+      std::string(BuildInformation().COMPILER).c_str(),
+      " ",
+      std::string(BuildInformation().COMPILER_VERSION).c_str());
+    ImGui::TextWrapped("Platform: ", std::string(BuildInformation().PLATFORM).c_str());
+    ImGui::TextWrapped("Build: ",
+      std::string(BuildInformation().BUILD_TYPE).c_str(),
+      " ",
+      std::string(BuildInformation().BUILD_DATE).c_str());
+    ImGui::TextWrapped("Build Hash: ", std::string(BuildInformation().BUILD_HASH).c_str());
     ImGui::TextWrapped("dear imgui says hello! (%s) (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
 
     if (ImGui::BeginPopupContextWindow()) {

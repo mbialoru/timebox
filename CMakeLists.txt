@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 set(CMAKE_POLICY_DEFAULT_CMP0135 NEW) # Disable CMP0135 warning
 
 # Not ideal to use this global variable, but necessary to make sure that tooling
@@ -16,15 +16,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # (sanitizers, static analysis) is enabled and all warnings are treated as
 # errors if you want to switch this behavior, change TRUE to FALSE
 set(ENABLE_DEVELOPER_MODE
-    TRUE
-    CACHE BOOL "Enable 'developer mode'")
+  TRUE
+  CACHE BOOL "Enable 'developer mode'")
 
 # Change this to FALSE if you want to disable warnings_as_errors in developer
 # mode
 set(WARNINGS_AS_ERRORS_DEVELOPER_DEFAULT FALSE)
-
-# uncomment to enable vcpkg: # Setup vcpkg - should be called before defining
-# project() run_vcpkg()
 
 # Add project_options
 # https://github.com/aminya/project_options
@@ -37,13 +34,19 @@ FetchContent_MakeAvailable(project_options)
 include(${project_options_SOURCE_DIR}/Index.cmake)
 include(${project_options_SOURCE_DIR}/src/DynamicProjectOptions.cmake)
 
+# Setup vcpkg - should be called before defining project()
+run_vcpkg()
+
 project(
   timebox
-  VERSION 0.1.0
+  VERSION 0.0.15
   LANGUAGES C CXX
   DESCRIPTION
     "Synchronize system clock with hardware GPS interface attached by USB"
   HOMEPAGE_URL "https://gitlab.sudobash.pl/Au5m8btpUaUS5t3dpixE/time-box")
+
+set(PROJECT_VERSION_ADDENDUM "InDev" CACHE STRING "Addendum to project version (i.e. RC)" FORCE)
+string(TIMESTAMP BUILD_TIME "%Y-%m-%d %H:%M:%S UTC" UTC)
 
 # Output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -57,32 +60,40 @@ string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
 if(PROJECT_IS_TOP_LEVEL)
   # Consider the CTest module, which creates targets and options! Only needed if
   # you want to enable submissions to a CDash server.
-  include(CTest)
+  # include(CTest)
 endif()
 
 # Add Git SHA
-find_package(Git)
-find_program(GIT_FOUND git)
+find_package(Git QUIET)
 if(GIT_FOUND)
-  message(
-    STATUS "Found Git (${GIT_FOUND}), executable will get SHA and branch used")
-  execute_process(
-    COMMAND git -C ${CMAKE_SOURCE_DIR} rev-parse HEAD
-    OUTPUT_VARIABLE GIT_SHA
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process(
-    COMMAND git -C ${CMAKE_SOURCE_DIR} branch --show-current
-    OUTPUT_VARIABLE GIT_BRANCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  string(SUBSTRING "${GIT_SHA}" 0 8 GIT_SHORT_SHA)
-  set(GIT_BRANCH ${GIT_BRANCH})
-  set(GIT_SHORT_SHA ${GIT_SHORT_SHA})
-  message(STATUS "GIT SHA = ${GIT_SHA}")
-  message(STATUS "GIT SHORT SHA = ${GIT_SHORT_SHA}")
-  message(STATUS "GIT BRANCH = ${GIT_BRANCH}")
+  message(STATUS "Found git")
+  if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
+    message(
+    STATUS "Executable will get SHA and branch used")
+    execute_process(
+      COMMAND git -C ${CMAKE_SOURCE_DIR} rev-parse HEAD
+      OUTPUT_VARIABLE GIT_SHA
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(
+      COMMAND git -C ${CMAKE_SOURCE_DIR} branch --show-current
+      OUTPUT_VARIABLE GIT_BRANCH
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(SUBSTRING "${GIT_SHA}" 0 8 GIT_SHORT_SHA)
+    set(GIT_BRANCH ${GIT_BRANCH})
+    set(GIT_SHORT_SHA ${GIT_SHORT_SHA})
+    message(STATUS "GIT SHA: ${GIT_SHA}")
+    message(STATUS "GIT SHORT SHA: ${GIT_SHORT_SHA}")
+    message(STATUS "GIT BRANCH: ${GIT_BRANCH}")
+    message(STATUS "Checking if branch is clean")
+  else()
+    message(WARNING ".git directory not found !")
+    message(WARNING "Have you cloned/synced everything ?")
+  endif()
 else()
   message(WARNING "Git not found !")
 endif()
+
+string(SHA256 BUILD_HASH ${GIT_SHORT_SHA})
 
 get_property(BUILDING_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(BUILDING_MULTI_CONFIG)
@@ -93,69 +104,105 @@ if(BUILDING_MULTI_CONFIG)
     # command line for VS
     message(TRACE "Setting up multi-config build types")
     set(CMAKE_CONFIGURATION_TYPES
-        Debug Release RelWithDebInfo MinSizeRel
-        CACHE STRING "Enabled build types" FORCE)
+      Debug Release RelWithDebInfo MinSizeRel
+      CACHE STRING "Enabled build types" FORCE)
   else()
     message(TRACE "User chose a specific build type, so we are using that")
     set(CMAKE_CONFIGURATION_TYPES
-        ${CMAKE_BUILD_TYPE}
-        CACHE STRING "Enabled build types" FORCE)
+      ${CMAKE_BUILD_TYPE}
+      CACHE STRING "Enabled build types" FORCE)
   endif()
 endif()
 
-dynamic_project_options(
-  ENABLE_INTERPROCEDURAL_OPTIMIZATION
-  ENABLE_BUILD_WITH_TIME_TRACE
-  ENABLE_NATIVE_OPTIMIZATION
-  ENABLE_SANITIZER_ADDRESS
-  ENABLE_SANITIZER_UNDEFINED_BEHAVIOR
-  ENABLE_INCLUDE_WHAT_YOU_USE
-  ENABLE_CACHE
-  ENABLE_CPPCHECK
-  ENABLE_CLANG_TIDY
-  ENABLE_DOXYGEN
-  CPPCHECK_OPTIONS
-  --enable=style,performance,warning,portability
-  --inline-suppr
-  --suppress=cppcheckError
-  --suppress=internalAstError
-  --suppress=unmatchedSuppression
-  --suppress=passedByValue
-  --suppress=syntaxError
-  --inconclusive)
+if (UNIX)
+  dynamic_project_options(
+    ENABLE_INTERPROCEDURAL_OPTIMIZATION
+    ENABLE_BUILD_WITH_TIME_TRACE
+    ENABLE_NATIVE_OPTIMIZATION
+    ENABLE_SANITIZER_ADDRESS
+    ENABLE_SANITIZER_UNDEFINED_BEHAVIOR
+    ENABLE_CACHE
+    ENABLE_CPPCHECK
+    ENABLE_CLANG_TIDY
+    ENABLE_DOXYGEN
+    CPPCHECK_OPTIONS
+    --enable=style,performance,warning,portability
+    --inline-suppr
+    --suppress=cppcheckError
+    --suppress=internalAstError
+    --suppress=unmatchedSuppression
+    --suppress=passedByValue
+    --suppress=syntaxError
+    --inconclusive)
+elseif(WIN32)
+    dynamic_project_options(
+    ENABLE_INTERPROCEDURAL_OPTIMIZATION
+    ENABLE_BUILD_WITH_TIME_TRACE
+    ENABLE_NATIVE_OPTIMIZATION
+    ENABLE_CACHE
+    ENABLE_CPPCHECK
+    ENABLE_CLANG_TIDY
+    ENABLE_DOXYGEN
+    CPPCHECK_OPTIONS
+    --enable=style,performance,warning,portability
+    --inline-suppr
+    --suppress=cppcheckError
+    --suppress=internalAstError
+    --suppress=unmatchedSuppression
+    --suppress=passedByValue
+    --suppress=syntaxError
+    --inconclusive)
+endif()
 
 target_compile_features(project_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
-# add file to find libserial with cmake
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules")
+if(UNIX)
+  # add file to find libserial with cmake
+  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules")
+endif()
+
+# boost vars
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+if (UNIX)
+  set(BOOST_ALL_DYN_LINK ON)
+  set(Boost_USE_STATIC_LIBS OFF)
+elseif(WIN32)
+  set(BOOST_ALL_DYN_LINK OFF)
+  set(Boost_USE_STATIC_LIBS ON)
+endif()
 
 # required packages
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED COMPONENTS log log_setup date_time)
-find_package(GTest REQUIRED)
-find_package(benchmark REQUIRED)
-find_package(LibSerial REQUIRED)
-find_package(PkgConfig REQUIRED)
+find_package(Boost REQUIRED COMPONENTS headers log log_setup date_time)
 
-# Boost vars
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-set(BOOST_ALL_DYN_LINK ON) # force dynamic linking for all libraries
-
-add_subdirectory(app)
-add_subdirectory(submodules)
-
-# If MSVC is being used, and ASAN is enabled, we need to set the debugger environment
-# so that it behaves well with MSVC's debugger, and we can run the target from visual studio
-if(MSVC)
-  get_all_installable_targets(all_targets)
-  message("all_targets=${all_targets}")
-  set_target_properties(${all_targets} PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=$(VC_ExecutablePath_x64);%PATH%")
+if (UNIX)
+  find_package(LibSerial REQUIRED)
+  find_package(PkgConfig REQUIRED)
 endif()
 
-# set the startup project for the "play" button in MSVC
-set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT intro)
+add_subdirectory(submodules)
+add_subdirectory(app)
+
+# profile guided optimization
+set(ENABLE_PROFILE_GENERATE OFF CACHE BOOL "Enable profile generation")
+set(ENABLE_PROFILE_USE OFF CACHE BOOL "Enable profile usage")
+set(PROFILE_DIR "prof" CACHE STRING "Profile directory" FORCE)
+
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
+  if(ENABLE_PROFILE_GENERATE)
+    add_compile_options(-fprofile-generate=${PROFILE_DIR})
+    add_link_options(-fprofile-generate=${PROFILE_DIR})
+    if(ENABLE_PROFILE_USE)
+      message(WARNING "Both profile generate and profile use enabled")
+    endif()
+  elseif(ENABLE_PROFILE_USE)
+    add_compile_options(-fprofile-use=${PROFILE_DIR})
+    add_link_options(-fprofile-use=${PROFILE_DIR})
+  endif()
+elseif(ENABLE_PROFILE_GENERATE OR ENABLE_PROFILE_USE)
+  message(WARNING "Profile Guided Optimization implemented only for GCC")
+endif()
 
 if(CMAKE_SKIP_INSTALL_RULES)
   return()
@@ -163,12 +210,12 @@ elseif(NOT PROJECT_IS_TOP_LEVEL)
   return()
 endif()
 
-# Add other targets that you want installed here, be default we just package the
+# add other targets that you want installed here, be default we just package the
 # one executable we know we want to ship
-package_project(TARGETS timebox project_options project_warnings)
+package_project(TARGETS ${PROJECT_NAME} project_options project_warnings)
 
 set(CPACK_PACKAGE_FILE_NAME
-    "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
+  "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
 )
 
 include(CPack)

@@ -12,7 +12,7 @@ ThreadWrapper::ThreadWrapper(std::string t_name, std::size_t t_startup_delay, st
 
   m_worker = std::thread(&ThreadWrapper::WorkLoop, this);
   m_tester = std::thread(&ThreadWrapper::TestLoop, this);
-};
+}
 
 ThreadWrapper::~ThreadWrapper()
 {

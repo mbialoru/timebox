@@ -85,8 +85,9 @@ RUN cmake ../ && cmake --build . && cmake --install .
 WORKDIR /root
 
 # Install this project dependencies
-RUN apt-get install -y libboost-all-dev libgtest-dev libgmock-dev libbenchmark-dev \
-    libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config libserial-dev
+RUN apt-get install -y libboost-all-dev libgtest-dev libgmock-dev \
+    libbenchmark-dev libgl1-mesa-dev freeglut3-dev libxext-dev pkg-config \
+    libserial-dev
 
 # Symbolic link for compatibility
 # RUN ln -s /bin/uname /usr/bin/uname

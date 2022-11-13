@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include <array>
 #include <boost/log/trivial.hpp>
 #include <functional>
-#include <libserial/SerialPort.h>
 
 #include "threadwrapper.hpp"
 #include "utilities.hpp"
@@ -15,20 +15,19 @@ namespace TimeBox {
 class SerialReader : public ThreadWrapper
 {
 public:
-  SerialReader(const char *, std::size_t, std::function<void(TimeboxReadout)>);
-  ~SerialReader();
+  SerialReader(std::function<void(TimeboxReadout)>);
+  virtual ~SerialReader() = default;
+  virtual bool QuerryDevice(std::string) = 0;
 
-private:
-  void InitalizeSerial(const char *, std::size_t);
+protected:
+  virtual void InitializeSerial(const char *, std::size_t) = 0;
   void WipeSerialBuffer();
-  void Work() override;
 
   static constexpr std::size_t m_flush_delay{ 2 };
   static constexpr std::size_t m_buffer_size{ 256 };
   static constexpr std::size_t m_read_timeout{ 250 };
   std::function<void(TimeboxReadout)> m_callback = nullptr;
   std::array<char, m_buffer_size> m_serial_buffer;
-  LibSerial::SerialPort m_serial_port;
 };
 
 }// namespace TimeBox

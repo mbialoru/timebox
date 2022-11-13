@@ -4,16 +4,24 @@
 #pragma once
 
 #include <boost/algorithm/string.hpp>
-#include <boost/asio.hpp>
 #include <boost/log/trivial.hpp>
 #include <chrono>
 #include <filesystem>
 #include <map>
+
+#include "exceptions.hpp"
+
+#if defined(__unix__)
 #include <termios.h>
 #include <unistd.h>
+#elif defined(_WIN64) && !defined(__CYGWIN__)
+#include <initguid.h>
+#include <windows.h>
+#endif
 
 namespace TimeBox {
 
+#if defined(__unix__)
 static std::map<int, int> s_baud_conversion_map{ { 0, B0 },
   { 50, B50 },
   { 75, B75 },
@@ -30,13 +38,39 @@ static std::map<int, int> s_baud_conversion_map{ { 0, B0 },
   { 9600, B9600 },
   { 19200, B19200 },
   { 38400, B38400 } };
+#elif defined(_WIN64) && !defined(__CYGWIN__)
+static std::map<int, int> s_baud_conversion_map{ { 110, CBR_110 },
+  { 300, CBR_300 },
+  { 600, CBR_600 },
+  { 1200, CBR_1200 },
+  { 2400, CBR_2400 },
+  { 4800, CBR_4800 },
+  { 9600, CBR_9600 },
+  { 14400, CBR_14400 },
+  { 19200, CBR_19200 },
+  { 38400, CBR_38400 },
+  { 56000, CBR_56000 },
+  { 57600, CBR_57600 },
+  { 115200, CBR_115200 },
+  { 128000, CBR_128000 },
+  { 115200, CBR_115200 },
+  { 256000, CBR_256000 } };
+#endif
 
+#if defined(__unix__)
 bool CheckSudo();
-bool CheckAdminPrivileges();
 bool CheckIfUsingDocker();
+#elif defined(_WIN64) && !defined(__CYGWIN__)
+void WindowsErrorDebugLog(const char *, const char * = NULL);
+void GetAvailableComPorts();
+#endif
+
+bool CheckAdminPrivileges();
 bool CheckNTPService();
+void PauseNTPService();
+void StartNTPService();
 std::vector<std::string> GetSerialDevicesList();
-std::size_t ConvertBaudRate(int);
+std::size_t ConvertBaudRate(std::size_t);
 std::chrono::system_clock::time_point ConvertStringToTimepoint(std::string);
 std::string ConvertTimepointToString(std::chrono::system_clock::time_point);
 
