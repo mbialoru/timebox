@@ -61,7 +61,7 @@ static std::map<int, int> s_baud_conversion_map{ { 110, CBR_110 },
 bool CheckSudo();
 bool CheckIfUsingDocker();
 #elif defined(_WIN64) && !defined(__CYGWIN__)
-void WindowsErrorDebugLog(const char *, const char * = NULL);
+void WindowsErrorDebugLog(const char *, const char * = nullptr);
 void GetAvailableComPorts();
 #endif
 

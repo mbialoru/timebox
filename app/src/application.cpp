@@ -224,7 +224,7 @@ void TimeBox::WarningPopup(AppContext &t_context)
     window_flags |= ImGuiWindowFlags_NoMove;
 
     ImGui::SetNextWindowBgAlpha(0.35f);
-    ImGui::Begin("Warning", static_cast<bool *>(NULL), window_flags);
+    ImGui::Begin("Warning", static_cast<bool *>(nullptr), window_flags);
     ImGui::SetWindowSize(ImVec2(WINDOW_WIDTH / 2, 200));
     ImGui::SetWindowPos(ImVec2(WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2 - 100));
 
@@ -254,7 +254,7 @@ void TimeBox::AboutDialog(AppContext &t_context)
     window_flags |= ImGuiWindowFlags_NoDecoration;
     window_flags |= ImGuiWindowFlags_NoFocusOnAppearing;
 
-    ImGui::Begin("About", static_cast<bool *>(NULL), window_flags);
+    ImGui::Begin("About", static_cast<bool *>(nullptr), window_flags);
     ImGui::Text("About");
     ImGui::Separator();
 

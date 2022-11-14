@@ -57,7 +57,7 @@ int main(const int t_argc, const char *t_argv[])
   SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
   SDL_WindowFlags window_flags = static_cast<SDL_WindowFlags>(SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
 
-  SDL_Window *window = SDL_CreateWindow(std::string(PROJECT_NAME).c_str(),
+  SDL_Window *window = SDL_CreateWindow(std::string(BuildInformation::PROJECT_NAME).c_str(),
     SDL_WINDOWPOS_CENTERED,
     SDL_WINDOWPOS_CENTERED,
     WINDOW_HEIGHT,

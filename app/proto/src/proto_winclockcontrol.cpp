@@ -37,7 +37,7 @@ private:
   HRESULT ObtainRequiredPrivileges()
   {
     HRESULT hresult;
-    HANDLE process_token{ NULL };
+    HANDLE process_token{ nullptr };
     TOKEN_PRIVILEGES token_privileges{ 0 };
     LUID luid;
 
@@ -67,7 +67,7 @@ private:
       BOOST_LOG_TRIVIAL(info) << "Added SYSTEMTIME privilege to the process token";
     }
 
-    if (process_token != NULL) { CloseHandle(process_token); }
+    if (process_token != nullptr) { CloseHandle(process_token); }
 
     return hresult;
   }

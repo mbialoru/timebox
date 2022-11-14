@@ -60,7 +60,7 @@ void TimeBox::WindowsErrorDebugLog(const char *t_method_name, const char *t_adde
     break;
   }
 
-  if (t_addendum != NULL) {
+  if (t_addendum != nullptr) {
     error_message.append(" Addendum: ");
     error_message.append(t_addendum);
   }
@@ -88,7 +88,7 @@ bool TimeBox::CheckAdminPrivileges()
     return false;
   }
 #elif defined(_WIN64) && !defined(__CYGWIN__)
-  PSID administrator_group{ NULL };
+  PSID administrator_group{ nullptr };
   SID_IDENTIFIER_AUTHORITY nt_authority{ SECURITY_NT_AUTHORITY };
   BOOL result{ AllocateAndInitializeSid(
     &nt_authority, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &administrator_group) };
@@ -126,15 +126,15 @@ bool TimeBox::CheckNTPService()
   // NOTE: AFAIK W32Time is the name of service we are looking for
   BOOL ntp_running{ false };
   SC_HANDLE manager_handle{ OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT) };
-  if (manager_handle == NULL) { WindowsErrorDebugLog("OpenSCManager"); }
+  if (manager_handle == nullptr) { WindowsErrorDebugLog("OpenSCManager"); }
 
   SC_HANDLE service_handle{ OpenService(manager_handle, L"W32Time", SERVICE_QUERY_STATUS) };
-  if (service_handle == NULL) { WindowsErrorDebugLog("OpenService"); }
+  if (service_handle == nullptr) { WindowsErrorDebugLog("OpenService"); }
 
   SERVICE_STATUS_PROCESS status;
   DWORD bytes_needed{ 0 };
   BOOL result{ QueryServiceStatusEx(
-    service_handle, SC_STATUS_PROCESS_INFO, (BYTE *)&status, sizeof(status), &bytes_needed) };
+    service_handle, SC_STATUS_PROCESS_INFO, reinterpret_cast<BYTE *>(&status), sizeof(status), &bytes_needed) };
   if (result == 0) { WindowsErrorDebugLog("QueryServiceStatusEx"); }
 
   if (status.dwCurrentState == SERVICE_RUNNING) { ntp_running = true; }
@@ -150,9 +150,9 @@ void TimeBox::PauseNTPService()
   throw NotImplementedException();
 #elif defined(_WIN64) && !defined(__CYGWIN__)
   SC_HANDLE manager_handle{ OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT) };
-  if (manager_handle == NULL) { WindowsErrorDebugLog("OpenSCManager"); }
+  if (manager_handle == nullptr) { WindowsErrorDebugLog("OpenSCManager"); }
   SC_HANDLE service_handle{ OpenService(manager_handle, L"W32Time", SERVICE_CONTROL_PAUSE) };
-  if (service_handle == NULL) { WindowsErrorDebugLog("OpenService"); }
+  if (service_handle == nullptr) { WindowsErrorDebugLog("OpenService"); }
 
   SERVICE_CONTROL_STATUS_REASON_PARAMS status;
   BOOL result{ ControlServiceEx(service_handle, SERVICE_CONTROL_PAUSE, 1, &status) };
@@ -171,9 +171,9 @@ void TimeBox::StartNTPService()
   throw NotImplementedException();
 #elif defined(_WIN64) && !defined(__CYGWIN__)
   SC_HANDLE manager_handle{ OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT) };
-  if (manager_handle == NULL) { WindowsErrorDebugLog("OpenSCManager"); }
+  if (manager_handle == nullptr) { WindowsErrorDebugLog("OpenSCManager"); }
   SC_HANDLE service_handle{ OpenService(manager_handle, L"W32Time", SERVICE_CONTROL_CONTINUE) };
-  if (service_handle == NULL) { WindowsErrorDebugLog("OpenService"); }
+  if (service_handle == nullptr) { WindowsErrorDebugLog("OpenService"); }
 
   SERVICE_CONTROL_STATUS_REASON_PARAMS status;
   BOOL result{ ControlServiceEx(service_handle, SERVICE_CONTROL_CONTINUE, 1, &status) };

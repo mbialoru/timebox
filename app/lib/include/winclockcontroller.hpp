@@ -23,9 +23,8 @@ public:
 
 private:
   HRESULT UpdateProcessTokenPrivileges();
-  void GetInitialParameters() const;
   void SystemTimeAdjustmentWrapper(long);
-  void LogCurrentClockAdjustments();
+  void PrintCurrentClockAdjustments() const;
 
   DWORD m_initial_adjustment_legacy{ 0 };
   DWORD m_current_adjustment_legacy{ 0 };
