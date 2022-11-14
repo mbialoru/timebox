@@ -71,14 +71,12 @@ TEST_F(Test_ClockController, linux_adjust_clock)
 
 TEST_F(Test_ClockController, windows_adjust_clock)
 {
-  boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
-
   std::shared_ptr<PID<double>> p_pid{ std::make_shared<PID<double>>(2.0, 1.0, 0.001, 0) };
   std::unique_ptr<ClockController> p_clockcontroller{ std::make_unique<WinClockController>(0, p_pid, 0.001) };
 
   TimeboxReadout readout{ ConvertTimepointToString(std::chrono::system_clock::now() - std::chrono::seconds(10)) + ".0",
     std::chrono::system_clock::now() };
-  std::this_thread::sleep_for(std::chrono::milliseconds(600));
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   EXPECT_NO_THROW(p_clockcontroller->AdjustClock(readout));
 
   p_clockcontroller.reset();

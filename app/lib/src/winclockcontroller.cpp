@@ -7,12 +7,12 @@ WinClockController::WinClockController(const std::size_t t_minimal_delay,
   const double t_resolution)
   : ClockController(t_minimal_delay), mp_pid(std::move(t_pid))
 {
-  if (!CheckAdminPrivileges()) { throw InsufficientPermissionsError(); }
+  if (not CheckAdminPrivileges()) { throw InsufficientPermissionsError(); }
   UpdateProcessTokenPrivileges();
 
   BOOL enabled_legacy{ 0 };
   DWORD time_increment_legacy{ 0 };
-  if (!GetSystemTimeAdjustment(&m_initial_adjustment_legacy, &time_increment_legacy, &enabled_legacy)) {
+  if (not GetSystemTimeAdjustment(&m_initial_adjustment_legacy, &time_increment_legacy, &enabled_legacy)) {
     BOOST_LOG_TRIVIAL(error) << "Failed to read system time adjustment" << HRESULT_FROM_WIN32(GetLastError());
     return;
   }
@@ -26,7 +26,7 @@ WinClockController::WinClockController(const std::size_t t_minimal_delay,
 WinClockController::~WinClockController()
 {
   BOOST_LOG_TRIVIAL(info) << "Reverting system clock adjustment to original value";
-  if (!SetSystemTimeAdjustment(m_initial_adjustment_legacy, FALSE)) {
+  if (not SetSystemTimeAdjustment(m_initial_adjustment_legacy, FALSE)) {
     BOOST_LOG_TRIVIAL(error) << "Failed to set system time adjustment " << HRESULT_FROM_WIN32(GetLastError());
     return;
   }
@@ -66,7 +66,7 @@ void WinClockController::PrintCurrentClockAdjustments() const
   BOOL enabled_legacy{ 0 };
   HRESULT hresult_legacy{ S_OK };
 
-  if (!GetSystemTimeAdjustment(&current_adjustment_legacy, &time_increment_legacy, &enabled_legacy)) {
+  if (not GetSystemTimeAdjustment(&current_adjustment_legacy, &time_increment_legacy, &enabled_legacy)) {
     BOOST_LOG_TRIVIAL(error) << "Failed to read system time adjustment" << HRESULT_FROM_WIN32(GetLastError());
   }
 
@@ -89,12 +89,12 @@ void WinClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment
   DWORD adjustment_units = static_cast<DWORD>(
     static_cast<double>(t_ppm_adjustment * m_performance_counter_frequency.QuadPart / m_micro_per_second));
 
-  BOOST_LOG_TRIVIAL(info) << "Adjusting system clock by " << ((t_ppm_adjustment > 0) ? "+" : "-")
+  BOOST_LOG_TRIVIAL(info) << "Adjusting system clock by " << ((t_ppm_adjustment >= 0) ? "+" : "-")
                           << std::to_string(t_ppm_adjustment) << " PPM";
 
   m_current_adjustment_legacy += adjustment_units;
 
-  if (!SetSystemTimeAdjustment(m_current_adjustment_legacy, FALSE)) {
+  if (not SetSystemTimeAdjustment(m_current_adjustment_legacy, FALSE)) {
     BOOST_LOG_TRIVIAL(error) << "Failed to set system time adjustment " << HRESULT_FROM_WIN32(GetLastError());
     return;
   }
@@ -109,14 +109,14 @@ HRESULT WinClockController::UpdateProcessTokenPrivileges()
   TOKEN_PRIVILEGES token_privileges{ 0 };
   LUID luid;
 
-  if (!LookupPrivilegeValue(NULL, SE_SYSTEMTIME_NAME, &luid)) {
+  if (not LookupPrivilegeValue(NULL, SE_SYSTEMTIME_NAME, &luid)) {
     hresult = HRESULT_FROM_WIN32(GetLastError());
     BOOST_LOG_TRIVIAL(error) << "Failed to lookup privilege value " << hresult;
     return hresult;
   }
 
   // get token for our process
-  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &process_token)) {
+  if (not OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &process_token)) {
     hresult = HRESULT_FROM_WIN32(GetLastError());
     BOOST_LOG_TRIVIAL(error) << "Failed to open process token " << hresult;
     return hresult;
@@ -127,7 +127,7 @@ HRESULT WinClockController::UpdateProcessTokenPrivileges()
   token_privileges.Privileges[0].Luid = luid;
   token_privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
-  if (!AdjustTokenPrivileges(process_token, FALSE, &token_privileges, sizeof(token_privileges), NULL, NULL)) {
+  if (not AdjustTokenPrivileges(process_token, FALSE, &token_privileges, sizeof(token_privileges), NULL, NULL)) {
     hresult = HRESULT_FROM_WIN32(GetLastError());
     BOOST_LOG_TRIVIAL(error) << "Failed to adjust process token privileges " << hresult;
   } else {
