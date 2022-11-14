@@ -8,12 +8,15 @@ WinClockController::WinClockController(const std::size_t t_minimal_delay,
   : ClockController(t_minimal_delay), mp_pid(std::move(t_pid))
 {
   if (!CheckAdminPrivileges()) { throw InsufficientPermissionsError(); }
-  if (!GetSystemTimeAdjustment(&m_initial_adjustment_legacy, 0, 0)) {
+  UpdateProcessTokenPrivileges();
+
+  BOOL enabled_legacy{ 0 };
+  DWORD time_increment_legacy{ 0 };
+  if (!GetSystemTimeAdjustment(&m_initial_adjustment_legacy, &time_increment_legacy, &enabled_legacy)) {
     BOOST_LOG_TRIVIAL(error) << "Failed to read system time adjustment" << HRESULT_FROM_WIN32(GetLastError());
     return;
   }
 
-  UpdateProcessTokenPrivileges();
   m_current_adjustment_legacy = m_initial_adjustment_legacy;
   static_cast<void>(QueryPerformanceCounter(&m_performance_counter_frequency));
   BOOST_LOG_TRIVIAL(debug) << "System performance counter frequency: "
