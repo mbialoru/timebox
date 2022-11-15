@@ -123,22 +123,22 @@ private:
     new_adjustment_units =
       static_cast<DWORD>(static_cast<float>(t_ppm_adjustment * perf_counter_frequency.QuadPart / micro_per_second));
 
-    // Adjust forward
-    BOOST_LOG_TRIVIAL(info) << "Adjusting system clock by +" << std::to_string(t_ppm_adjustment) << " PPM (+"
-                            << std::to_string(new_adjustment_units) << " adjustment units)";
-    if (!SetSystemTimeAdjustment(current_adjustment_legacy + new_adjustment_units, FALSE)) {
-      BOOST_LOG_TRIVIAL(error) << "Failed to set system time adjustment " << HRESULT_FROM_WIN32(GetLastError());
-      return;
-    }
+    // // Adjust forward
+    // BOOST_LOG_TRIVIAL(info) << "Adjusting system clock by +" << std::to_string(t_ppm_adjustment) << " PPM (+"
+    //                         << std::to_string(new_adjustment_units) << " adjustment units)";
+    // if (!SetSystemTimeAdjustment(current_adjustment_legacy + new_adjustment_units, FALSE)) {
+    //   BOOST_LOG_TRIVIAL(error) << "Failed to set system time adjustment " << HRESULT_FROM_WIN32(GetLastError());
+    //   return;
+    // }
 
-    GetCurrentClockAdjustments();
+    // GetCurrentClockAdjustments();
 
-    // Revert changes
-    BOOST_LOG_TRIVIAL(info) << "Reverting changes";
-    if (!SetSystemTimeAdjustment(current_adjustment_legacy, FALSE)) {
-      BOOST_LOG_TRIVIAL(error) << "Failed to set system time adjustment";
-      HRESULT_FROM_WIN32(GetLastError());
-    }
+    // // Revert changes
+    // BOOST_LOG_TRIVIAL(info) << "Reverting changes";
+    // if (!SetSystemTimeAdjustment(current_adjustment_legacy, FALSE)) {
+    //   BOOST_LOG_TRIVIAL(error) << "Failed to set system time adjustment";
+    //   HRESULT_FROM_WIN32(GetLastError());
+    // }
 
     GetCurrentClockAdjustments();
 
@@ -151,6 +151,7 @@ private:
     }
 
     GetCurrentClockAdjustments();
+    std::this_thread::sleep_for(std::chrono::seconds(60));
 
     // Revert changes
     BOOST_LOG_TRIVIAL(info) << "Reverting changes";

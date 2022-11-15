@@ -12,10 +12,14 @@ WinClockController::WinClockController(const std::size_t t_minimal_delay,
 
   BOOL enabled_legacy{ 0 };
   DWORD time_increment_legacy{ 0 };
+  BOOST_LOG_TRIVIAL(debug) << "Reading initial system time adjustment";
   if (not GetSystemTimeAdjustment(&m_initial_adjustment_legacy, &time_increment_legacy, &enabled_legacy)) {
-    BOOST_LOG_TRIVIAL(error) << "Failed to read system time adjustment" << HRESULT_FROM_WIN32(GetLastError());
+    BOOST_LOG_TRIVIAL(error) << "Failed to read system time adjustment, error code: "
+                             << HRESULT_FROM_WIN32(GetLastError());
     return;
   }
+  BOOST_LOG_TRIVIAL(debug) << "Obtained initial system time adjustment: "
+                           << std::to_string(m_initial_adjustment_legacy);
 
   m_current_adjustment_legacy = m_initial_adjustment_legacy;
   static_cast<void>(QueryPerformanceCounter(&m_performance_counter_frequency));
@@ -26,8 +30,10 @@ WinClockController::WinClockController(const std::size_t t_minimal_delay,
 WinClockController::~WinClockController()
 {
   BOOST_LOG_TRIVIAL(info) << "Reverting system clock adjustment to original value";
+  BOOST_LOG_TRIVIAL(debug) << "Applied initial system time adjustment: " << std::to_string(m_initial_adjustment_legacy);
   if (not SetSystemTimeAdjustment(m_initial_adjustment_legacy, FALSE)) {
-    BOOST_LOG_TRIVIAL(error) << "Failed to set system time adjustment " << HRESULT_FROM_WIN32(GetLastError());
+    BOOST_LOG_TRIVIAL(error) << "Failed to set system time adjustment, error code: "
+                             << HRESULT_FROM_WIN32(GetLastError());
     return;
   }
 }
@@ -43,12 +49,13 @@ void WinClockController::AdjustClock(const TimeboxReadout t_readout)
   }
 
   auto from_str = ConvertStringToTimepoint(time_string);
-  auto time_difference = now - from_str;
+  auto time_difference = std::chrono::duration_cast<std::chrono::microseconds>(now - from_str);
   time_difference_history.push_back(time_difference);
-  BOOST_LOG_TRIVIAL(debug) << "Clock difference is " << time_difference.count() << " nanoseconds";
+  BOOST_LOG_TRIVIAL(debug) << "Clock difference is " << time_difference.count() << " microseconds";
 
-  auto processing_time = std::chrono::system_clock::now() - time_stamp;
-  BOOST_LOG_TRIVIAL(debug) << "Processing time was " << processing_time.count() << " nanoseconds";
+  auto processing_time =
+    std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - time_stamp);
+  BOOST_LOG_TRIVIAL(debug) << "Processing time was " << processing_time.count() << " microseconds";
 
   mp_pid->UpdateLimited(static_cast<double>(time_difference.count()), 1);// For now we assume t_tick is always 1s (PPS)
   auto pid_output = mp_pid->GetOutputLimited();
@@ -67,7 +74,8 @@ void WinClockController::PrintCurrentClockAdjustments() const
   HRESULT hresult_legacy{ S_OK };
 
   if (not GetSystemTimeAdjustment(&current_adjustment_legacy, &time_increment_legacy, &enabled_legacy)) {
-    BOOST_LOG_TRIVIAL(error) << "Failed to read system time adjustment" << HRESULT_FROM_WIN32(GetLastError());
+    BOOST_LOG_TRIVIAL(error) << "Failed to read system time adjustment, error code: "
+                             << HRESULT_FROM_WIN32(GetLastError());
   }
 
   std::stringstream message;
@@ -86,19 +94,36 @@ void WinClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment
     return;
   }
 
-  DWORD adjustment_units = static_cast<DWORD>(
-    static_cast<double>(t_ppm_adjustment * m_performance_counter_frequency.QuadPart / m_micro_per_second));
+  double adjustment_units_raw{ t_ppm_adjustment * (m_performance_counter_frequency.QuadPart / m_micro_per_second) };
+  DWORD adjustment_units{ static_cast<DWORD>(std::abs(adjustment_units_raw)) };
 
-  BOOST_LOG_TRIVIAL(info) << "Adjusting system clock by " << ((t_ppm_adjustment >= 0) ? "+" : "-")
-                          << std::to_string(t_ppm_adjustment) << " PPM";
+  BOOST_LOG_TRIVIAL(info) << "Adjusting system clock by " << std::to_string(t_ppm_adjustment) << " PPM ("
+                          << ((t_ppm_adjustment >= 0) ? "+" : "-") << std::to_string(adjustment_units)
+                          << " adjustment units";
 
-  m_current_adjustment_legacy += adjustment_units;
-
-  if (not SetSystemTimeAdjustment(m_current_adjustment_legacy, FALSE)) {
-    BOOST_LOG_TRIVIAL(error) << "Failed to set system time adjustment " << HRESULT_FROM_WIN32(GetLastError());
-    return;
+  // NOTE: DWORD size limitations, prevent wraparound
+  // ref: https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2
+  if (t_ppm_adjustment > 0) {
+    if (m_current_adjustment_legacy + adjustment_units >= 4294967295) {
+      m_current_adjustment_legacy = 4294967295;
+    } else {
+      m_current_adjustment_legacy += adjustment_units;
+    }
+  } else {
+    if (m_current_adjustment_legacy >= adjustment_units) {
+      m_current_adjustment_legacy -= adjustment_units;
+    } else {
+      m_current_adjustment_legacy = 0;
+    }
   }
 
+  BOOST_LOG_TRIVIAL(debug) << "Current adjustment legacy " << std::to_string(m_current_adjustment_legacy);
+
+  if (not SetSystemTimeAdjustment(m_current_adjustment_legacy, FALSE)) {
+    BOOST_LOG_TRIVIAL(error) << "Failed to set system time adjustment, error code: "
+                             << HRESULT_FROM_WIN32(GetLastError());
+    return;
+  }
   m_adjustment_history.push_back(t_ppm_adjustment);
 }
 
@@ -111,14 +136,14 @@ HRESULT WinClockController::UpdateProcessTokenPrivileges()
 
   if (not LookupPrivilegeValue(NULL, SE_SYSTEMTIME_NAME, &luid)) {
     hresult = HRESULT_FROM_WIN32(GetLastError());
-    BOOST_LOG_TRIVIAL(error) << "Failed to lookup privilege value " << hresult;
+    BOOST_LOG_TRIVIAL(error) << "Failed to lookup privilege value, error code: " << hresult;
     return hresult;
   }
 
   // get token for our process
   if (not OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &process_token)) {
     hresult = HRESULT_FROM_WIN32(GetLastError());
-    BOOST_LOG_TRIVIAL(error) << "Failed to open process token " << hresult;
+    BOOST_LOG_TRIVIAL(error) << "Failed to open process token, error code: " << hresult;
     return hresult;
   }
 
@@ -128,11 +153,11 @@ HRESULT WinClockController::UpdateProcessTokenPrivileges()
   token_privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
   if (not AdjustTokenPrivileges(process_token, FALSE, &token_privileges, sizeof(token_privileges), NULL, NULL)) {
-    hresult = HRESULT_FROM_WIN32(GetLastError());
-    BOOST_LOG_TRIVIAL(error) << "Failed to adjust process token privileges " << hresult;
+    BOOST_LOG_TRIVIAL(error) << "Failed to adjust process token privileges, error code: "
+                             << HRESULT_FROM_WIN32(GetLastError());
   } else {
     hresult = S_OK;
-    BOOST_LOG_TRIVIAL(info) << "Added SYSTEMTIME privilege to the process token";
+    BOOST_LOG_TRIVIAL(debug) << "Added SYSTEMTIME privilege to the process token";
   }
 
   if (process_token != nullptr) { CloseHandle(process_token); }
