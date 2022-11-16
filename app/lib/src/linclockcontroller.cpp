@@ -4,7 +4,7 @@ using namespace TimeBox;
 
 LinClockController::LinClockController(const char t_clock_mode,
   std::shared_ptr<PID<double>> t_pid,
-  const double t_resolution,
+  [[maybe_unused]] const double t_resolution,
   const std::size_t t_minimal_delay)
   : ClockController(t_minimal_delay), m_clock_mode(t_clock_mode), mp_pid(std::move(t_pid))
 {

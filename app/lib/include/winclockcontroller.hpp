@@ -4,6 +4,7 @@
 #pragma once
 
 #include <boost/log/trivial.hpp>
+#include <limits>
 #include <sysinfoapi.h>
 #include <windows.h>
 
@@ -26,10 +27,11 @@ private:
   void SystemTimeAdjustmentWrapper(long);
   void PrintCurrentClockAdjustments() const;
 
-  DWORD m_initial_adjustment_legacy{ 0 };
-  DWORD m_current_adjustment_legacy{ 0 };
-  LARGE_INTEGER m_performance_counter_frequency{ 0 };
-  static constexpr DWORD m_micro_per_second{ 1000000 };
+  DWORD m_initial_adjustment_legacy{ 0UL };
+  DWORD m_current_adjustment_legacy{ 0UL };
+  LARGE_INTEGER m_performance_counter_frequency{ 0L };
+  static constexpr DWORD m_min_adjustment{ 0UL };
+  static constexpr DWORD m_micro_per_second{ 1000000UL };
   std::shared_ptr<PID<double>> mp_pid;
   std::vector<long> m_adjustment_history;
 };

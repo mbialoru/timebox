@@ -4,7 +4,7 @@ using namespace TimeBox;
 
 WinClockController::WinClockController(const std::size_t t_minimal_delay,
   std::shared_ptr<PID<double>> t_pid,
-  const double t_resolution)
+  [[maybe_unused]] const double t_resolution)
   : ClockController(t_minimal_delay), mp_pid(std::move(t_pid))
 {
   if (not CheckAdminPrivileges()) { throw InsufficientPermissionsError(); }
@@ -94,26 +94,26 @@ void WinClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment
     return;
   }
 
-  double adjustment_units_raw{ t_ppm_adjustment * (m_performance_counter_frequency.QuadPart / m_micro_per_second) };
-  DWORD adjustment_units{ static_cast<DWORD>(std::abs(adjustment_units_raw)) };
+  double scaling_factor{ static_cast<double>(m_performance_counter_frequency.QuadPart / m_micro_per_second) };
+  DWORD adjustment_units{ static_cast<DWORD>(std::abs(t_ppm_adjustment * scaling_factor)) };
 
   BOOST_LOG_TRIVIAL(info) << "Adjusting system clock by " << std::to_string(t_ppm_adjustment) << " PPM ("
                           << ((t_ppm_adjustment >= 0) ? "+" : "-") << std::to_string(adjustment_units)
                           << " adjustment units";
 
-  // NOTE: DWORD size limitations, prevent wraparound
+  // NOTE: DWORD (unsigned long) size limitations, prevent wraparound
   // ref: https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2
   if (t_ppm_adjustment > 0) {
-    if (m_current_adjustment_legacy + adjustment_units >= 4294967295) {
-      m_current_adjustment_legacy = 4294967295;
+    if ((m_current_adjustment_legacy + adjustment_units) >= std::numeric_limits<unsigned long>::max()) {
+      m_current_adjustment_legacy = std::numeric_limits<unsigned long>::max();
     } else {
       m_current_adjustment_legacy += adjustment_units;
     }
   } else {
-    if (m_current_adjustment_legacy >= adjustment_units) {
+    if ((m_current_adjustment_legacy - adjustment_units) <= m_min_adjustment) {
       m_current_adjustment_legacy -= adjustment_units;
     } else {
-      m_current_adjustment_legacy = 0;
+      m_current_adjustment_legacy = m_min_adjustment;
     }
   }
 
