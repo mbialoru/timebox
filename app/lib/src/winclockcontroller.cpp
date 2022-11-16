@@ -22,7 +22,7 @@ WinClockController::WinClockController(const std::size_t t_minimal_delay,
                            << std::to_string(m_initial_adjustment_legacy);
 
   m_current_adjustment_legacy = m_initial_adjustment_legacy;
-  static_cast<void>(QueryPerformanceCounter(&m_performance_counter_frequency));
+  std::ignore = QueryPerformanceFrequency(&m_performance_counter_frequency);
   BOOST_LOG_TRIVIAL(debug) << "System performance counter frequency: "
                            << std::to_string(m_performance_counter_frequency.QuadPart);
 }

@@ -116,7 +116,7 @@ private:
       return;
     }
 
-    static_cast<void>(QueryPerformanceCounter(&perf_counter_frequency));
+    std::ignore = QueryPerformanceFrequency(&perf_counter_frequency);
     BOOST_LOG_TRIVIAL(info) << "System performance counter frequency "
                             << std::to_string(perf_counter_frequency.QuadPart);
 
