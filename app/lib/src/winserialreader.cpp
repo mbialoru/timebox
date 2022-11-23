@@ -14,15 +14,88 @@ WinSerialReader::WinSerialReader(const char *t_device,
 
 WinSerialReader::WinSerialReader(std::string t_device,
   std::size_t t_baud,
-  std::function<void(TimeboxReadout)> t_callback)
-  : m_open(false), m_error_flag(false), m_callback(std::move(t_callback))
+  std::function<void(TimeboxReadout)> t_callback,
+  boost::asio::serial_port_base::parity t_parity,
+  boost::asio::serial_port_base::character_size t_character_size,
+  boost::asio::serial_port_base::flow_control t_flow_control,
+  boost::asio::serial_port_base::stop_bits t_stop_bits)
+  : m_open(false), m_error_flag(false), m_callback(std::move(t_callback)), m_parity(t_parity),
+    m_character_size(t_character_size), m_flow_control(t_flow_control), m_stop_bits(t_stop_bits)
 {
-  using namespace boost::asio;
-  mp_serial_port = std::make_shared<serial_port>(m_io_service);
-  serial_port_base::parity parity{ serial_port_base::parity::none };
-  serial_port_base::character_size character_size{ serial_port_base::character_size(8) };
-  serial_port_base::flow_control flow_control{ serial_port_base::flow_control::none };
-  serial_port_base::stop_bits stop_bits{ serial_port_base::stop_bits(serial_port_base::stop_bits::one) };
+  mp_serial_port = std::make_shared<boost::asio::serial_port>(m_io_service);
+}
+
+WinSerialReader::~WinSerialReader()
+{
+  m_callback = nullptr;
+  if (IsOpen()) {
+    try {
+      Close();
+    } catch (...) {}
+  }
+}
+
+void WinSerialReader::Open(const std::string &t_device,
+  std::size_t t_baud,
+  boost::asio::serial_port_base::parity t_parity,
+  boost::asio::serial_port_base::character_size t_character_size,
+  boost::asio::serial_port_base::flow_control t_flow_control,
+  boost::asio::serial_port_base::stop_bits t_stop_bits)
+{
+  if (IsOpen()) { Close(); }
+
+  SetErrorStatus(true);// In case of exception - it stays true
+  mp_serial_port->open(t_device);
+  mp_serial_port->set_option(boost::asio::serial_port_base::baud_rate(t_baud));
+  mp_serial_port->set_option(t_parity);
+  mp_serial_port->set_option(t_character_size);
+  mp_serial_port->set_option(t_flow_control);
+  mp_serial_port->set_option(t_stop_bits);
+
+  // m_io_service.post(
+  //   std::bind(&boost::asio::serial_port::read_some, boost::asio::buffer(m_read_buffer, read_buffer_size), ));
+  std::thread thread{ std::bind(
+    static_cast<std::size_t (boost::asio::io_service::*)()>(&boost::asio::io_service::run), &m_io_service) };
+  m_worker_thread.swap(thread);
+
+  SetErrorStatus(false);
+  m_open = true;
+}
+
+void WinSerialReader::ClosePort()
+{
+  boost::system::error_code error_code;
+  mp_serial_port->cancel(error_code);
+  if (error_code) {
+    SetErrorStatus(true);
+    BOOST_LOG_TRIVIAL(error) << "Error canceling serial connection";
+  }
+  mp_serial_port->close(error_code);
+  if (error_code) {
+    SetErrorStatus(true);
+    BOOST_LOG_TRIVIAL(error) << "Error closing serial connection";
+  }
+}
+
+void WinSerialReader::Close()
+{
+  if (not IsOpen()) { return; }
+  m_open = false;
+  m_io_service.post(std::bind(&WinSerialReader::ClosePort, this));
+  if (m_worker_thread.joinable()) { m_worker_thread.join(); }
+  m_io_service.reset();
+  if (ErrorStatus()) {
+    BOOST_LOG_TRIVIAL(error) << "Error while closing serial port";
+    throw(std::system_error(boost::system::error_code()));
+  }
+}
+
+bool WinSerialReader::IsOpen() const { return m_open; }
+
+bool WinSerialReader::ErrorStatus() const
+{
+  std::lock_guard<std::mutex> lock(m_error_mutex);
+  return m_error_flag;
 }
 
 std::size_t WinSerialReader::Read(char *t_data, std::size_t t_buffer_size)
@@ -66,19 +139,24 @@ std::vector<char>::iterator WinSerialReader::FindInBuffer(std::vector<char> &t_b
 {
   if (t_needle.size() == 0) { return t_buffer.end(); }
   bool found{ false };
+  bool mismatch{ false };
   std::vector<char>::iterator iterator{ t_buffer.begin() };
+
   while (not found) {
+    mismatch = false;
     std::vector<char>::iterator result{ std::find(iterator, t_buffer.end(), t_needle[0]) };
     if (result == t_buffer.end()) { return t_buffer.end(); }
 
     for (std::size_t i = 0; i < t_needle.size(); i++) {
       std::vector<char>::iterator tmp{ result + i };
       if (result == t_buffer.end()) { return t_buffer.end(); }
-      if (t_needle[i] != *tmp) { goto mismatch; }
-      // TODO: Figure this out to refactor out goto statement
+      if (t_needle[i] != *tmp) {
+        mismatch = true;
+        iterator = result + 1;
+        break;
+      }
     }
+    if (mismatch) { continue; }
     return result;
-  mismatch:
-    iterator = result + 1;
   }
 }

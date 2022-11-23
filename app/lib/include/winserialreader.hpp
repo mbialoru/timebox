@@ -60,7 +60,14 @@ public:
   static constexpr std::size_t read_buffer_size{ 512 };
 
 private:
+  void ClosePort();
+  void SetErrorStatus(bool);
   static std::vector<char>::iterator FindInBuffer(std::vector<char> &, const std::string &);
+
+  boost::asio::serial_port_base::parity m_parity;
+  boost::asio::serial_port_base::character_size m_character_size;
+  boost::asio::serial_port_base::flow_control m_flow_control;
+  boost::asio::serial_port_base::stop_bits m_stop_bits;
 
   boost::asio::io_service m_io_service;
   std::shared_ptr<boost::asio::serial_port> mp_serial_port;
@@ -74,6 +81,7 @@ private:
   std::size_t m_write_buffer_size;
   std::mutex m_write_queue_mutex;
 
+  std::array<char, read_buffer_size> m_read_buffer;
   std::vector<char> m_read_queue;
   std::mutex m_read_queue_mutex;
 
