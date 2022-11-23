@@ -4,8 +4,12 @@ using namespace TimeBox;
 
 WinSerialReader::WinSerialReader(const char *t_device,
   std::size_t t_baud,
-  std::function<void(TimeboxReadout)> t_callback)
-  : WinSerialReader(std::string(t_device), t_baud, t_callback)
+  std::function<void(TimeboxReadout)> t_callback,
+  boost::asio::serial_port_base::parity t_parity,
+  boost::asio::serial_port_base::character_size t_character_size,
+  boost::asio::serial_port_base::flow_control t_flow_control,
+  boost::asio::serial_port_base::stop_bits t_stop_bits)
+  : WinSerialReader(std::string(t_device), t_baud, t_callback, t_parity, t_character_size, t_flow_control, t_stop_bits)
 {}
 
 WinSerialReader::WinSerialReader(std::string t_device,

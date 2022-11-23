@@ -16,11 +16,34 @@ namespace TimeBox {
 class WinSerialReader final : private boost::noncopyable
 {
 public:
-  WinSerialReader(const char *, std::size_t, std::function<void(TimeboxReadout)>);
-  WinSerialReader(std::string, std::size_t, std::function<void(TimeboxReadout)>);
-  virtual ~WinSerialReader() = 0;
+  WinSerialReader(const char *,
+    std::size_t,
+    std::function<void(TimeboxReadout)>,
+    boost::asio::serial_port_base::parity = boost::asio::serial_port_base::parity(
+      boost::asio::serial_port_base::parity::none),
+    boost::asio::serial_port_base::character_size = boost::asio::serial_port_base::character_size(8),
+    boost::asio::serial_port_base::flow_control = boost::asio::serial_port_base::flow_control(
+      boost::asio::serial_port_base::flow_control::none),
+    boost::asio::serial_port_base::stop_bits = boost::asio::serial_port_base::stop_bits(
+      boost::asio::serial_port_base::stop_bits::one));
+  WinSerialReader(std::string,
+    std::size_t,
+    std::function<void(TimeboxReadout)>,
+    boost::asio::serial_port_base::parity = boost::asio::serial_port_base::parity(
+      boost::asio::serial_port_base::parity::none),
+    boost::asio::serial_port_base::character_size = boost::asio::serial_port_base::character_size(8),
+    boost::asio::serial_port_base::flow_control = boost::asio::serial_port_base::flow_control(
+      boost::asio::serial_port_base::flow_control::none),
+    boost::asio::serial_port_base::stop_bits = boost::asio::serial_port_base::stop_bits(
+      boost::asio::serial_port_base::stop_bits::one));
+  virtual ~WinSerialReader();
 
-  void Open(const std::string &, std::size_t);
+  void Open(const std::string &,
+    std::size_t,
+    boost::asio::serial_port_base::parity,
+    boost::asio::serial_port_base::character_size,
+    boost::asio::serial_port_base::flow_control,
+    boost::asio::serial_port_base::stop_bits);
   void Close();
   bool IsOpen() const;
   bool ErrorStatus() const;
