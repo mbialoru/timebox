@@ -4,9 +4,11 @@
 #pragma once
 
 #include <boost/asio.hpp>
+#include <boost/bind.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_array.hpp>
+#include <optional>
 #include <windows.h>
 
 #include "utilities.hpp"
@@ -16,19 +18,7 @@ namespace TimeBox {
 class WinSerialReader final : private boost::noncopyable
 {
 public:
-  WinSerialReader(const char *,
-    std::size_t,
-    std::function<void(TimeboxReadout)>,
-    boost::asio::serial_port_base::parity = boost::asio::serial_port_base::parity(
-      boost::asio::serial_port_base::parity::none),
-    boost::asio::serial_port_base::character_size = boost::asio::serial_port_base::character_size(8),
-    boost::asio::serial_port_base::flow_control = boost::asio::serial_port_base::flow_control(
-      boost::asio::serial_port_base::flow_control::none),
-    boost::asio::serial_port_base::stop_bits = boost::asio::serial_port_base::stop_bits(
-      boost::asio::serial_port_base::stop_bits::one));
-  WinSerialReader(std::string,
-    std::size_t,
-    std::function<void(TimeboxReadout)>,
+  WinSerialReader(std::function<void(TimeboxReadout)>,
     boost::asio::serial_port_base::parity = boost::asio::serial_port_base::parity(
       boost::asio::serial_port_base::parity::none),
     boost::asio::serial_port_base::character_size = boost::asio::serial_port_base::character_size(8),
@@ -38,12 +28,18 @@ public:
       boost::asio::serial_port_base::stop_bits::one));
   virtual ~WinSerialReader();
 
+  void Open(const char *,
+    std::size_t,
+    std::optional<boost::asio::serial_port_base::parity> = std::nullopt,
+    std::optional<boost::asio::serial_port_base::character_size> = std::nullopt,
+    std::optional<boost::asio::serial_port_base::flow_control> = std::nullopt,
+    std::optional<boost::asio::serial_port_base::stop_bits> = std::nullopt);
   void Open(const std::string &,
     std::size_t,
-    boost::asio::serial_port_base::parity,
-    boost::asio::serial_port_base::character_size,
-    boost::asio::serial_port_base::flow_control,
-    boost::asio::serial_port_base::stop_bits);
+    std::optional<boost::asio::serial_port_base::parity> = std::nullopt,
+    std::optional<boost::asio::serial_port_base::character_size> = std::nullopt,
+    std::optional<boost::asio::serial_port_base::flow_control> = std::nullopt,
+    std::optional<boost::asio::serial_port_base::stop_bits> = std::nullopt);
   void Close();
   bool IsOpen() const;
   bool ErrorStatus() const;
@@ -60,7 +56,12 @@ public:
   static constexpr std::size_t read_buffer_size{ 512 };
 
 private:
+  void ReadBegin();
+  void ReadEnd(const std::system_error &, std::size_t);
+  void WriteBegin();
+  void WriteEnd(const std::system_error &);
   void ClosePort();
+
   void SetErrorStatus(bool);
   static std::vector<char>::iterator FindInBuffer(std::vector<char> &, const std::string &);
 
