@@ -140,9 +140,9 @@ void WinSerialReader::ReadBegin()
       &WinSerialReader::ReadEnd, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }
 
-void WinSerialReader::ReadEnd(const std::system_error &t_error, std::size_t t_bytes)
+void WinSerialReader::ReadEnd(const boost::system::error_code &t_error, std::size_t t_bytes)
 {
-  if (t_error.code()) {
+  if (t_error) {
     if (IsOpen()) {
       Close();
       SetErrorStatus(true);

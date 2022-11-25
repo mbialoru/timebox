@@ -57,7 +57,7 @@ public:
 
 private:
   void ReadBegin();
-  void ReadEnd(const std::system_error &, std::size_t);
+  void ReadEnd(const boost::system::error_code &, std::size_t);
   void WriteBegin();
   void WriteEnd(const std::system_error &);
   void ClosePort();

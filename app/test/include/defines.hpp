@@ -2,7 +2,7 @@
 #define TEST_DEFINES_HPP
 
 // Conditional compile
-#define USING_REAL_HARDWARE false
+#define USING_REAL_HARDWARE true
 
 // Constexpr
 constexpr bool LONG_TESTS = true;

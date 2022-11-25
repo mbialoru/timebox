@@ -3,6 +3,8 @@
 #include <boost/log/trivial.hpp>
 #include <gtest/gtest.h>
 
+#define WIN32_LEAN_AND_MEAN// Fixes "WinSock.h has already been included" error
+
 #include "defines.hpp"
 #include "utilities.hpp"
 
@@ -41,32 +43,34 @@ public:
 int MyCallback_calls{ 0 };
 void MyCallback(TimeboxReadout) { MyCallback_calls++; }
 
-TEST_F(Test_SerialReader, thread_callback)
-{
-#if USING_REAL_HARDWARE
-#if defined(__unix__)
-  LinSerialReader sr{ "/dev/ttyACM0", 9600, std::bind(MyCallback, std::placeholders::_1) };
-#elif defined(_WIN64) && !defined(__CYGWIN__)
-  WinSerialReader sr{ "COM1", 9600, std::bind(MyCallback, std::placeholders::_1) };
-#endif
-#else
-  FakeSerialReader sr{ "/dev/ttyACM0", 9600, std::bind(&Test_SerialReader::CallbackDummy, this) };
-#endif
-  std::this_thread::sleep_for(std::chrono::seconds(5));
-  EXPECT_TRUE(callback_calls > 3);
-}
+// TEST_F(Test_SerialReader, thread_callback)
+// {
+// #if USING_REAL_HARDWARE
+// #if defined(__unix__)
+//   LinSerialReader sr{ "/dev/ttyACM0", 9600, std::bind(MyCallback, std::placeholders::_1) };
+// #elif defined(_WIN64) && !defined(__CYGWIN__)
+//   WinSerialReader sr{ "COM1", 9600, std::bind(MyCallback, std::placeholders::_1) };
+// #endif
+// #else
+//   FakeSerialReader sr{ "/dev/ttyACM0", 9600, std::bind(&Test_SerialReader::CallbackDummy, this) };
+// #endif
+//   std::this_thread::sleep_for(std::chrono::seconds(5));
+//   EXPECT_TRUE(callback_calls > 3);
+// }
 
-TEST_F(Test_SerialReader, using_free_function_callback)
-{
-#if USING_REAL_HARDWARE
-#if defined(__unix__)
-  LinSerialReader sr{ "/dev/ttyACM0", 9600, std::bind(MyCallback, std::placeholders::_1) };
-#elif defined(_WIN64) && !defined(__CYGWIN__)
-  WinSerialReader sr{ "COM1", 9600, std::bind(MyCallback, std::placeholders::_1) };
-#endif
-#else
-  FakeSerialReader sr{ "/dev/ttyACM0", 9600, std::bind(MyCallback, std::placeholders::_1) };
-#endif
-  std::this_thread::sleep_for(std::chrono::seconds(5));
-  EXPECT_TRUE(MyCallback_calls > 3);
-}
+// TEST_F(Test_SerialReader, using_free_function_callback)
+// {
+// #if USING_REAL_HARDWARE
+// #if defined(__unix__)
+//   LinSerialReader sr{ "/dev/ttyACM0", 9600, std::bind(MyCallback, std::placeholders::_1) };
+// #elif defined(_WIN64) && !defined(__CYGWIN__)
+//   WinSerialReader sr{ "COM1", 9600, std::bind(MyCallback, std::placeholders::_1) };
+// #endif
+// #else
+//   FakeSerialReader sr{ "/dev/ttyACM0", 9600, std::bind(MyCallback, std::placeholders::_1) };
+// #endif
+//   std::this_thread::sleep_for(std::chrono::seconds(5));
+//   EXPECT_TRUE(MyCallback_calls > 3);
+// }
+
+TEST(Test_SerialReader, new_implementation) { WinSerialReader sr{ std::bind(MyCallback, std::placeholders::_1) }; }
