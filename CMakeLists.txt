@@ -18,9 +18,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(ENABLE_DEVELOPER_MODE
   TRUE
   CACHE BOOL "Enable 'developer mode'")
-
-# Change this to FALSE if you want to disable warnings_as_errors in developer
-# mode
 set(WARNINGS_AS_ERRORS_DEVELOPER_DEFAULT FALSE)
 
 # Add project_options
@@ -34,9 +31,6 @@ FetchContent_MakeAvailable(project_options)
 include(${project_options_SOURCE_DIR}/Index.cmake)
 include(${project_options_SOURCE_DIR}/src/DynamicProjectOptions.cmake)
 
-# Setup vcpkg - should be called before defining project()
-run_vcpkg()
-
 project(
   timebox
   VERSION 0.0.15
@@ -44,23 +38,18 @@ project(
   DESCRIPTION
     "Synchronize system clock with hardware GPS interface attached by USB"
   HOMEPAGE_URL "https://gitlab.sudobash.pl/Au5m8btpUaUS5t3dpixE/time-box")
-
 set(PROJECT_VERSION_ADDENDUM "InDev" CACHE STRING "Addendum to project version (i.e. RC)" FORCE)
 string(TIMESTAMP BUILD_TIME "%Y-%m-%d %H:%M:%S UTC" UTC)
 
-# Output directories
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-# # This variable is set by project() in CMake 3.21+
-string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}"
-               PROJECT_IS_TOP_LEVEL)
-
-if(PROJECT_IS_TOP_LEVEL)
-  # Consider the CTest module, which creates targets and options! Only needed if
-  # you want to enable submissions to a CDash server.
-  # include(CTest)
+# detect target platform
+if(NOT TARGET_PLATFORM)
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set(TARGET_PLATFORM "WIN32")
+  elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    set(TARGET_PLATFORM "LINUX")
+  else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+  endif()
 endif()
 
 # Add Git SHA
@@ -84,7 +73,7 @@ if(GIT_FOUND)
     message(STATUS "GIT SHA: ${GIT_SHA}")
     message(STATUS "GIT SHORT SHA: ${GIT_SHORT_SHA}")
     message(STATUS "GIT BRANCH: ${GIT_BRANCH}")
-    message(STATUS "Checking if branch is clean")
+    string(SHA256 BUILD_HASH ${GIT_SHORT_SHA})
   else()
     message(WARNING ".git directory not found !")
     message(WARNING "Have you cloned/synced everything ?")
@@ -93,102 +82,74 @@ else()
   message(WARNING "Git not found !")
 endif()
 
-string(SHA256 BUILD_HASH ${GIT_SHORT_SHA})
-
-get_property(BUILDING_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-if(BUILDING_MULTI_CONFIG)
-  if(NOT CMAKE_BUILD_TYPE)
-    # Make sure that all supported configuration types have their associated
-    # conan packages available. You can reduce this list to only the
-    # configuration types you use, but only if one is not forced-set on the
-    # command line for VS
-    message(TRACE "Setting up multi-config build types")
-    set(CMAKE_CONFIGURATION_TYPES
-      Debug Release RelWithDebInfo MinSizeRel
-      CACHE STRING "Enabled build types" FORCE)
-  else()
-    message(TRACE "User chose a specific build type, so we are using that")
-    set(CMAKE_CONFIGURATION_TYPES
-      ${CMAKE_BUILD_TYPE}
-      CACHE STRING "Enabled build types" FORCE)
-  endif()
-endif()
-
-if (UNIX)
-  dynamic_project_options(
-    ENABLE_INTERPROCEDURAL_OPTIMIZATION
-    ENABLE_BUILD_WITH_TIME_TRACE
-    ENABLE_NATIVE_OPTIMIZATION
-    ENABLE_SANITIZER_ADDRESS
-    ENABLE_SANITIZER_UNDEFINED_BEHAVIOR
-    ENABLE_CACHE
-    ENABLE_CPPCHECK
-    ENABLE_CLANG_TIDY
-    ENABLE_DOXYGEN
-    CPPCHECK_OPTIONS
-    --enable=style,performance,warning,portability
-    --inline-suppr
-    --suppress=cppcheckError
-    --suppress=internalAstError
-    --suppress=unmatchedSuppression
-    --suppress=passedByValue
-    --suppress=syntaxError
-    --inconclusive)
-elseif(WIN32)
-    dynamic_project_options(
-    ENABLE_INTERPROCEDURAL_OPTIMIZATION
-    ENABLE_BUILD_WITH_TIME_TRACE
-    ENABLE_NATIVE_OPTIMIZATION
-    ENABLE_CACHE
-    ENABLE_CPPCHECK
-    ENABLE_CLANG_TIDY
-    ENABLE_DOXYGEN
-    CPPCHECK_OPTIONS
-    --enable=style,performance,warning,portability
-    --inline-suppr
-    --suppress=cppcheckError
-    --suppress=internalAstError
-    --suppress=unmatchedSuppression
-    --suppress=passedByValue
-    --suppress=syntaxError
-    --inconclusive)
-endif()
-
+dynamic_project_options(
+  ENABLE_INTERPROCEDURAL_OPTIMIZATION
+  ENABLE_BUILD_WITH_TIME_TRACE
+  ENABLE_NATIVE_OPTIMIZATION
+  ENABLE_CACHE
+  ENABLE_DOXYGEN)
 target_compile_features(project_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
-
-if(UNIX)
-  # add file to find libserial with cmake
-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules")
-endif()
 
 # boost vars
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-if (UNIX)
+if (TARGET_PLATFORM MATCHES "LINUX")
   set(BOOST_ALL_DYN_LINK ON)
   set(Boost_USE_STATIC_LIBS OFF)
-elseif(WIN32)
+elseif(TARGET_PLATFORM MATCHES "WIN32")
   set(BOOST_ALL_DYN_LINK OFF)
   set(Boost_USE_STATIC_LIBS ON)
 endif()
 
 # required packages
 find_package(Threads REQUIRED)
+find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED COMPONENTS headers log log_setup date_time)
 
-if (UNIX)
-  find_package(LibSerial REQUIRED)
-  find_package(PkgConfig REQUIRED)
-endif()
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest
+  GIT_BRANCH main
+)
+# FetchContent_MakeAvailable(googletest)
+FetchContent_Declare(
+  googlebenchmark
+  GIT_REPOSITORY https://github.com/google/benchmark
+  GIT_BRANCH main
+)
+FetchContent_Declare(
+  sdl
+  GIT_REPOSITORY https://github.com/libsdl-org/SDL
+  GIT_BRANCH main
+)
+FetchContent_Declare(
+  imgui
+  GIT_REPOSITORY https://github.com/ocornut/imgui
+  GIT_BRANCH master
+)
+
+# TODO: Choose if we make use of these packages
+# FetchContent_Declare(
+#   fmt
+#   GIT_REPOSITORY https://github.com/fmtlib/fmt
+#   GIT_BRANCH master)
+# FetchContent_Declare(
+#   inja
+#   GIT_REPOSITORY https://github.com/pantor/inja
+#   GIT_TAG master)
 
 add_subdirectory(submodules)
 add_subdirectory(app)
 
+# output directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 # profile guided optimization
 set(ENABLE_PROFILE_GENERATE OFF CACHE BOOL "Enable profile generation")
 set(ENABLE_PROFILE_USE OFF CACHE BOOL "Enable profile usage")
-set(PROFILE_DIR "prof" CACHE STRING "Profile directory" FORCE)
-
+set(PROFILE_DIR "pgo" CACHE STRING "Profile directory" FORCE)
 if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
   if(ENABLE_PROFILE_GENERATE)
     add_compile_options(-fprofile-generate=${PROFILE_DIR})
@@ -203,19 +164,3 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
 elseif(ENABLE_PROFILE_GENERATE OR ENABLE_PROFILE_USE)
   message(WARNING "Profile Guided Optimization implemented only for GCC")
 endif()
-
-if(CMAKE_SKIP_INSTALL_RULES)
-  return()
-elseif(NOT PROJECT_IS_TOP_LEVEL)
-  return()
-endif()
-
-# add other targets that you want installed here, be default we just package the
-# one executable we know we want to ship
-package_project(TARGETS ${PROJECT_NAME} project_options project_warnings)
-
-set(CPACK_PACKAGE_FILE_NAME
-  "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
-)
-
-include(CPack)
