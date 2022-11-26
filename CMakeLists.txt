@@ -107,7 +107,7 @@ find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED COMPONENTS headers log log_setup date_time)
 
-include(external_content)
+include(ExternalContent)
 
 add_subdirectory(app)
 
