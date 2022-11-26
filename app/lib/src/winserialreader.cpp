@@ -31,7 +31,7 @@ void WinSerialReader::Open(const char *t_device,
   std::optional<boost::asio::serial_port_base::stop_bits> t_stop_bits)
 {
   std::string device{ t_device };
-  Open(t_device, t_baud, t_parity, t_character_size, t_flow_control, t_stop_bits);
+  Open(device, t_baud, t_parity, t_character_size, t_flow_control, t_stop_bits);
 }
 
 void WinSerialReader::Open(const std::string &t_device,
@@ -89,6 +89,12 @@ void WinSerialReader::Close()
 }
 
 bool WinSerialReader::IsOpen() const { return m_open; }
+
+void WinSerialReader::SetErrorStatus(bool t_status)
+{
+  std::lock_guard<std::mutex> lock(m_error_mutex);
+  m_error_flag = t_status;
+}
 
 bool WinSerialReader::ErrorStatus() const
 {

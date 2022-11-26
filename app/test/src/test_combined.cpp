@@ -3,6 +3,8 @@
 #include <boost/log/trivial.hpp>
 #include <gtest/gtest.h>
 
+#define WIN32_LEAN_AND_MEAN// Fixes "WinSock.h has already been included" error
+
 #include "defines.hpp"
 
 #if USING_REAL_HARDWARE

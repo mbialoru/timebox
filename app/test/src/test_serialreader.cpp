@@ -73,4 +73,13 @@ void MyCallback(TimeboxReadout) { MyCallback_calls++; }
 //   EXPECT_TRUE(MyCallback_calls > 3);
 // }
 
-TEST(Test_SerialReader, new_implementation) { WinSerialReader sr{ std::bind(MyCallback, std::placeholders::_1) }; }
+TEST(Test_SerialReader, new_implementation)
+{
+  WinSerialReader sr{ std::bind(MyCallback, std::placeholders::_1) };
+  sr.Open("COM3", 9600);
+  for (std::size_t i = 0; i < 10; i++) {
+    std::cout << sr.ReadString();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+  EXPECT_TRUE(MyCallback_calls > 0);// TODO: Fix callback feature
+}
