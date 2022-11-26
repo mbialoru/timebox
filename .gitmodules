@@ -1,20 +1,3 @@
-[submodule "submodules/imgui"]
-	path = submodules/imgui
-	url = https://github.com/ocornut/imgui
-
-[submodule "submodules/SDL"]
-	path = submodules/SDL
-	url = https://github.com/libsdl-org/SDL
-
-[submodule "submodules/fmt"]
-	path = submodules/fmt
-	url = https://github.com/fmtlib/fmt.git
 [submodule "submodules/windows-vagrant"]
 	path = submodules/windows-vagrant
 	url = https://github.com/rgl/windows-vagrant
-[submodule "submodules/benchmark"]
-	path = submodules/benchmark
-	url = https://github.com/google/benchmark.git
-[submodule "submodules/googletest"]
-	path = submodules/googletest
-	url = https://github.com/google/googletest.git

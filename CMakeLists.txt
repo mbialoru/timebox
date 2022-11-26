@@ -138,7 +138,6 @@ FetchContent_Declare(
 #   GIT_REPOSITORY https://github.com/pantor/inja
 #   GIT_TAG master)
 
-add_subdirectory(submodules)
 add_subdirectory(app)
 
 # output directories
