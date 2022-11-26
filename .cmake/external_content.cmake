@@ -1,7 +1,7 @@
 FetchContent_Declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest
-  GIT_BRANCH main
+  GIT_TAG release-1.12.1
 )
 FetchContent_GetProperties(googletest)
 if(NOT googletest_POPULATED)
@@ -12,7 +12,7 @@ endif()
 FetchContent_Declare(
   googlebenchmark
   GIT_REPOSITORY https://github.com/google/benchmark
-  GIT_BRANCH main
+  GIT_BRANCH v1.7.1
 )
 FetchContent_GetProperties(googlebenchmark)
 if(NOT googlebenchmark_POPULATED)
@@ -23,7 +23,7 @@ endif()
 FetchContent_Declare(
   sdl
   GIT_REPOSITORY https://github.com/libsdl-org/SDL
-  GIT_BRANCH main
+  GIT_BRANCH release-2.26.0
 )
 FetchContent_GetProperties(sdl)
 if(NOT sdl_POPULATED)
@@ -34,7 +34,7 @@ endif()
 FetchContent_Declare(
   imgui
   GIT_REPOSITORY https://github.com/ocornut/imgui
-  GIT_BRANCH master
+  GIT_BRANCH v1.89.1
 )
 FetchContent_GetProperties(imgui)
 if(NOT imgui_POPULATED)
@@ -45,7 +45,7 @@ endif()
 FetchContent_Declare(
   fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt
-  GIT_BRANCH master
+  GIT_BRANCH 9.1.0
 )
 FetchContent_GetProperties(fmt)
 if(NOT fmt_POPULATED)
@@ -56,7 +56,7 @@ endif()
 FetchContent_Declare(
   inja
   GIT_REPOSITORY https://github.com/pantor/inja
-  GIT_TAG master
+  GIT_TAG v3.3.0
 )
 FetchContent_GetProperties(inja)
 if(NOT inja_POPULATED)
