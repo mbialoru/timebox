@@ -1,8 +1,14 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 set(CMAKE_POLICY_DEFAULT_CMP0135 NEW) # Disable CMP0135 warning
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/.cmake")
+include(EnablePGO)
 
-# Not ideal to use this global variable, but necessary to make sure that tooling
+# set output directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# not ideal to use this global variable, but necessary to make sure that tooling
 # and projects use the same version
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD 17)
@@ -13,7 +19,7 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Note: by default ENABLE_DEVELOPER_MODE is True This means that all analysis
+# note: by default ENABLE_DEVELOPER_MODE is True This means that all analysis
 # (sanitizers, static analysis) is enabled and all warnings are treated as
 # errors if you want to switch this behavior, change TRUE to FALSE
 set(ENABLE_DEVELOPER_MODE
@@ -21,8 +27,7 @@ set(ENABLE_DEVELOPER_MODE
   CACHE BOOL "Enable 'developer mode'")
 set(WARNINGS_AS_ERRORS_DEVELOPER_DEFAULT FALSE)
 
-# Add project_options
-# https://github.com/aminya/project_options
+# project_options
 include(FetchContent)
 FetchContent_Declare(
   project_options
@@ -53,7 +58,7 @@ if(NOT TARGET_PLATFORM)
   endif()
 endif()
 
-# Add Git SHA
+# grab git information
 find_package(Git QUIET)
 if(GIT_FOUND)
   message(STATUS "Found git")
@@ -106,31 +111,7 @@ endif()
 find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED COMPONENTS headers log log_setup date_time)
-
 include(ExternalContent)
 
+# include application
 add_subdirectory(app)
-
-# output directories
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-# profile guided optimization
-set(ENABLE_PROFILE_GENERATE OFF CACHE BOOL "Enable profile generation")
-set(ENABLE_PROFILE_USE OFF CACHE BOOL "Enable profile usage")
-set(PROFILE_DIR "pgo" CACHE STRING "Profile directory" FORCE)
-if(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
-  if(ENABLE_PROFILE_GENERATE)
-    add_compile_options(-fprofile-generate=${PROFILE_DIR})
-    add_link_options(-fprofile-generate=${PROFILE_DIR})
-    if(ENABLE_PROFILE_USE)
-      message(WARNING "Both profile generate and profile use enabled")
-    endif()
-  elseif(ENABLE_PROFILE_USE)
-    add_compile_options(-fprofile-use=${PROFILE_DIR})
-    add_link_options(-fprofile-use=${PROFILE_DIR})
-  endif()
-elseif(ENABLE_PROFILE_GENERATE OR ENABLE_PROFILE_USE)
-  message(WARNING "Profile Guided Optimization implemented only for GCC")
-endif()
