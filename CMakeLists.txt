@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 set(CMAKE_POLICY_DEFAULT_CMP0135 NEW) # Disable CMP0135 warning
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/.cmake")
 
 # Not ideal to use this global variable, but necessary to make sure that tooling
 # and projects use the same version
@@ -106,37 +107,7 @@ find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED COMPONENTS headers log log_setup date_time)
 
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest
-  GIT_BRANCH main
-)
-# FetchContent_MakeAvailable(googletest)
-FetchContent_Declare(
-  googlebenchmark
-  GIT_REPOSITORY https://github.com/google/benchmark
-  GIT_BRANCH main
-)
-FetchContent_Declare(
-  sdl
-  GIT_REPOSITORY https://github.com/libsdl-org/SDL
-  GIT_BRANCH main
-)
-FetchContent_Declare(
-  imgui
-  GIT_REPOSITORY https://github.com/ocornut/imgui
-  GIT_BRANCH master
-)
 
-# TODO: Choose if we make use of these packages
-# FetchContent_Declare(
-#   fmt
-#   GIT_REPOSITORY https://github.com/fmtlib/fmt
-#   GIT_BRANCH master)
-# FetchContent_Declare(
-#   inja
-#   GIT_REPOSITORY https://github.com/pantor/inja
-#   GIT_TAG master)
 
 add_subdirectory(app)
 
