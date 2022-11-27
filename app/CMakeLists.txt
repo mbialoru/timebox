@@ -6,11 +6,9 @@ if(ENABLE_DEVELOPER_MODE)
   add_subdirectory(proto)
 endif()
 
-file(GLOB_RECURSE SRCS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-
-add_executable(${PROJECT_NAME} ${SRCS})
-target_include_directories(${PROJECT_NAME}
-                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_executable(${PROJECT_NAME})
+add_subdirectory(include)
+add_subdirectory(src)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE project_options project_warnings
                                               lib${PROJECT_NAME})

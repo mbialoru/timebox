@@ -7,7 +7,7 @@ function(DisableAnalyzers target_name)
 endfunction(DisableAnalyzers)
 
 function(FetchExternalContent repo_url git_tag content_uid)
-  message("Fetching external repository ${content_uid}")
+  message(STATUS "Fetching external repository ${content_uid}")
   FetchContent_Declare(
     "${content_uid}"
     GIT_REPOSITORY "${repo_url}"
