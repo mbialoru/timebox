@@ -3,21 +3,11 @@
 #include <boost/log/trivial.hpp>
 #include <gtest/gtest.h>
 
-#define WIN32_LEAN_AND_MEAN// Fixes "WinSock.h has already been included" error
-
 #include "defines.hpp"
 
 #if USING_REAL_HARDWARE
-#if defined(__unix__)
-#include "linclockcontroller.hpp"
-#include "linserialreader.hpp"
-#include "pid.hpp"
-
-#elif defined(_WIN64) && !defined(__CYGWIN__)
-#include "winclockcontroller.hpp"
-#include "winserialreader.hpp"
-#endif
-
+#include "clockcontroller.hpp"
+#include "serialreader.hpp"
 #else
 #include "fakes.hpp"
 #endif

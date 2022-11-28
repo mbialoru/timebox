@@ -1,7 +1,7 @@
 #ifndef TEST_FAKES_HPP
 #define TEST_FAKES_HPP
 
-#include "clockcontroller.hpp"
+#include "baseclockcontroller.hpp"
 #include "defines.hpp"
 #include "pid.hpp"
 #include "serialreader.hpp"

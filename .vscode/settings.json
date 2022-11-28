@@ -78,7 +78,8 @@
         "forward_list": "cpp",
         "unordered_set": "cpp",
         "regex": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "valarray": "cpp"
     },
     "cmake.configureOnOpen": true
 }
