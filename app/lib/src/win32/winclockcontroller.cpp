@@ -1,11 +1,11 @@
-#include "winclockcontroller.hpp"
+#include "clockcontroller.hpp"
 
 using namespace TimeBox;
 
-WinClockController::WinClockController(const std::size_t t_minimal_delay,
+ClockController::ClockController(const std::size_t t_minimal_delay,
   std::shared_ptr<PID<double>> t_pid,
   [[maybe_unused]] const double t_resolution)
-  : ClockController(t_minimal_delay), mp_pid(std::move(t_pid))
+  : BaseClockController(t_minimal_delay), mp_pid(std::move(t_pid))
 {
   if (not CheckAdminPrivileges()) { throw InsufficientPermissionsError(); }
   UpdateProcessTokenPrivileges();
@@ -27,7 +27,7 @@ WinClockController::WinClockController(const std::size_t t_minimal_delay,
                            << std::to_string(m_performance_counter_frequency.QuadPart);
 }
 
-WinClockController::~WinClockController()
+ClockController::~ClockController()
 {
   BOOST_LOG_TRIVIAL(info) << "Reverting system clock adjustment to original value";
   BOOST_LOG_TRIVIAL(debug) << "Applied initial system time adjustment: " << std::to_string(m_initial_adjustment_legacy);
@@ -38,7 +38,7 @@ WinClockController::~WinClockController()
   }
 }
 
-void WinClockController::AdjustClock(const TimeboxReadout t_readout)
+void ClockController::AdjustClock(const TimeboxReadout t_readout)
 {
   auto [time_string, time_stamp] = t_readout;
   auto now = std::chrono::system_clock::now();
@@ -66,7 +66,7 @@ void WinClockController::AdjustClock(const TimeboxReadout t_readout)
   m_last_call = now;
 }
 
-void WinClockController::PrintCurrentClockAdjustments() const
+void ClockController::PrintCurrentClockAdjustments() const
 {
   DWORD current_adjustment_legacy{ 0 };
   DWORD time_increment_legacy{ 0 };
@@ -87,7 +87,7 @@ void WinClockController::PrintCurrentClockAdjustments() const
   BOOST_LOG_TRIVIAL(info) << message.str();
 }
 
-void WinClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment)
+void ClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment)
 {
   if (t_ppm_adjustment > 1000 || t_ppm_adjustment < -1000) {
     BOOST_LOG_TRIVIAL(error) << "PPM clock adjustment outside of operational range !";
@@ -127,7 +127,7 @@ void WinClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment
   m_adjustment_history.push_back(t_ppm_adjustment);
 }
 
-HRESULT WinClockController::UpdateProcessTokenPrivileges()
+HRESULT ClockController::UpdateProcessTokenPrivileges()
 {
   HRESULT hresult;
   HANDLE process_token{ nullptr };

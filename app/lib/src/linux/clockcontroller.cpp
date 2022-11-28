@@ -1,8 +1,8 @@
-#include "linclockcontroller.hpp"
+#include "clockcontroller.hpp"
 
 using namespace TimeBox;
 
-LinClockController::LinClockController(const char t_clock_mode,
+ClockController::ClockController(const char t_clock_mode,
   std::shared_ptr<PID<double>> t_pid,
   [[maybe_unused]] const double t_resolution,
   const std::size_t t_minimal_delay)
@@ -10,7 +10,7 @@ LinClockController::LinClockController(const char t_clock_mode,
 {
   BOOST_LOG_TRIVIAL(debug) << "Retrieving timex from kernel";
 
-  std::future<timex> res{ std::async(std::launch::async, std::bind(&LinClockController::GetSystemTimex, this)) };
+  std::future<timex> res{ std::async(std::launch::async, std::bind(&ClockController::GetSystemTimex, this)) };
   m_timex = res.get();
   m_original_tick = static_cast<std::size_t>(m_timex.tick);
 
@@ -19,19 +19,19 @@ LinClockController::LinClockController(const char t_clock_mode,
   m_timex.modes |= ADJ_TICK;
 };
 
-LinClockController::~LinClockController()
+ClockController::~ClockController()
 {
   BOOST_LOG_TRIVIAL(debug) << "Rolling back kernel tick to original value";
   m_timex.tick = static_cast<long>(m_original_tick);
-  std::ignore = std::async(
-    std::launch::async, std::bind(&LinClockController::SetSystemTimex, this, std::placeholders::_1), &m_timex);
+  std::ignore =
+    std::async(std::launch::async, std::bind(&ClockController::SetSystemTimex, this, std::placeholders::_1), &m_timex);
 }
 
-timex LinClockController::GetTimex() const { return m_timex; }
+timex ClockController::GetTimex() const { return m_timex; }
 
-void LinClockController::SetSystemTimex(timex *t_timex) const { AdjtimexWrapper(t_timex); }
+void ClockController::SetSystemTimex(timex *t_timex) const { AdjtimexWrapper(t_timex); }
 
-void LinClockController::AdjustKernelTick(const std::size_t t_tick)
+void ClockController::AdjustKernelTick(const std::size_t t_tick)
 {
   BOOST_LOG_TRIVIAL(debug) << "Adjusting kernel tick to " << t_tick;
   m_tick_history.push_back(t_tick);
@@ -39,13 +39,13 @@ void LinClockController::AdjustKernelTick(const std::size_t t_tick)
 
   if (not CheckAdminPrivileges()) { throw InsufficientPermissionsError(); }
 
-  std::ignore = std::async(
-    std::launch::async, std::bind(&LinClockController::SetSystemTimex, this, std::placeholders::_1), &m_timex);
+  std::ignore =
+    std::async(std::launch::async, std::bind(&ClockController::SetSystemTimex, this, std::placeholders::_1), &m_timex);
 
   BOOST_LOG_TRIVIAL(debug) << "Successfully changed kernel tick to " << t_tick;
 }
 
-bool LinClockController::AdjtimexWrapper(timex *t_tm) const
+bool ClockController::AdjtimexWrapper(timex *t_tm) const
 {
   bool success{ false };
   std::size_t attempt{ 0 };
@@ -78,7 +78,7 @@ bool LinClockController::AdjtimexWrapper(timex *t_tm) const
   return success;
 }
 
-void LinClockController::AdjustClock(const TimeboxReadout t_readout)
+void ClockController::AdjustClock(const TimeboxReadout t_readout)
 {
   auto [time_string, time_stamp] = t_readout;
   auto now = std::chrono::system_clock::now();
@@ -105,7 +105,7 @@ void LinClockController::AdjustClock(const TimeboxReadout t_readout)
   m_last_call = now;
 }
 
-timex LinClockController::GetSystemTimex() const
+timex ClockController::GetSystemTimex() const
 {
   timex ret{};
   AdjtimexWrapper(&ret);

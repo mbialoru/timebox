@@ -1,5 +1,5 @@
-#ifndef LINCLOCKCONTROLLER_HPP
-#define LINCLOCKCONTROLLER_HPP
+#ifndef CLOCKCONTROLLER_HPP
+#define CLOCKCONTROLLER_HPP
 
 #pragma once
 
@@ -9,16 +9,16 @@
 #include <memory>
 #include <sys/timex.h>
 
-#include "clockcontroller.hpp"
+#include "baseclockcontroller.hpp"
 #include "pid.hpp"
 
 namespace TimeBox {
 
-class LinClockController final : public ClockController
+class ClockController final : public BaseClockController
 {
 public:
-  LinClockController(char, std::shared_ptr<PID<double>>, double, std::size_t = 500);
-  ~LinClockController();
+  ClockController(char, std::shared_ptr<PID<double>>, double, std::size_t = 500);
+  ~ClockController();
   void AdjustClock(TimeboxReadout) override;
 
 private:
@@ -37,4 +37,4 @@ private:
 
 }// namespace TimeBox
 
-#endif// LINCLOCKCONTROLLER_HPP
+#endif// CLOCKCONTROLLER_HPP

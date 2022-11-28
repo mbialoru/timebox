@@ -1,20 +1,19 @@
-#ifndef CLOCKCONTROLLER_HPP
-#define CLOCKCONTROLLER_HPP
+#ifndef BASECLOCKCONTROLLER_HPP
+#define BASECLOCKCONTROLLER_HPP
 
 #pragma once
 
 #include <chrono>
 
-#include "exceptions.hpp"
 #include "utilities.hpp"
 
 namespace TimeBox {
 
-class ClockController
+class BaseClockController
 {
 public:
-  ClockController(std::size_t) noexcept;
-  virtual ~ClockController() = default;
+  BaseClockController(std::size_t) noexcept;
+  virtual ~BaseClockController() = default;
   virtual void AdjustClock(TimeboxReadout) = 0;
 
 protected:
@@ -25,4 +24,4 @@ protected:
 
 }// namespace TimeBox
 
-#endif// CLOCKCONTROLLER_HPP
+#endif// BASECLOCKCONTROLLER_HPP

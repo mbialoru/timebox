@@ -1,5 +1,5 @@
 function(DisableAnalyzers target_name)
-  message(STATUS "Disabling static analysis from ProjectOptions for target ${target_name}")
+  message(STATUS "Disabling static analysis for target ${target_name}")
   target_disable_cpp_check(${target_name})
   target_disable_vs_analysis(${target_name})
   target_disable_clang_tidy(${target_name})

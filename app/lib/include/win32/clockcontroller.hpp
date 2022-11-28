@@ -1,5 +1,5 @@
-#ifndef WINCLOCKCONTROLLER_HPP
-#define WINCLOCKCONTROLLER_HPP
+#ifndef CLOCKCONTROLLER_HPP
+#define CLOCKCONTROLLER_HPP
 
 #pragma once
 
@@ -8,17 +8,17 @@
 #include <sysinfoapi.h>
 #include <windows.h>
 
-#include "clockcontroller.hpp"
+#include "baseclockcontroller.hpp"
 #include "pid.hpp"
 
 namespace TimeBox {
 
 // NOTE: This class could be later expanded with precise variant for Windows10
-class WinClockController final : public ClockController
+class ClockController final : public BaseClockController
 {
 public:
-  WinClockController(std::size_t, std::shared_ptr<PID<double>>, double);
-  ~WinClockController();
+  ClockController(std::size_t, std::shared_ptr<PID<double>>, double);
+  ~ClockController();
 
   void AdjustClock(TimeboxReadout) override;
 
@@ -38,4 +38,4 @@ private:
 
 }// namespace TimeBox
 
-#endif// WINCLOCKCONTROLLER_HPP
+#endif// CLOCKCONTROLLER_HPP
