@@ -1,0 +1,1 @@
+Get-Childitem -Path ..\app -Recurse "CMakeLists.txt" | Foreach-Object {cmake-format $_.FullName -i}
