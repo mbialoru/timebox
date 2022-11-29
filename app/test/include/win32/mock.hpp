@@ -1,5 +1,5 @@
-#ifndef TEST_FAKES_HPP
-#define TEST_FAKES_HPP
+#ifndef MOCK_HPP
+#define MOCK_HPP
 
 #include "base_clockcontroller.hpp"
 #include "mock_common.hpp"
@@ -22,4 +22,4 @@ private:
 
 }// namespace TimeBox
 
-#endif// TEST_FAKES_HPP
+#endif// MOCK_HPP

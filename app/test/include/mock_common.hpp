@@ -62,8 +62,6 @@ public:
   std::string ReadStringUntil(const std::string);
 
   static constexpr std::size_t read_buffer_size{ 512 };
-
-private:
 };
 
 }// namespace TimeBox

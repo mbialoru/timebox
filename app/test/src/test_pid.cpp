@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "defines.hpp"
 #include "pid.hpp"
 
 using namespace TimeBox;
