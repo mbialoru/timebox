@@ -1,5 +1,5 @@
-#ifndef COMMONFAKES_HPP
-#define COMMONFAKES_HPP
+#ifndef TEST_COMMONFAKES_HPP
+#define TEST_COMMONFAKES_HPP
 
 #include <array>
 #include <atomic>
@@ -40,11 +40,11 @@ protected:
   std::atomic<std::size_t> m_worker_tick;
 };
 
-class FakeSerialReader final : public ThreadWrapper
+class MockSerialReader final : public ThreadWrapper
 {
 public:
-  FakeSerialReader(std::function<void(TimeboxReadout)>);
-  virtual ~FakeSerialReader();
+  MockSerialReader(std::function<void(TimeboxReadout)>);
+  virtual ~MockSerialReader();
 
   void Open(const char *, std::size_t);
   void Open(const std::string &, std::size_t);
@@ -66,17 +66,17 @@ public:
 private:
 };
 
-// class FakeClockController final : public BaseClockController
+// class MockClockController final : public BaseClockController
 // {
 // public:
-//   FakeClockController()
+//   MockClockController()
 //     : BaseClockController(500), m_tick(10000), m_timepoint(std::chrono::system_clock::now()),
 //       mp_pid(std::move(std::make_shared<PID<double>>(1.0, 0.5, 1.0, 0)))
 //   {
 //     mp_pid->SetLimits(9000, 10000);
 //   }
 
-//   ~FakeClockController() = default;
+//   ~MockClockController() = default;
 
 //   void AdjustClock(TimeboxReadout t_readout) override
 //   {
@@ -112,4 +112,4 @@ private:
 
 }// namespace TimeBox
 
-#endif// COMMONFAKES_HPP
+#endif// TEST_COMMONFAKES_HPP
