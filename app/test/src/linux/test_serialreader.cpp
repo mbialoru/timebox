@@ -57,5 +57,3 @@ TEST_F(Test_SerialReader, using_free_function_callback)
   std::this_thread::sleep_for(std::chrono::seconds(5));
   EXPECT_TRUE(MyCallback_calls > 3);
 }
-
-TEST(Test_SerialReader, new_implementation) { GTEST_FAIL(); }

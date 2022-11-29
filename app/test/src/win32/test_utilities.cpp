@@ -6,11 +6,7 @@
 
 using namespace TimeBox;
 
-TEST(Test_Utilities, timesync_service_running)
-{
-  // TODO: This could be conditional and detect both cases
-  EXPECT_EQ(CheckNTPService(), true);
-}
+TEST(Test_Utilities, timesync_service_running) { EXPECT_EQ(CheckNTPService(), true); }
 
 TEST(Test_Utilities, convert_baud_rate) { EXPECT_EQ(ConvertBaudRate(9600), CBR_9600); }
 

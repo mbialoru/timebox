@@ -25,31 +25,31 @@ SerialReader::~SerialReader()
 
 void SerialReader::Open(const char *t_device,
   std::size_t t_baud,
-  std::optional<boost::asio::serial_port_base::parity> t_parity,
-  std::optional<boost::asio::serial_port_base::character_size> t_character_size,
-  std::optional<boost::asio::serial_port_base::flow_control> t_flow_control,
-  std::optional<boost::asio::serial_port_base::stop_bits> t_stop_bits)
+  std::optional<boost::asio::serial_port_base::parity> to_parity,
+  std::optional<boost::asio::serial_port_base::character_size> to_character_size,
+  std::optional<boost::asio::serial_port_base::flow_control> to_flow_control,
+  std::optional<boost::asio::serial_port_base::stop_bits> to_stop_bits)
 {
   std::string device{ t_device };
-  Open(device, t_baud, t_parity, t_character_size, t_flow_control, t_stop_bits);
+  Open(device, t_baud, to_parity, to_character_size, to_flow_control, to_stop_bits);
 }
 
 void SerialReader::Open(const std::string &t_device,
   std::size_t t_baud,
-  std::optional<boost::asio::serial_port_base::parity> t_parity,
-  std::optional<boost::asio::serial_port_base::character_size> t_character_size,
-  std::optional<boost::asio::serial_port_base::flow_control> t_flow_control,
-  std::optional<boost::asio::serial_port_base::stop_bits> t_stop_bits)
+  std::optional<boost::asio::serial_port_base::parity> to_parity,
+  std::optional<boost::asio::serial_port_base::character_size> to_character_size,
+  std::optional<boost::asio::serial_port_base::flow_control> to_flow_control,
+  std::optional<boost::asio::serial_port_base::stop_bits> to_stop_bits)
 {
   if (IsOpen()) { Close(); }
 
   SetErrorStatus(true);// In case of exception - it stays true
   mp_serial_port->open(t_device);
   mp_serial_port->set_option(boost::asio::serial_port_base::baud_rate(static_cast<unsigned>(t_baud)));
-  mp_serial_port->set_option(t_parity.value_or(m_parity));
-  mp_serial_port->set_option(t_character_size.value_or(m_character_size));
-  mp_serial_port->set_option(t_flow_control.value_or(m_flow_control));
-  mp_serial_port->set_option(t_stop_bits.value_or(m_stop_bits));
+  mp_serial_port->set_option(to_parity.value_or(m_parity));
+  mp_serial_port->set_option(to_character_size.value_or(m_character_size));
+  mp_serial_port->set_option(to_flow_control.value_or(m_flow_control));
+  mp_serial_port->set_option(to_stop_bits.value_or(m_stop_bits));
 
   m_io_service.post(std::bind(&SerialReader::ReadBegin, this));
   std::thread thread{ std::bind(

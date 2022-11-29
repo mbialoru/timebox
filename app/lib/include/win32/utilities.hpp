@@ -6,7 +6,7 @@
 #include <initguid.h>
 #include <windows.h>
 
-#include "common.hpp"
+#include "utilities_common.hpp"
 
 namespace TimeBox {
 

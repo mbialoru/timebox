@@ -25,6 +25,9 @@
 * Arguments should be prepended with ‘t_’, rest of the name should follow
   snake_case.
 
+* Optional arguments should be prepended with ‘o_’ rest of the name should
+  follow snake_case.
+
 * The variable name should begin with an alphabet ASCII character, rest should
   follow snake_case rule.
 
@@ -115,6 +118,13 @@
 
     ```cpp
     int ConnectToDatabase(int t_access_mode, std::string t_database_address);
+    ```
+
+    Optional arguments should be prepended with ‘o_’ rest of the name should follow
+    snake_case.
+    
+    ```cpp
+    int OpenFile(std::string t_filename, std::string to_mode);
     ```
 
 * Variables

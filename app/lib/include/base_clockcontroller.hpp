@@ -1,5 +1,5 @@
-#ifndef BASECLOCKCONTROLLER_HPP
-#define BASECLOCKCONTROLLER_HPP
+#ifndef BASE_CLOCKCONTROLLER_HPP
+#define BASE_CLOCKCONTROLLER_HPP
 
 #pragma once
 
@@ -24,4 +24,4 @@ protected:
 
 }// namespace TimeBox
 
-#endif// BASECLOCKCONTROLLER_HPP
+#endif// BASE_CLOCKCONTROLLER_HPP

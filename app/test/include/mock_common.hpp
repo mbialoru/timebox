@@ -1,5 +1,5 @@
-#ifndef TEST_COMMONFAKES_HPP
-#define TEST_COMMONFAKES_HPP
+#ifndef MOCK_COMMON_HPP
+#define MOCK_COMMON_HPP
 
 #include <array>
 #include <atomic>
@@ -9,9 +9,9 @@
 #include <mutex>
 #include <thread>
 
-#include "common.hpp"
 #include "defines.hpp"
 #include "pid.hpp"
+#include "utilities.hpp"
 
 namespace TimeBox {
 
@@ -112,4 +112,4 @@ private:
 
 }// namespace TimeBox
 
-#endif// TEST_COMMONFAKES_HPP
+#endif// MOCK_COMMON_HPP

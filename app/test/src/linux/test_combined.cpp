@@ -28,28 +28,17 @@ public:
   };
 };
 
-// TEST_F(Test_Combined, fake_combined_test)
-// {
-//   MockClockController cc;
-//   MockSerialReader sr{ "/dev/ttyACM0", 9600, std::bind(&MockClockController::AdjustClock, &cc,
-std::placeholders::_1)
-//   }; std::this_thread::sleep_for(std::chrono::seconds(5));
-// }
-
-#if defined(__unix__)
-
-TEST_F(Test_Combined, linux_combined_test)
+#if USING_REAL_HARDWARE
+TEST_F(Test_Combined, combined_test)
 {
   if (not CheckAdminPrivileges()) { GTEST_SKIP() << "Skipping, requires admin privileges"; }
   GTEST_SKIP() << "Test not implemented";
 }
-
-#elif defined(_WIN64) && !defined(__CYGWIN__)
-
-TEST_F(Test_Combined, windows_combined_test)
+#else
+TEST_F(Test_Combined, fake_combined_test)
 {
-  if (not CheckAdminPrivileges()) { GTEST_SKIP() << "Skipping, requires admin privileges"; }
-  GTEST_SKIP() << "Test not implemented";
+  MockClockController cc;
+  MockSerialReader sr{ std::bind(&MockClockController::AdjustClock, &cc, std::placeholders::_1) };
+  std::this_thread::sleep_for(std::chrono::seconds(5));
 }
-
 #endif

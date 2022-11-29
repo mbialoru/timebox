@@ -1,7 +1,8 @@
 #ifndef TEST_FAKES_HPP
 #define TEST_FAKES_HPP
 
-#include "mockcommon.hpp"
+#include "base_clockcontroller.hpp"
+#include "mock_common.hpp"
 
 class MockClockController final : public BaseClockController
 {
