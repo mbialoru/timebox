@@ -7,8 +7,8 @@ SerialReader::SerialReader(std::function<void(TimeboxReadout)> t_callback,
   boost::asio::serial_port_base::character_size t_character_size,
   boost::asio::serial_port_base::flow_control t_flow_control,
   boost::asio::serial_port_base::stop_bits t_stop_bits)
-  : m_open(false), m_error_flag(false), m_callback(std::move(t_callback)), m_parity(t_parity),
-    m_character_size(t_character_size), m_flow_control(t_flow_control), m_stop_bits(t_stop_bits)
+  : m_callback(std::move(t_callback)), m_parity(t_parity), m_character_size(t_character_size),
+    m_flow_control(t_flow_control), m_stop_bits(t_stop_bits), m_open(false), m_error_flag(false)
 {
   mp_serial_port = std::make_shared<boost::asio::serial_port>(m_io_service);
 }
@@ -45,7 +45,7 @@ void SerialReader::Open(const std::string &t_device,
 
   SetErrorStatus(true);// In case of exception - it stays true
   mp_serial_port->open(t_device);
-  mp_serial_port->set_option(boost::asio::serial_port_base::baud_rate(t_baud));
+  mp_serial_port->set_option(boost::asio::serial_port_base::baud_rate(static_cast<unsigned>(t_baud)));
   mp_serial_port->set_option(t_parity.value_or(m_parity));
   mp_serial_port->set_option(t_character_size.value_or(m_character_size));
   mp_serial_port->set_option(t_flow_control.value_or(m_flow_control));
