@@ -11,7 +11,7 @@ AppContext TimeBox::InitializeContext()
   context.ntp_running = CheckNTPService();
 
   context.baud_rate = 0;
-  for (const auto &[key, value] : s_baud_conversion_map) { context.baud_rate_list.push_back(std::to_string(key)); }
+  for (const auto &[key, value] : baud_conversion_map) { context.baud_rate_list.push_back(std::to_string(key)); }
 
   context.application_run = true;
   context.disabled_warning_popup = false;

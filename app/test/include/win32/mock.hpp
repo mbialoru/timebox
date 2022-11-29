@@ -4,6 +4,8 @@
 #include "base_clockcontroller.hpp"
 #include "mock_common.hpp"
 
+namespace TimeBox {
+
 class MockClockController final : public BaseClockController
 {
 public:
@@ -17,5 +19,7 @@ private:
   std::shared_ptr<PID<double>> mp_pid;
   std::chrono::system_clock::time_point m_timepoint;
 };
+
+}// namespace TimeBox
 
 #endif// TEST_FAKES_HPP

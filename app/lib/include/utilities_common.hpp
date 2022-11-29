@@ -1,5 +1,5 @@
-#ifndef COMMON_HPP
-#define COMMON_HPP
+#ifndef UTILITIES_COMMON_HPP
+#define UTILITIES_COMMON_HPP
 
 #pragma once
 
@@ -12,7 +12,7 @@
 
 namespace TimeBox {
 
-extern std::map<int, int> s_baud_conversion_map;
+extern std::map<int, int> baud_conversion_map;
 typedef std::pair<std::string, std::chrono::system_clock::time_point> TimeboxReadout;
 
 bool CheckAdminPrivileges();
@@ -70,4 +70,4 @@ template<typename T, typename... Args> auto WrapTimingDecorator(T (*function)(Ar
 
 }// namespace TimeBox
 
-#endif// COMMON_HPP
+#endif// UTILITIES_COMMON_HPP

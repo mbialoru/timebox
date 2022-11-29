@@ -10,7 +10,7 @@
 
 namespace TimeBox {
 
-std::map<int, int> s_baud_conversion_map{ { 110, CBR_110 },
+std::map<int, int> baud_conversion_map{ { 110, CBR_110 },
   { 300, CBR_300 },
   { 600, CBR_600 },
   { 1200, CBR_1200 },

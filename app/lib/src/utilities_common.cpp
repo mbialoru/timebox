@@ -4,8 +4,8 @@ using namespace TimeBox;
 
 std::size_t ConvertBaudRate(const std::size_t t_baud)
 {
-  auto search = s_baud_conversion_map.find(static_cast<int>(t_baud));
-  if (search != s_baud_conversion_map.end()) {
+  auto search = baud_conversion_map.find(static_cast<int>(t_baud));
+  if (search != baud_conversion_map.end()) {
     return static_cast<std::size_t>(search->second);
   } else {
     throw std::invalid_argument("Invalid baud rate !");
