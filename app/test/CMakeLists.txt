@@ -4,11 +4,11 @@ enable_testing()
 set(CTEST_TEST_TIMEOUT 20) # if triggered, log files won't be written
 
 file(GLOB_RECURSE SRCS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-file(GLOB_RECURSE HDRS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 
-add_executable(${PROJECT_NAME}_test ${HDRS} ${SRCS})
-target_include_directories(${PROJECT_NAME}_test
-                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_executable(${PROJECT_NAME}_test)
+
+add_subdirectory(include)
+add_subdirectory(src)
 
 target_compile_options(${PROJECT_NAME}_test PRIVATE "--coverage")
 target_link_options(${PROJECT_NAME}_test PRIVATE "--coverage")
@@ -16,27 +16,14 @@ target_link_options(${PROJECT_NAME}_test PRIVATE "--coverage")
 target_link_libraries(
   ${PROJECT_NAME}_test PRIVATE project_options project_warnings
                                lib${PROJECT_NAME})
-if(UNIX)
-  target_link_system_libraries(
-    ${PROJECT_NAME}_test
-    PRIVATE
-    LibSerial::serial
-    GTest::gtest
-    GTest::gtest_main
-    GTest::gmock
-    GTest::gmock_main
-    Boost::log
-    Boost::log_setup)
-elseif(WIN32)
-  target_link_system_libraries(
-    ${PROJECT_NAME}_test
-    PRIVATE
-    GTest::gtest
-    GTest::gtest_main
-    GTest::gmock
-    GTest::gmock_main
-    Boost::log
-    Boost::log_setup)
-endif()
+target_link_system_libraries(
+  ${PROJECT_NAME}_test
+  PRIVATE
+  GTest::gtest
+  GTest::gtest_main
+  GTest::gmock
+  GTest::gmock_main
+  Boost::log
+  Boost::log_setup)
 
 gtest_discover_tests(${PROJECT_NAME}_test)

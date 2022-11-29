@@ -9,4 +9,4 @@ target_link_libraries(${PROJECT_NAME}_benchmark PRIVATE project_options
 target_link_system_libraries(${PROJECT_NAME}_benchmark PRIVATE Threads::Threads
                              benchmark::benchmark)
 
-DisableAnalyzers(${PROJECT_NAME}_benchmark)
+disableanalyzers(${PROJECT_NAME}_benchmark)

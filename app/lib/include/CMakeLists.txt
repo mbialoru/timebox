@@ -1,7 +1,8 @@
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../config.hpp.in
                ${CMAKE_CURRENT_SOURCE_DIR}/config.hpp)
 
-target_include_directories(lib${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(lib${PROJECT_NAME}
+                           PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(TARGET_PLATFORM MATCHES "LINUX")
   add_subdirectory(linux)
