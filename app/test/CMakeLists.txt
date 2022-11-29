@@ -3,10 +3,7 @@ enable_testing()
 
 set(CTEST_TEST_TIMEOUT 20) # if triggered, log files won't be written
 
-file(GLOB_RECURSE SRCS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-
 add_executable(${PROJECT_NAME}_test)
-
 add_subdirectory(include)
 add_subdirectory(src)
 

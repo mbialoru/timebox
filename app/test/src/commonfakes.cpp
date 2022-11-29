@@ -1,4 +1,4 @@
-#include "fakes.hpp"
+#include "commonfakes.hpp"
 
 using namespace TimeBox;
 
@@ -65,5 +65,3 @@ void ThreadWrapper::Resume()
   BOOST_LOG_TRIVIAL(debug) << "Resumed thread for " << m_name;
   m_is_paused = false;
 }
-
-FakeClockController::FakeClockController()

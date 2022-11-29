@@ -23,8 +23,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # (sanitizers, static analysis) is enabled and all warnings are treated as
 # errors if you want to switch this behavior, change TRUE to FALSE
 set(ENABLE_DEVELOPER_MODE
-  TRUE
-  CACHE BOOL "Enable 'developer mode'")
+    TRUE
+    CACHE BOOL "Enable 'developer mode'")
 set(WARNINGS_AS_ERRORS_DEVELOPER_DEFAULT FALSE)
 
 # project_options
@@ -44,7 +44,9 @@ project(
   DESCRIPTION
     "Synchronize system clock with hardware GPS interface attached by USB"
   HOMEPAGE_URL "https://gitlab.sudobash.pl/Au5m8btpUaUS5t3dpixE/time-box")
-set(PROJECT_VERSION_ADDENDUM "InDev" CACHE STRING "Addendum to project version (i.e. RC)" FORCE)
+set(PROJECT_VERSION_ADDENDUM
+    "InDev"
+    CACHE STRING "Addendum to project version (i.e. RC)" FORCE)
 string(TIMESTAMP BUILD_TIME "%Y-%m-%d %H:%M:%S UTC" UTC)
 
 # detect target platform
@@ -63,17 +65,14 @@ endif()
 include(GitVars)
 
 dynamic_project_options(
-  ENABLE_INTERPROCEDURAL_OPTIMIZATION
-  ENABLE_BUILD_WITH_TIME_TRACE
-  ENABLE_NATIVE_OPTIMIZATION
-  ENABLE_CACHE
-  ENABLE_DOXYGEN)
+  ENABLE_INTERPROCEDURAL_OPTIMIZATION ENABLE_BUILD_WITH_TIME_TRACE
+  ENABLE_NATIVE_OPTIMIZATION ENABLE_CACHE ENABLE_DOXYGEN)
 target_compile_features(project_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
 # boost vars
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-if (TARGET_PLATFORM MATCHES "LINUX")
+if(TARGET_PLATFORM MATCHES "LINUX")
   set(BOOST_ALL_DYN_LINK ON)
   set(Boost_USE_STATIC_LIBS OFF)
 elseif(TARGET_PLATFORM MATCHES "WIN32")

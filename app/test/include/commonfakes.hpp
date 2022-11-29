@@ -1,5 +1,5 @@
-#ifndef TEST_FAKES_HPP
-#define TEST_FAKES_HPP
+#ifndef COMMONFAKES_HPP
+#define COMMONFAKES_HPP
 
 #include <array>
 #include <atomic>
@@ -9,7 +9,6 @@
 #include <mutex>
 #include <thread>
 
-#include "baseclockcontroller.hpp"
 #include "common.hpp"
 #include "defines.hpp"
 #include "pid.hpp"
@@ -67,12 +66,6 @@ public:
 private:
 };
 
-class FakeClockController final : public BaseClockController
-{
-public:
-  FakeClockController
-}
-
 // class FakeClockController final : public BaseClockController
 // {
 // public:
@@ -119,4 +112,4 @@ public:
 
 }// namespace TimeBox
 
-#endif// TEST_FAKES_HPP
+#endif// COMMONFAKES_HPP
