@@ -1,5 +1,4 @@
 add_executable(${PROJECT_NAME}_benchmark)
-
 add_subdirectory(include)
 add_subdirectory(src)
 

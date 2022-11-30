@@ -1,4 +1,5 @@
 add_library(lib${PROJECT_NAME} STATIC "")
+
 set_target_properties(lib${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX PREFIX
                                                                         "")
 

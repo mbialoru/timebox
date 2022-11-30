@@ -10,4 +10,6 @@
 #define PROTO_EXPERIMENT false
 #define PROTO_COMBINED false
 #define PROTO_BOOSTPROCESS false
-#define PROTO_WINCLOCKCONTROL true
+#define PROTO_WINCLOCKCONTROL false
+
+#define PROTO_TEMPORARY_TEST true
