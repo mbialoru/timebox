@@ -2,7 +2,7 @@
 
 using namespace TimeBox;
 
-std::size_t ConvertBaudRate(const std::size_t t_baud)
+std::size_t TimeBox::ConvertBaudRate(const std::size_t t_baud)
 {
   auto search = baud_conversion_map.find(static_cast<int>(t_baud));
   if (search != baud_conversion_map.end()) {
@@ -12,7 +12,7 @@ std::size_t ConvertBaudRate(const std::size_t t_baud)
   }
 }
 
-std::chrono::system_clock::time_point ConvertStringToTimepoint(const std::string t_time_string)
+std::chrono::system_clock::time_point TimeBox::ConvertStringToTimepoint(const std::string t_time_string)
 {
   std::vector<std::string> tmp;
   time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -30,7 +30,7 @@ std::chrono::system_clock::time_point ConvertStringToTimepoint(const std::string
   return res;
 }
 
-std::string ConvertTimepointToString(const std::chrono::system_clock::time_point t_timepoint)
+std::string TimeBox::ConvertTimepointToString(const std::chrono::system_clock::time_point t_timepoint)
 {
   time_t tmp = std::chrono::system_clock::to_time_t(t_timepoint);
   struct tm tm = *std::localtime(&tmp);
