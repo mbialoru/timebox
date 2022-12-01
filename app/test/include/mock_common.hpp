@@ -43,7 +43,7 @@ protected:
 class MockSerialReader final : private ThreadWrapper
 {
 public:
-  MockSerialReader(std::function<void(TimeboxReadout)>);
+  explicit MockSerialReader(std::function<void(TimeboxReadout)>);
   virtual ~MockSerialReader();
 
   void Open(const char *, std::size_t);
@@ -66,6 +66,7 @@ public:
 private:
   void Work() override;
   bool m_open;
+  const bool m_error_flag{ false };
   std::function<void(TimeboxReadout)> m_callback;
 };
 
