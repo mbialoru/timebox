@@ -17,7 +17,7 @@ namespace TimeBox {
 class SerialReader final : private boost::noncopyable
 {
 public:
-  SerialReader(std::function<void(TimeboxReadout)>,
+  explicit SerialReader(std::function<void(TimeboxReadout)>,
     boost::asio::serial_port_base::parity = boost::asio::serial_port_base::parity(
       boost::asio::serial_port_base::parity::none),
     boost::asio::serial_port_base::character_size = boost::asio::serial_port_base::character_size(8),
@@ -64,6 +64,7 @@ private:
   void SetErrorStatus(bool);
   static std::vector<char>::iterator FindInBuffer(std::vector<char> &, const std::string &);
 
+  std::function<void(TimeboxReadout)> m_callback;
   boost::asio::serial_port_base::parity m_parity;
   boost::asio::serial_port_base::character_size m_character_size;
   boost::asio::serial_port_base::flow_control m_flow_control;
@@ -84,8 +85,6 @@ private:
   std::array<char, read_buffer_size> m_read_buffer;
   std::vector<char> m_read_queue;
   std::mutex m_read_queue_mutex;
-
-  std::function<void(TimeboxReadout)> m_callback;
 };
 
 }// namespace TimeBox
