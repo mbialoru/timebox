@@ -1,5 +1,5 @@
-#ifndef SERIALREADER_HPP
-#define SERIALREADER_HPP
+#ifndef SERIALINTERFACE_HPP
+#define SERIALINTERFACE_HPP
 
 #pragma once
 
@@ -14,10 +14,10 @@
 
 namespace TimeBox {
 
-class SerialReader final : private boost::noncopyable
+class SerialInterface final : private boost::noncopyable
 {
 public:
-  explicit SerialReader(std::function<void(TimeboxReadout)>,
+  explicit SerialInterface(std::function<void(TimeboxReadout)>,
     boost::asio::serial_port_base::parity = boost::asio::serial_port_base::parity(
       boost::asio::serial_port_base::parity::none),
     boost::asio::serial_port_base::character_size = boost::asio::serial_port_base::character_size(8),
@@ -25,7 +25,7 @@ public:
       boost::asio::serial_port_base::flow_control::none),
     boost::asio::serial_port_base::stop_bits = boost::asio::serial_port_base::stop_bits(
       boost::asio::serial_port_base::stop_bits::one));
-  virtual ~SerialReader();
+  virtual ~SerialInterface();
 
   void Open(const char *,
     std::size_t,
@@ -89,4 +89,4 @@ private:
 
 }// namespace TimeBox
 
-#endif// SERIALREADER_HPP
+#endif// SERIALINTERFACE_HPP

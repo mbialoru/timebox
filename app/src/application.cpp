@@ -195,7 +195,7 @@ void TimeBox::ConnectDialog(AppContext &t_context)
 
         if (ImGui::Button("Connect")) {
           t_context.p_clock_controller = std::make_unique<ClockController>(0.001, 0, t_context.p_pid);
-          t_context.p_serial_reader = std::make_unique<SerialReader>(t_context.serial_port.c_str(),
+          t_context.p_serial_reader = std::make_unique<SerialInterface>(t_context.serial_port.c_str(),
             t_context.baud_rate,
             std::bind(&ClockController::AdjustClock, t_context.p_clock_controller.get(), std::placeholders::_1));
           t_context.connection_established = true;

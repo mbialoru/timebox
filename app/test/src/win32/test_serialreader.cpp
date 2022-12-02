@@ -39,7 +39,7 @@ void MyCallback(TimeboxReadout) { MyCallback_calls++; }
 TEST_F(Test_SerialReader, thread_callback)
 {
 #if USING_REAL_HARDWARE
-  SerialReader sr{ std::bind(MyCallback, std::placeholders::_1) };
+  SerialInterface sr{ std::bind(MyCallback, std::placeholders::_1) };
 #else
   MockSerialReader sr{ std::bind(&Test_SerialReader::CallbackDummy, this) };
 #endif
@@ -50,7 +50,7 @@ TEST_F(Test_SerialReader, thread_callback)
 TEST_F(Test_SerialReader, using_free_function_callback)
 {
 #if USING_REAL_HARDWARE
-  SerialReader sr{ std::bind(MyCallback, std::placeholders::_1) };
+  SerialInterface sr{ std::bind(MyCallback, std::placeholders::_1) };
 #else
   MockSerialReader sr{ std::bind(MyCallback, std::placeholders::_1) };
 #endif
@@ -61,7 +61,7 @@ TEST_F(Test_SerialReader, using_free_function_callback)
 #if USING_REAL_HARDWARE
 TEST(Test_SerialReader, new_implementation)
 {
-  SerialReader sr{ std::bind(MyCallback, std::placeholders::_1) };
+  SerialInterface sr{ std::bind(MyCallback, std::placeholders::_1) };
   sr.Open("COM3", 9600);
   for (std::size_t i = 0; i < 10; i++) {
     std::cout << sr.ReadString();

@@ -27,7 +27,7 @@ struct AppContext
   std::vector<std::string> serial_port_list;
 
   std::unique_ptr<TimeBox::ClockController> p_clock_controller;
-  std::unique_ptr<TimeBox::SerialReader> p_serial_reader;
+  std::unique_ptr<TimeBox::SerialInterface> p_serial_reader;
   std::shared_ptr<TimeBox::PID<double>> p_pid;
 
   // ImGUI variables

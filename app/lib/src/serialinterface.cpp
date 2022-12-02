@@ -1,8 +1,8 @@
-#include "serialreader.hpp"
+#include "serialinterface.hpp"
 
 using namespace TimeBox;
 
-SerialReader::SerialReader(std::function<void(TimeboxReadout)> t_callback,
+SerialInterface::SerialInterface(std::function<void(TimeboxReadout)> t_callback,
   boost::asio::serial_port_base::parity t_parity,
   boost::asio::serial_port_base::character_size t_character_size,
   boost::asio::serial_port_base::flow_control t_flow_control,
@@ -13,7 +13,7 @@ SerialReader::SerialReader(std::function<void(TimeboxReadout)> t_callback,
   mp_serial_port = std::make_shared<boost::asio::serial_port>(m_io_service);
 }
 
-SerialReader::~SerialReader()
+SerialInterface::~SerialInterface()
 {
   m_callback = nullptr;
   if (IsOpen()) {
@@ -23,7 +23,7 @@ SerialReader::~SerialReader()
   }
 }
 
-void SerialReader::Open(const char *t_device,
+void SerialInterface::Open(const char *t_device,
   std::size_t t_baud,
   std::optional<boost::asio::serial_port_base::parity> to_parity,
   std::optional<boost::asio::serial_port_base::character_size> to_character_size,
@@ -34,7 +34,7 @@ void SerialReader::Open(const char *t_device,
   Open(device, t_baud, to_parity, to_character_size, to_flow_control, to_stop_bits);
 }
 
-void SerialReader::Open(const std::string &t_device,
+void SerialInterface::Open(const std::string &t_device,
   std::size_t t_baud,
   std::optional<boost::asio::serial_port_base::parity> to_parity,
   std::optional<boost::asio::serial_port_base::character_size> to_character_size,
@@ -51,7 +51,7 @@ void SerialReader::Open(const std::string &t_device,
   mp_serial_port->set_option(to_flow_control.value_or(m_flow_control));
   mp_serial_port->set_option(to_stop_bits.value_or(m_stop_bits));
 
-  m_io_service.post(std::bind(&SerialReader::ReadBegin, this));
+  m_io_service.post(std::bind(&SerialInterface::ReadBegin, this));
   std::thread thread{ std::bind(
     static_cast<std::size_t (boost::asio::io_service::*)()>(&boost::asio::io_service::run), &m_io_service) };
   m_worker_thread.swap(thread);
@@ -60,7 +60,7 @@ void SerialReader::Open(const std::string &t_device,
   m_open = true;
 }
 
-void SerialReader::ClosePort()
+void SerialInterface::ClosePort()
 {
   boost::system::error_code error_code;
   mp_serial_port->cancel(error_code);
@@ -75,11 +75,11 @@ void SerialReader::ClosePort()
   }
 }
 
-void SerialReader::Close()
+void SerialInterface::Close()
 {
   if (not IsOpen()) { return; }
   m_open = false;
-  m_io_service.post(std::bind(&SerialReader::ClosePort, this));
+  m_io_service.post(std::bind(&SerialInterface::ClosePort, this));
   if (m_worker_thread.joinable()) { m_worker_thread.join(); }
   m_io_service.reset();
   if (ErrorStatus()) {
@@ -88,21 +88,21 @@ void SerialReader::Close()
   }
 }
 
-bool SerialReader::IsOpen() const { return m_open; }
+bool SerialInterface::IsOpen() const { return m_open; }
 
-void SerialReader::SetErrorStatus(bool t_status)
+void SerialInterface::SetErrorStatus(bool t_status)
 {
   std::lock_guard<std::mutex> lock(m_error_mutex);
   m_error_flag = t_status;
 }
 
-bool SerialReader::ErrorStatus() const
+bool SerialInterface::ErrorStatus() const
 {
   std::lock_guard<std::mutex> lock_guard(m_error_mutex);
   return m_error_flag;
 }
 
-std::size_t SerialReader::Read(char *t_data, std::size_t t_buffer_size)
+std::size_t SerialInterface::Read(char *t_data, std::size_t t_buffer_size)
 {
   std::lock_guard<std::mutex> lock_guard(m_read_queue_mutex);
   std::size_t offset{ std::min(t_buffer_size, m_read_queue.size()) };
@@ -112,7 +112,7 @@ std::size_t SerialReader::Read(char *t_data, std::size_t t_buffer_size)
   return offset;
 }
 
-std::vector<char> SerialReader::Read()
+std::vector<char> SerialInterface::Read()
 {
   std::lock_guard<std::mutex> lock_guard(m_read_queue_mutex);
   std::vector<char> read_buffer;
@@ -120,7 +120,7 @@ std::vector<char> SerialReader::Read()
   return read_buffer;
 }
 
-std::string SerialReader::ReadString()
+std::string SerialInterface::ReadString()
 {
   std::lock_guard<std::mutex> lock_guard(m_read_queue_mutex);
   std::string read_buffer(m_read_queue.begin(), m_read_queue.end());
@@ -128,7 +128,7 @@ std::string SerialReader::ReadString()
   return read_buffer;
 }
 
-std::string SerialReader::ReadStringUntil(const std::string t_flag)
+std::string SerialInterface::ReadStringUntil(const std::string t_flag)
 {
   std::lock_guard<std::mutex> lock_guard(m_read_queue_mutex);
   std::vector<char>::iterator iterator{ FindInBuffer(m_read_queue, t_flag) };
@@ -139,14 +139,14 @@ std::string SerialReader::ReadStringUntil(const std::string t_flag)
   return result;
 }
 
-void SerialReader::ReadBegin()
+void SerialInterface::ReadBegin()
 {
   mp_serial_port->async_read_some(boost::asio::buffer(m_read_buffer, read_buffer_size),
     boost::bind(
-      &SerialReader::ReadEnd, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+      &SerialInterface::ReadEnd, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }
 
-void SerialReader::ReadEnd(const boost::system::error_code &t_error, std::size_t t_bytes)
+void SerialInterface::ReadEnd(const boost::system::error_code &t_error, std::size_t t_bytes)
 {
   if (t_error) {
     if (IsOpen()) {
@@ -160,7 +160,7 @@ void SerialReader::ReadEnd(const boost::system::error_code &t_error, std::size_t
   }
 }
 
-std::vector<char>::iterator SerialReader::FindInBuffer(std::vector<char> &t_buffer, const std::string &t_needle)
+std::vector<char>::iterator SerialInterface::FindInBuffer(std::vector<char> &t_buffer, const std::string &t_needle)
 {
   if (t_needle.size() == 0) { return t_buffer.end(); }
   bool found{ false };
