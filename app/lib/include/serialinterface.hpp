@@ -20,6 +20,7 @@ class SerialInterface final : private boost::noncopyable
 {
 public:
   explicit SerialInterface(std::function<void(TimeboxReadout)>,
+    std::chrono::milliseconds = std::chrono::duration<int64_t, std::milli>(5000),
     boost::asio::serial_port_base::parity = boost::asio::serial_port_base::parity(
       boost::asio::serial_port_base::parity::none),
     boost::asio::serial_port_base::character_size = boost::asio::serial_port_base::character_size(8),
@@ -69,6 +70,8 @@ private:
   void WriteEnd(const std::system_error &);
   void ClosePort();
 
+  void NotifierLoop();
+
   void SetErrorStatus(bool);
   static std::vector<char>::iterator FindInBuffer(std::vector<char> &, const std::string &);
 
@@ -81,13 +84,16 @@ private:
   boost::asio::io_service m_io_service;
   std::shared_ptr<boost::asio::serial_port> mp_serial_port;
   std::thread m_worker_thread;
-  std::atomic<bool> m_open;
+  std::thread m_notifier_thread;
+  std::atomic<bool> m_port_open;
   std::atomic<bool> m_error_flag;
   mutable std::mutex m_error_mutex;
 
-  std::condition_variable m_conditon_variable;
+  std::condition_variable m_condition_variable;
   std::mutex m_condition_variable_mutex;
   std::unique_lock<std::mutex> m_condition_variable_lock;
+
+  std::chrono::milliseconds m_timeout_duration;
 
   std::vector<char> m_write_queue;
   boost::shared_array<char> m_write_buffer;

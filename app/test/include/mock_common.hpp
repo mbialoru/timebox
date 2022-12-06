@@ -65,7 +65,7 @@ public:
 
 private:
   void Work() override;
-  bool m_open;
+  bool m_port_open;
   const bool m_error_flag{ false };
   std::function<void(TimeboxReadout)> m_callback;
 };

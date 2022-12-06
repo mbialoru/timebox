@@ -79,16 +79,16 @@ MockSerialReader::~MockSerialReader()
 void MockSerialReader::Open(const std::string &t_device, std::size_t t_baudrate)
 {
   m_is_paused = false;
-  m_open = true;
+  m_port_open = true;
 }
 
 void MockSerialReader::Close()
 {
   m_is_paused = true;
-  m_open = false;
+  m_port_open = false;
 }
 
-bool MockSerialReader::IsOpen() const { return m_open; }
+bool MockSerialReader::IsOpen() const { return m_port_open; }
 
 bool MockSerialReader::ErrorStatus() const { return m_error_flag; }
 

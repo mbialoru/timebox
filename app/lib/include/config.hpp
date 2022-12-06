@@ -17,7 +17,7 @@ struct BuildInformation
   static constexpr std::string_view PLATFORM{ "Windows" };
   static constexpr std::string_view COMPILER{ "GNU" };
   static constexpr std::string_view COMPILER_VERSION{ "12.2.0" };
-  static constexpr std::string_view BUILD_DATE{ "2022-12-06 11:17:40 UTC" };
+  static constexpr std::string_view BUILD_DATE{ "2022-12-06 18:12:16 UTC" };
   static constexpr std::string_view BUILD_HASH{ "72f71364e728eaf4b4abcbbe563ce5d6beba846df3c8a9c394ea42a8522a54fd" };
 };
 

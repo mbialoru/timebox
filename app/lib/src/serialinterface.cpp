@@ -3,12 +3,14 @@
 using namespace TimeBox;
 
 SerialInterface::SerialInterface(std::function<void(TimeboxReadout)> t_callback,
+  std::chrono::milliseconds t_timeout,
   boost::asio::serial_port_base::parity t_parity,
   boost::asio::serial_port_base::character_size t_character_size,
   boost::asio::serial_port_base::flow_control t_flow_control,
   boost::asio::serial_port_base::stop_bits t_stop_bits)
-  : m_callback(std::move(t_callback)), m_parity(t_parity), m_character_size(t_character_size),
-    m_flow_control(t_flow_control), m_stop_bits(t_stop_bits), m_open(false), m_error_flag(false)
+  : m_callback(std::move(t_callback)), m_timeout_duration(t_timeout), m_parity(t_parity),
+    m_character_size(t_character_size), m_flow_control(t_flow_control), m_stop_bits(t_stop_bits), m_port_open(false),
+    m_error_flag(false)
 {
   mp_serial_port = std::make_shared<boost::asio::serial_port>(m_io_service);
   std::unique_lock<std::mutex>(m_condition_variable_mutex).swap(m_condition_variable_lock);
@@ -20,7 +22,7 @@ SerialInterface::~SerialInterface()
   if (IsOpen()) {
     try {
       Close();
-    } catch (...) {}
+    } catch (...) {}// Do not throw exceptions in destructor
   }
 }
 
@@ -58,7 +60,7 @@ void SerialInterface::Open(const std::string &t_device,
   m_worker_thread.swap(thread);
 
   SetErrorStatus(false);
-  m_open = true;
+  m_port_open = true;
 }
 
 void SerialInterface::ClosePort()
@@ -79,7 +81,6 @@ void SerialInterface::ClosePort()
 void SerialInterface::Close()
 {
   if (not IsOpen()) { return; }
-  m_open = false;
   m_io_service.post(std::bind(&SerialInterface::ClosePort, this));
   if (m_worker_thread.joinable()) { m_worker_thread.join(); }
   m_io_service.reset();
@@ -87,9 +88,10 @@ void SerialInterface::Close()
     BOOST_LOG_TRIVIAL(error) << "Error while closing serial port";
     throw(std::system_error(boost::system::error_code()));
   }
+  m_port_open = false;
 }
 
-bool SerialInterface::IsOpen() const { return m_open; }
+bool SerialInterface::IsOpen() const { return m_port_open; }
 
 void SerialInterface::SetErrorStatus(bool t_status)
 {
@@ -184,5 +186,24 @@ std::vector<char>::iterator SerialInterface::FindInBuffer(std::vector<char> &t_b
     }
     if (mismatch) { continue; }
     return result;
+  }
+}
+
+void SerialInterface::NotifierLoop()
+{
+  static std::regex readout_regex{ std::string(correct_serial_readout_regex) };
+
+  while (IsOpen()) {
+    if (m_condition_variable.wait_for(m_condition_variable_lock, std::chrono::milliseconds(m_timeout_duration))
+        == std::cv_status::timeout) {
+      BOOST_LOG_TRIVIAL(error) << "Timeout reached, check serial connection";
+    } else {
+      auto buffer_string{ ReadStringUntil("\n") };
+      if (std::regex_match(buffer_string, readout_regex)) {
+        m_callback(TimeboxReadout{ buffer_string, std::chrono::system_clock::now() });
+      } else {
+        BOOST_LOG_TRIVIAL(warning) << "Received malformed readout data from serial";
+      }
+    }
   }
 }
