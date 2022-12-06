@@ -55,9 +55,12 @@ void SerialInterface::Open(const std::string &t_device,
   mp_serial_port->set_option(to_stop_bits.value_or(m_stop_bits));
 
   m_io_service.post(std::bind(&SerialInterface::ReadBegin, this));
-  std::thread thread{ std::bind(
+  std::thread worker_thread{ std::bind(
     static_cast<std::size_t (boost::asio::io_service::*)()>(&boost::asio::io_service::run), &m_io_service) };
-  m_worker_thread.swap(thread);
+  m_worker_thread.swap(worker_thread);
+
+  std::thread notifier_thread{ std::bind(&SerialInterface::NotifierLoop, this) };
+  m_notifier_thread.swap(notifier_thread);
 
   SetErrorStatus(false);
   m_port_open = true;
@@ -83,6 +86,7 @@ void SerialInterface::Close()
   if (not IsOpen()) { return; }
   m_io_service.post(std::bind(&SerialInterface::ClosePort, this));
   if (m_worker_thread.joinable()) { m_worker_thread.join(); }
+  if (m_notifier_thread.joinable()) { m_notifier_thread.join(); }
   m_io_service.reset();
   if (ErrorStatus()) {
     BOOST_LOG_TRIVIAL(error) << "Error while closing serial port";
@@ -159,6 +163,7 @@ void SerialInterface::ReadEnd(const boost::system::error_code &t_error, std::siz
   } else {
     std::scoped_lock<std::mutex> lock(m_read_queue_mutex);
     m_read_queue.insert(m_read_queue.end(), m_read_buffer.data(), m_read_buffer.data() + t_bytes);
+    m_condition_variable.notify_all();
     ReadBegin();
   }
 }
@@ -194,8 +199,7 @@ void SerialInterface::NotifierLoop()
   static std::regex readout_regex{ std::string(correct_serial_readout_regex) };
 
   while (IsOpen()) {
-    if (m_condition_variable.wait_for(m_condition_variable_lock, std::chrono::milliseconds(m_timeout_duration))
-        == std::cv_status::timeout) {
+    if (m_condition_variable.wait_for(m_condition_variable_lock, m_timeout_duration) == std::cv_status::timeout) {
       BOOST_LOG_TRIVIAL(error) << "Timeout reached, check serial connection";
     } else {
       auto buffer_string{ ReadStringUntil("\n") };
@@ -203,6 +207,7 @@ void SerialInterface::NotifierLoop()
         m_callback(TimeboxReadout{ buffer_string, std::chrono::system_clock::now() });
       } else {
         BOOST_LOG_TRIVIAL(warning) << "Received malformed readout data from serial";
+        BOOST_LOG_TRIVIAL(debug) << "Read string: " << buffer_string;
       }
     }
   }

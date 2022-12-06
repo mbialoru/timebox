@@ -76,6 +76,7 @@ private:
   static std::vector<char>::iterator FindInBuffer(std::vector<char> &, const std::string &);
 
   std::function<void(TimeboxReadout)> m_callback;
+  std::chrono::milliseconds m_timeout_duration;
   boost::asio::serial_port_base::parity m_parity;
   boost::asio::serial_port_base::character_size m_character_size;
   boost::asio::serial_port_base::flow_control m_flow_control;
@@ -92,8 +93,6 @@ private:
   std::condition_variable m_condition_variable;
   std::mutex m_condition_variable_mutex;
   std::unique_lock<std::mutex> m_condition_variable_lock;
-
-  std::chrono::milliseconds m_timeout_duration;
 
   std::vector<char> m_write_queue;
   boost::shared_array<char> m_write_buffer;
