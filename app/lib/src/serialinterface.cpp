@@ -11,6 +11,7 @@ SerialInterface::SerialInterface(std::function<void(TimeboxReadout)> t_callback,
     m_flow_control(t_flow_control), m_stop_bits(t_stop_bits), m_open(false), m_error_flag(false)
 {
   mp_serial_port = std::make_shared<boost::asio::serial_port>(m_io_service);
+  std::unique_lock<std::mutex>(m_condition_variable_mutex).swap(m_condition_variable_lock);
 }
 
 SerialInterface::~SerialInterface()
@@ -92,19 +93,19 @@ bool SerialInterface::IsOpen() const { return m_open; }
 
 void SerialInterface::SetErrorStatus(bool t_status)
 {
-  std::lock_guard<std::mutex> lock(m_error_mutex);
+  std::scoped_lock<std::mutex> lock(m_error_mutex);
   m_error_flag = t_status;
 }
 
 bool SerialInterface::ErrorStatus() const
 {
-  std::lock_guard<std::mutex> lock_guard(m_error_mutex);
+  std::scoped_lock<std::mutex> lock(m_error_mutex);
   return m_error_flag;
 }
 
 std::size_t SerialInterface::Read(char *t_data, std::size_t t_buffer_size)
 {
-  std::lock_guard<std::mutex> lock_guard(m_read_queue_mutex);
+  std::scoped_lock<std::mutex> lock(m_read_queue_mutex);
   std::size_t offset{ std::min(t_buffer_size, m_read_queue.size()) };
   std::vector<char>::iterator iterator{ m_read_queue.begin() + offset };
   std::copy(m_read_queue.begin(), iterator, t_data);
@@ -114,7 +115,7 @@ std::size_t SerialInterface::Read(char *t_data, std::size_t t_buffer_size)
 
 std::vector<char> SerialInterface::Read()
 {
-  std::lock_guard<std::mutex> lock_guard(m_read_queue_mutex);
+  std::scoped_lock<std::mutex> lock(m_read_queue_mutex);
   std::vector<char> read_buffer;
   read_buffer.swap(m_read_queue);
   return read_buffer;
@@ -122,15 +123,15 @@ std::vector<char> SerialInterface::Read()
 
 std::string SerialInterface::ReadString()
 {
-  std::lock_guard<std::mutex> lock_guard(m_read_queue_mutex);
+  std::scoped_lock<std::mutex> lock(m_read_queue_mutex);
   std::string read_buffer(m_read_queue.begin(), m_read_queue.end());
-  m_read_queue.clear();// Might leak memory and require a std::swap()
+  std::vector<char>().swap(m_read_queue);// Should be leak free
   return read_buffer;
 }
 
 std::string SerialInterface::ReadStringUntil(const std::string t_flag)
 {
-  std::lock_guard<std::mutex> lock_guard(m_read_queue_mutex);
+  std::scoped_lock<std::mutex> lock(m_read_queue_mutex);
   std::vector<char>::iterator iterator{ FindInBuffer(m_read_queue, t_flag) };
   if (iterator == m_read_queue.end()) { return std::string(""); }// could throw exception instead of empty
   std::string result(m_read_queue.begin(), iterator);
@@ -154,7 +155,7 @@ void SerialInterface::ReadEnd(const boost::system::error_code &t_error, std::siz
       SetErrorStatus(true);
     }
   } else {
-    std::lock_guard<std::mutex> lock_guard(m_read_queue_mutex);
+    std::scoped_lock<std::mutex> lock(m_read_queue_mutex);
     m_read_queue.insert(m_read_queue.end(), m_read_buffer.data(), m_read_buffer.data() + t_bytes);
     ReadBegin();
   }

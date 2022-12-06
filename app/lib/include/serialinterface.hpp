@@ -3,11 +3,13 @@
 
 #pragma once
 
+#include <atomic>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_array.hpp>
+#include <condition_variable>
 #include <optional>
 
 #include "utilities.hpp"
@@ -43,6 +45,12 @@ public:
   bool IsOpen() const;
   bool ErrorStatus() const;
 
+  // NOTE: Boost asio does not provide a high-level api for buffer flushing, we need to access the lower layer with
+  // platform specific calls - implementation of this method is thus kept separate
+  void FlushInputBuffer();
+  void FlushOutputBuffer();
+  void FlushIOBuffers();
+
   void Write(const char *, std::size_t);
   void Write(const std::vector<char> &);
   void WriteString(const std::string &);
@@ -73,9 +81,13 @@ private:
   boost::asio::io_service m_io_service;
   std::shared_ptr<boost::asio::serial_port> mp_serial_port;
   std::thread m_worker_thread;
-  bool m_open;
-  bool m_error_flag;
+  std::atomic<bool> m_open;
+  std::atomic<bool> m_error_flag;
   mutable std::mutex m_error_mutex;
+
+  std::condition_variable m_conditon_variable;
+  std::mutex m_condition_variable_mutex;
+  std::unique_lock<std::mutex> m_condition_variable_lock;
 
   std::vector<char> m_write_queue;
   boost::shared_array<char> m_write_buffer;
