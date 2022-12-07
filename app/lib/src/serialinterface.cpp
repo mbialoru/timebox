@@ -84,6 +84,7 @@ void SerialInterface::ClosePort()
 void SerialInterface::Close()
 {
   if (not IsOpen()) { return; }
+  m_port_open = false;
   m_io_service.post(std::bind(&SerialInterface::ClosePort, this));
   if (m_worker_thread.joinable()) { m_worker_thread.join(); }
   if (m_notifier_thread.joinable()) { m_notifier_thread.join(); }
@@ -92,7 +93,6 @@ void SerialInterface::Close()
     BOOST_LOG_TRIVIAL(error) << "Error while closing serial port";
     throw(std::system_error(boost::system::error_code()));
   }
-  m_port_open = false;
 }
 
 bool SerialInterface::IsOpen() const { return m_port_open; }
@@ -139,7 +139,7 @@ std::string SerialInterface::ReadStringUntil(const std::string t_flag)
 {
   std::scoped_lock<std::mutex> lock(m_read_queue_mutex);
   std::vector<char>::iterator iterator{ FindInBuffer(m_read_queue, t_flag) };
-  if (iterator == m_read_queue.end()) { return std::string(""); }// could throw exception instead of empty
+  if (iterator == m_read_queue.end()) { return std::string(""); }// NOTE: could throw exception instead of empty
   std::string result(m_read_queue.begin(), iterator);
   iterator += t_flag.size();// remove flag from buffer
   m_read_queue.erase(m_read_queue.begin(), iterator);
@@ -196,10 +196,11 @@ std::vector<char>::iterator SerialInterface::FindInBuffer(std::vector<char> &t_b
 
 void SerialInterface::NotifierLoop()
 {
-  static std::regex readout_regex{ std::string(correct_serial_readout_regex) };
+  std::regex readout_regex{ correct_serial_readout_regex };
 
   while (IsOpen()) {
-    if (m_condition_variable.wait_for(m_condition_variable_lock, m_timeout_duration) == std::cv_status::timeout) {
+    if (m_condition_variable.wait_for(m_condition_variable_lock, m_timeout_duration) == std::cv_status::timeout
+        and IsOpen()) {
       BOOST_LOG_TRIVIAL(error) << "Timeout reached, check serial connection";
     } else {
       auto buffer_string{ ReadStringUntil("\n") };

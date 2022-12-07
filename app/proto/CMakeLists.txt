@@ -12,17 +12,12 @@ target_link_libraries(
                                 lib${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME}_proto AFTER
-PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_system_libraries(
-  ${PROJECT_NAME}_proto
-  PRIVATE
-  Boost::headers
-  Threads::Threads
-  gtest
+  ${PROJECT_NAME}_proto PRIVATE Boost::headers Threads::Threads gtest
   gtest_main
-  # IMGUI
-  # SDL2
-  )
+  # IMGUI SDL2
+)
 
 gtest_discover_tests(${PROJECT_NAME}_proto)
