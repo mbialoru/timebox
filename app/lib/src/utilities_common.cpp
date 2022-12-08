@@ -2,6 +2,31 @@
 
 using namespace TimeBox;
 
+std::string TimeBox::RenderNonPrintableCharacters(const std::string &t_input_string)
+{
+  std::string result;
+  std::string character_represent;
+  for (auto &character : t_input_string) {
+    switch (static_cast<int>(character)) {
+    case 9:
+      character_represent = "\\t";
+      break;
+    case 10:
+      character_represent = "\\n";
+      break;
+    case 32:
+      character_represent = "\\s";
+      break;
+    default:
+      character_represent = character;
+      break;
+    }
+    result.append(character_represent);
+    character_represent.clear();
+  }
+  return result;
+}
+
 std::size_t TimeBox::ConvertBaudRate(const std::size_t t_baud)
 {
   auto search = baud_conversion_map.find(static_cast<int>(t_baud));

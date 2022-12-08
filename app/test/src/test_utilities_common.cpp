@@ -58,3 +58,10 @@ TEST(Test_Utilities, timing_decorator_void_type)
   auto run_time = decorated_dummy_c();
   EXPECT_GE(run_time, 20);
 }
+
+TEST(Test_Utilities, debug_string_ascii_printing)
+{
+  std::string test_object{ "\tThis is a test string\n" };
+  std::string result{ RenderNonPrintableCharacters(test_object) };
+  EXPECT_EQ(result, std::string("\\tThis\\sis\\sa\\stest\\sstring\\n"));
+}
