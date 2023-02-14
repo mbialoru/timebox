@@ -27,7 +27,7 @@ AppContext TimeBox::InitializeContext()
   return context;
 }
 
-void TimeBox::CleanupContext(AppContext &t_context)
+void TimeBox::DestroyContext(AppContext &t_context)
 {
   t_context.p_serial_reader.reset();
   t_context.p_clock_controller.reset();

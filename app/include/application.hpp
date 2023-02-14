@@ -40,15 +40,17 @@ struct AppContext
 };
 
 AppContext InitializeContext();
-void CleanupContext(AppContext &);
-
+void DestroyContext(AppContext &);
 void SaveHistoryToFile(std::unique_ptr<TimeBox::ClockController>);
-
 void CenterWindow(std::size_t, std::size_t);
+
+// Dialog windows
 void MainDialog(AppContext &);
 void ConnectDialog(AppContext &);
-void WarningPopup(AppContext &);
 void AboutDialog(AppContext &);
+
+// Popups
+void WarningPopup(AppContext &);
 
 }// namespace TimeBox
 
