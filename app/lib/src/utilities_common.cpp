@@ -8,13 +8,19 @@ std::string TimeBox::RenderNonPrintableCharacters(const std::string &t_input_str
   std::string character_represent;
   for (auto &character : t_input_string) {
     switch (static_cast<int>(character)) {
-    case 9:
+    case 0:// NULL
+      character_represent = "\\0";
+      break;
+    case 9:// Tabulator
       character_represent = "\\t";
       break;
-    case 10:
+    case 10:// Line Feed LF
       character_represent = "\\n";
       break;
-    case 32:
+    case 13:// Carriage Return CR
+      character_represent = "\\r";
+      break;
+    case 32:// Whitespace
       character_represent = "\\s";
       break;
     default:
@@ -24,6 +30,17 @@ std::string TimeBox::RenderNonPrintableCharacters(const std::string &t_input_str
     result.append(character_represent);
     character_represent.clear();
   }
+  return result;
+}
+
+std::string TimeBox::RenderStringASCIICodes(const std::string &t_input_string)
+{
+  std::string result;
+  for (auto &character : t_input_string) {
+    result.append(std::to_string(static_cast<int>(character)));
+    result.append(" ");
+  }
+  result.pop_back();
   return result;
 }
 

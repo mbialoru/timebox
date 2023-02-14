@@ -24,6 +24,7 @@ bool CheckNTPService();
 void PauseNTPService();
 void StartNTPService();
 std::string RenderNonPrintableCharacters(const std::string &);
+std::string RenderStringASCIICodes(const std::string &);
 std::vector<std::string> GetSerialDevicesList();
 std::size_t ConvertBaudRate(std::size_t);
 std::chrono::system_clock::time_point ConvertStringToTimepoint(std::string);
