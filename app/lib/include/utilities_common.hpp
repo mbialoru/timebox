@@ -16,7 +16,7 @@ namespace TimeBox {
 
 extern std::map<int, int> baud_conversion_map;
 typedef std::pair<std::string, std::chrono::system_clock::time_point> TimeboxReadout;
-const std::string correct_serial_readout_regex{ "^[0-9]{1,2}\\:[0-9]{1,2}\\:[0-9]{1,2}\\.[0-9]{1,2}\\n?$" };
+const std::string correct_serial_readout_regex{ "[0-9]{1,2}\\:[0-9]{1,2}\\:[0-9]{1,2}\\.[0-9]{1,2}\\n?" };
 
 bool CheckAdminPrivileges();
 // TODO: These functions just ask to be wrapped into a class

@@ -59,8 +59,8 @@ void SerialInterface::Open(const std::string &t_device,
     static_cast<std::size_t (boost::asio::io_service::*)()>(&boost::asio::io_service::run), &m_io_service) };
   m_worker_thread.swap(worker_thread);
 
-  std::thread notifier_thread{ std::bind(&SerialInterface::NotifierLoop, this) };
-  m_notifier_thread.swap(notifier_thread);
+  std::thread callback_thread{ std::bind(&SerialInterface::CallbackLoop, this) };
+  m_callback_thread.swap(callback_thread);
 
   SetErrorStatus(false);
   m_port_open = true;
@@ -87,7 +87,7 @@ void SerialInterface::Close()
   m_port_open = false;
   m_io_service.post(std::bind(&SerialInterface::ClosePort, this));
   if (m_worker_thread.joinable()) { m_worker_thread.join(); }
-  if (m_notifier_thread.joinable()) { m_notifier_thread.join(); }
+  if (m_callback_thread.joinable()) { m_callback_thread.join(); }
   m_io_service.reset();
   if (ErrorStatus()) {
     BOOST_LOG_TRIVIAL(error) << "Error while closing serial port";
@@ -135,7 +135,7 @@ std::string SerialInterface::ReadString()
   return read_buffer;
 }
 
-std::string SerialInterface::ReadStringUntil(const std::string t_flag)
+std::string SerialInterface::ReadStringUntil(const std::string &t_flag)
 {
   std::scoped_lock<std::mutex> lock(m_read_queue_mutex);
   std::vector<char>::iterator iterator{ FindInBuffer(m_read_queue, t_flag) };
@@ -194,7 +194,7 @@ std::vector<char>::iterator SerialInterface::FindInBuffer(std::vector<char> &t_b
   }
 }
 
-void SerialInterface::NotifierLoop()
+void SerialInterface::CallbackLoop()
 {
   std::regex readout_regex{ correct_serial_readout_regex };
 
@@ -204,11 +204,10 @@ void SerialInterface::NotifierLoop()
       BOOST_LOG_TRIVIAL(error) << "Timeout reached, check serial connection";
     } else {
       auto buffer_string{ ReadStringUntil("\n") };
-      if (std::regex_match(buffer_string, readout_regex)) {
+      if (std::regex_search(buffer_string, readout_regex)) {
         m_callback(TimeboxReadout{ buffer_string, std::chrono::system_clock::now() });
       } else {
         BOOST_LOG_TRIVIAL(warning) << "Received malformed readout data from serial";
-        BOOST_LOG_TRIVIAL(debug) << "Read string: " << buffer_string;
       }
     }
   }

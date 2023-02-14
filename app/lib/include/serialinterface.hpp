@@ -5,7 +5,7 @@
 
 #include <atomic>
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_array.hpp>
@@ -59,7 +59,7 @@ public:
   std::vector<char> Read();
   std::size_t Read(char *, std::size_t);
   std::string ReadString();
-  std::string ReadStringUntil(const std::string);
+  std::string ReadStringUntil(const std::string &);
 
   static constexpr std::size_t read_buffer_size{ 512 };
 
@@ -70,7 +70,7 @@ private:
   void WriteEnd(const std::system_error &);
   void ClosePort();
 
-  void NotifierLoop();
+  void CallbackLoop();
 
   void SetErrorStatus(bool);
   static std::vector<char>::iterator FindInBuffer(std::vector<char> &, const std::string &);
@@ -85,7 +85,7 @@ private:
   boost::asio::io_service m_io_service;
   std::shared_ptr<boost::asio::serial_port> mp_serial_port;
   std::thread m_worker_thread;
-  std::thread m_notifier_thread;
+  std::thread m_callback_thread;
   std::atomic<bool> m_port_open;
   std::atomic<bool> m_error_flag;
   mutable std::mutex m_error_mutex;
