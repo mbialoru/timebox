@@ -1,5 +1,5 @@
-project(IMGUI)
-set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
+# project(IMGUI)
+set(IMGUI_DIR ${CMAKE_BINARY_DIR}/_deps/imgui-src)
 add_library(IMGUI STATIC)
 
 find_package(OpenGL REQUIRED)

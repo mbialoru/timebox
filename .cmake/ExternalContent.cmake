@@ -44,13 +44,10 @@ DisableAnalyzers(fmt)
 FetchExternalContent(https://github.com/pantor/inja v3.3.0 inja)
 DisableAnalyzers(inja)
 
-# FetchContent_Declare(
-#   imgui
-#   GIT_REPOSITORY https://github.com/ocornut/imgui
-#   GIT_TAG v1.89.1
-# )
-# FetchContent_GetProperties(imgui)
-# if(NOT imgui_POPULATED)
-#   FetchContent_Populate(imgui)
-#   add_subdirectory(${imgui_SOURCE_DIR} ${imgui_BINARY_DIR} EXCLUDE_FROM_ALL)
-# endif()
+FetchContent_Declare(
+  imgui
+  GIT_REPOSITORY https://github.com/ocornut/imgui
+  GIT_TAG v1.89.1
+)
+include(imgui)
+DisableAnalyzers(IMGUI)
