@@ -44,16 +44,6 @@ std::string TimeBox::RenderStringASCIICodes(const std::string &t_input_string)
   return result;
 }
 
-std::size_t TimeBox::ConvertBaudRate(const std::size_t t_baud)
-{
-  auto search = baud_conversion_map.find(static_cast<int>(t_baud));
-  if (search != baud_conversion_map.end()) {
-    return static_cast<std::size_t>(search->second);
-  } else {
-    throw std::invalid_argument("Invalid baud rate !");
-  }
-}
-
 std::chrono::system_clock::time_point TimeBox::ConvertStringToTimepoint(const std::string t_time_string)
 {
   std::vector<std::string> tmp;

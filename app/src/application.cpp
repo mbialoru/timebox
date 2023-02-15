@@ -7,11 +7,11 @@ AppContext TimeBox::InitializeContext()
   AppContext context;
 
   context.admin_privileges = CheckAdminPrivileges();
-  context.using_docker = CheckIfUsingDocker();
+  context.using_docker = CheckIfUsingDocker();// Doesn't work with Windows!
   context.ntp_running = CheckNTPService();
 
   context.baud_rate = 0;
-  for (const auto &[key, value] : baud_conversion_map) { context.baud_rate_list.push_back(std::to_string(key)); }
+  for (const auto &baud_rate : baud_rate_list) { context.baud_rate_string_list.push_back(std::to_string(baud_rate)); }
 
   context.application_run = true;
   context.disabled_warning_popup = false;
@@ -152,14 +152,16 @@ void TimeBox::ConnectDialog(AppContext &t_context)
     ImGui::Begin("Connect", &t_context.display_connect_dialog, window_flags);
     {
       // Baud rate choosing combo
-      const char *preview_value_baud = t_context.baud_rate_list[current_item_index_baud].c_str();
-      t_context.baud_rate = std::stoul(t_context.baud_rate_list[current_item_index_baud]);
+      const char *preview_value_baud = t_context.baud_rate_string_list[current_item_index_baud].c_str();
+      t_context.baud_rate = std::stoul(t_context.baud_rate_string_list[current_item_index_baud]);
       if (ImGui::BeginCombo("Baud rate", preview_value_baud)) {
-        for (std::size_t i{ 0 }; i < t_context.baud_rate_list.size(); ++i) {
+        for (std::size_t i{ 0 }; i < t_context.baud_rate_string_list.size(); ++i) {
           const bool is_selected = (current_item_index_baud == i);
-          if (ImGui::Selectable(t_context.baud_rate_list[i].c_str(), is_selected)) { current_item_index_baud = i; }
+          if (ImGui::Selectable(t_context.baud_rate_string_list[i].c_str(), is_selected)) {
+            current_item_index_baud = i;
+          }
           if (is_selected) {
-            t_context.baud_rate = std::stoul(t_context.baud_rate_list[i]);
+            t_context.baud_rate = std::stoul(t_context.baud_rate_string_list[i]);
             ImGui::SetItemDefaultFocus();
           }
         }

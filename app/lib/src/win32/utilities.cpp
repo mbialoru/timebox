@@ -2,22 +2,22 @@
 
 using namespace TimeBox;
 
-std::map<int, int> TimeBox::baud_conversion_map{ { 110, CBR_110 },
-  { 300, CBR_300 },
-  { 600, CBR_600 },
-  { 1200, CBR_1200 },
-  { 2400, CBR_2400 },
-  { 4800, CBR_4800 },
-  { 9600, CBR_9600 },
-  { 14400, CBR_14400 },
-  { 19200, CBR_19200 },
-  { 38400, CBR_38400 },
-  { 56000, CBR_56000 },
-  { 57600, CBR_57600 },
-  { 115200, CBR_115200 },
-  { 128000, CBR_128000 },
-  { 115200, CBR_115200 },
-  { 256000, CBR_256000 } };
+std::vector<std::size_t> TimeBox::baud_rate_list{ 110,
+  300,
+  600,
+  1200,
+  2400,
+  4800,
+  9600,
+  14400,
+  19200,
+  38400,
+  56000,
+  57600,
+  115200,
+  128000,
+  115200,
+  256000 };
 
 bool TimeBox::CheckAdminPrivileges()
 {

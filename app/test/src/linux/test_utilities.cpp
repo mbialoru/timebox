@@ -14,8 +14,6 @@ TEST(Test_Utilities, timesync_service_running)
     EXPECT_EQ(CheckNTPService(), true);
 }
 
-TEST(Test_Utilities, convert_baud_rate) { EXPECT_EQ(ConvertBaudRate(9600), B9600); }
-
 TEST(Test_Utilities, serial_devices_list)
 {
   if (CheckIfUsingDocker()) { GTEST_SKIP() << "Cannot run from Docker container !"; }

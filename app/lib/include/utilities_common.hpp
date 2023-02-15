@@ -14,7 +14,7 @@
 
 namespace TimeBox {
 
-extern std::map<int, int> baud_conversion_map;
+extern std::vector<std::size_t> baud_rate_list;
 typedef std::pair<std::string, std::chrono::system_clock::time_point> TimeboxReadout;
 const std::string correct_serial_readout_regex{ "[0-9]{1,2}\\:[0-9]{1,2}\\:[0-9]{1,2}\\.[0-9]{1,2}\\n?" };
 
@@ -26,7 +26,6 @@ void StartNTPService();
 std::string RenderNonPrintableCharacters(const std::string &);
 std::string RenderStringASCIICodes(const std::string &);
 std::vector<std::string> GetSerialDevicesList();
-std::size_t ConvertBaudRate(std::size_t);
 std::chrono::system_clock::time_point ConvertStringToTimepoint(std::string);
 std::string ConvertTimepointToString(std::chrono::system_clock::time_point);
 

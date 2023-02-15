@@ -7,7 +7,7 @@
 
 #include "clockcontroller.hpp"
 #include "config.hpp"
-#include "serialreader.hpp"
+#include "serialinterface.hpp"
 #include "utilities.hpp"
 
 namespace TimeBox {
@@ -23,7 +23,7 @@ struct AppContext
   std::string serial_port;
   std::string main_window_name;
 
-  std::vector<std::string> baud_rate_list;
+  std::vector<std::string> baud_rate_string_list;
   std::vector<std::string> serial_port_list;
 
   std::unique_ptr<TimeBox::ClockController> p_clock_controller;
