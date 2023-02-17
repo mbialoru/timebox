@@ -1,3 +1,6 @@
 [submodule "submodules/windows-vagrant"]
 	path = submodules/windows-vagrant
 	url = https://github.com/rgl/windows-vagrant
+[submodule "submodules/time-box-hardware-interface"]
+	path = submodules/time-box-hardware-interface
+	url = https://gitlab.sudobash.pl/Au5m8btpUaUS5t3dpixE/time-box-hardware-interface.git
