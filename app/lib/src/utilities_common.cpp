@@ -44,6 +44,15 @@ std::string TimeBox::RenderStringASCIICodes(const std::string &t_input_string)
   return result;
 }
 
+bool TimeBox::CheckIfUsingDocker()
+{
+  if (std::filesystem::exists(std::filesystem::path("/.dockerenv"))) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 std::chrono::system_clock::time_point TimeBox::ConvertStringToTimepoint(const std::string t_time_string)
 {
   std::vector<std::string> tmp;

@@ -6,6 +6,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/log/trivial.hpp>
 #include <chrono>
+#include <filesystem>
 #include <iostream>
 #include <map>
 #include <regex>
@@ -19,6 +20,7 @@ typedef std::pair<std::string, std::chrono::system_clock::time_point> TimeboxRea
 const std::string correct_serial_readout_regex{ "[0-9]{1,2}\\:[0-9]{1,2}\\:[0-9]{1,2}\\.[0-9]{1,2}\\n?" };
 
 bool CheckAdminPrivileges();
+bool CheckIfUsingDocker();
 // TODO: These functions just ask to be wrapped into a class
 bool CheckNTPService();
 void PauseNTPService();

@@ -7,7 +7,7 @@ AppContext TimeBox::InitializeContext()
   AppContext context;
 
   context.admin_privileges = CheckAdminPrivileges();
-  context.using_docker = CheckIfUsingDocker();// Doesn't work with Windows!
+  context.using_docker = CheckIfUsingDocker();
   context.ntp_running = CheckNTPService();
 
   context.baud_rate = 0;
