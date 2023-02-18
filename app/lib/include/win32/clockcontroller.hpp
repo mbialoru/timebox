@@ -33,7 +33,6 @@ private:
   static constexpr DWORD m_min_adjustment{ 0UL };
   static constexpr DWORD m_micro_per_second{ 1000000UL };
   std::shared_ptr<PID<double>> mp_pid;
-  std::vector<long> m_adjustment_history;
 };
 
 }// namespace TimeBox

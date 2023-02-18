@@ -90,7 +90,7 @@ void ClockController::AdjustClock(const TimeboxReadout t_readout)
 
   auto from_str = ConvertStringToTimepoint(time_string);
   auto diff = now - from_str;
-  time_difference_history.push_back(diff);
+  m_difference_history.push_back(diff);
   BOOST_LOG_TRIVIAL(debug) << "Clock difference is " << diff.count() << " nanoseconds";
 
   auto processing_time = std::chrono::system_clock::now() - time_stamp;

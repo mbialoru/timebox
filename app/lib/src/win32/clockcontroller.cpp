@@ -21,6 +21,7 @@ ClockController::ClockController(const std::size_t t_minimal_delay,
   BOOST_LOG_TRIVIAL(debug) << "Obtained initial system time adjustment: "
                            << std::to_string(m_initial_adjustment_legacy);
 
+  m_initial_adjustment = m_initial_adjustment_legacy;
   m_current_adjustment_legacy = m_initial_adjustment_legacy;
   std::ignore = QueryPerformanceFrequency(&m_performance_counter_frequency);
   BOOST_LOG_TRIVIAL(debug) << "System performance counter frequency: "
@@ -50,7 +51,7 @@ void ClockController::AdjustClock(const TimeboxReadout t_readout)
 
   auto from_str = ConvertStringToTimepoint(time_string);
   auto time_difference = std::chrono::duration_cast<std::chrono::microseconds>(now - from_str);
-  time_difference_history.push_back(time_difference);
+  m_difference_history.push_back(time_difference);
   BOOST_LOG_TRIVIAL(debug) << "Clock difference is " << time_difference.count() << " microseconds";
 
   auto processing_time =

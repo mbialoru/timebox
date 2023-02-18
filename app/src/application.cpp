@@ -72,12 +72,16 @@ void TimeBox::MainDialog(AppContext &t_context)
     ImGui::Text(t_context.serial_port.c_str());
     ImGui::Separator();
 
-    if (!t_context.p_clock_controller->time_difference_history.empty()
+    // TODO: Bring out time difference and adjustment history
+    if (!t_context.p_clock_controller->m_difference_history.empty()
         && !t_context.p_clock_controller->tick_history.empty()) {
-      ImGui::Text("Clock difference %ld ms", t_context.p_clock_controller->time_difference_history.back());
-      ImGui::Text("Kernel tick %lu (%.3f %%speed)",
+      ImGui::Text("Clock difference %ld ms", t_context.p_clock_controller->m_difference_history.back());
+      ImGui::Text("Clock adjustment %lu (%.3f %%speed)",
         t_context.p_clock_controller->tick_history.back(),
-        (static_cast<double>(t_context.p_clock_controller->tick_history.back()) - 10000) / 100 + 100);
+        (static_cast<double>(t_context.p_clock_controller->tick_history.back())
+          - t_context.p_clock_controller->GetInitialAdjustment())
+            / 100
+          + 100);
       ImGui::Separator();
     }
   }
@@ -112,11 +116,12 @@ void TimeBox::MainDialog(AppContext &t_context)
   ImGui::Text("P: %.3f I: %.3f D: %.3f", p, i, d);
   ImGui::Separator();
 
-  if (t_context.p_clock_controller != nullptr && !t_context.p_clock_controller->time_difference_history.empty()) {
+  // TODO: Fix history saving to file and implement autosave every X steps
+  if (t_context.p_clock_controller != nullptr && !t_context.p_clock_controller->m_difference_history.empty()) {
     if (ImGui::Button("Save History")) {
       std::fstream output_file;
       output_file.open("timebox_history.log", std::ios::out);
-      for (const auto entry : t_context.p_clock_controller->time_difference_history) {
+      for (const auto entry : t_context.p_clock_controller->m_difference_history) {
         output_file << std::to_string(entry).c_str();
         output_file << "\n";
       }
