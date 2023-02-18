@@ -7,3 +7,10 @@ BaseClockController::BaseClockController(const std::size_t t_minimal_delay) noex
 {}
 
 long BaseClockController::GetInitialAdjustment() const { return m_initial_adjustment; }
+
+std::vector<std::chrono::system_clock::duration> BaseClockController::GetDifferenceHistory() const
+{
+  return m_difference_history;
+}
+
+std::vector<long> BaseClockController::GetAdjustmentHistory() const { return m_adjustment_history; }

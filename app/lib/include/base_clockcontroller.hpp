@@ -16,6 +16,8 @@ public:
   virtual ~BaseClockController() = default;
   virtual void AdjustClock(TimeboxReadout) = 0;
   long GetInitialAdjustment() const;
+  std::vector<std::chrono::system_clock::duration> GetDifferenceHistory() const;
+  std::vector<long> GetAdjustmentHistory() const;
 
 protected:
   long m_initial_adjustment;

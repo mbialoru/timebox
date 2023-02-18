@@ -73,12 +73,12 @@ void TimeBox::MainDialog(AppContext &t_context)
     ImGui::Separator();
 
     // TODO: Bring out time difference and adjustment history
-    if (!t_context.p_clock_controller->m_difference_history.empty()
-        && !t_context.p_clock_controller->tick_history.empty()) {
-      ImGui::Text("Clock difference %ld ms", t_context.p_clock_controller->m_difference_history.back());
+    if (!t_context.p_clock_controller->GetDifferenceHistory().empty()
+        && !t_context.p_clock_controller->GetAdjustmentHistory().empty()) {
+      ImGui::Text("Clock difference %ld ms", t_context.p_clock_controller->GetDifferenceHistory().back());
       ImGui::Text("Clock adjustment %lu (%.3f %%speed)",
-        t_context.p_clock_controller->tick_history.back(),
-        (static_cast<double>(t_context.p_clock_controller->tick_history.back())
+        t_context.p_clock_controller->GetAdjustmentHistory().back(),
+        (static_cast<double>(t_context.p_clock_controller->GetAdjustmentHistory().back())
           - t_context.p_clock_controller->GetInitialAdjustment())
             / 100
           + 100);
@@ -117,12 +117,12 @@ void TimeBox::MainDialog(AppContext &t_context)
   ImGui::Separator();
 
   // TODO: Fix history saving to file and implement autosave every X steps
-  if (t_context.p_clock_controller != nullptr && !t_context.p_clock_controller->m_difference_history.empty()) {
+  if (t_context.p_clock_controller != nullptr && !t_context.p_clock_controller->GetDifferenceHistory().empty()) {
     if (ImGui::Button("Save History")) {
       std::fstream output_file;
       output_file.open("timebox_history.log", std::ios::out);
-      for (const auto entry : t_context.p_clock_controller->m_difference_history) {
-        output_file << std::to_string(entry).c_str();
+      for (const auto entry : t_context.p_clock_controller->GetDifferenceHistory()) {
+        output_file << std::to_string(entry.count()).c_str();
         output_file << "\n";
       }
       output_file.close();
@@ -201,10 +201,17 @@ void TimeBox::ConnectDialog(AppContext &t_context)
         ImGui::Text(std::to_string(t_context.baud_rate).c_str());
 
         if (ImGui::Button("Connect")) {
-          t_context.p_clock_controller = std::make_unique<ClockController>(0.001, 0, t_context.p_pid);
-          t_context.p_serial_reader = std::make_unique<SerialInterface>(t_context.serial_port.c_str(),
-            t_context.baud_rate,
+          t_context.p_clock_controller = std::make_unique<ClockController>(0, t_context.p_pid, 0.001);
+          t_context.p_serial_reader = std::make_unique<SerialInterface>(
             std::bind(&ClockController::AdjustClock, t_context.p_clock_controller.get(), std::placeholders::_1));
+
+          try {
+            t_context.p_serial_reader->Open(t_context.serial_port, t_context.baud_rate);
+          } catch (const std::exception &e) {
+            BOOST_LOG_TRIVIAL(error) << e.what();
+            throw e;
+          }
+
           t_context.connection_established = true;
         }
 

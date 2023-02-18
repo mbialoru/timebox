@@ -168,63 +168,64 @@ void SerialInterface::ReadEnd(const boost::system::error_code &t_error, std::siz
   }
 }
 
-void SerialInterface::Write(const char *t_data, std::size_t t_buffer_size)
-{
-  std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
-  m_write_queue.insert(m_write_queue.end(), t_data, t_data + t_buffer_size);
-  m_io_service.post(std::bind(&SerialInterface::WriteBegin, this));
-}
+// FIXME: Convert from shared_array to shared_ptr, compile error otherwise
+// void SerialInterface::Write(const char *t_data, std::size_t t_buffer_size)
+// {
+//   std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
+//   m_write_queue.insert(m_write_queue.end(), t_data, t_data + t_buffer_size);
+//   m_io_service.post(std::bind(&SerialInterface::WriteBegin, this));
+// }
 
-void SerialInterface::Write(const std::vector<char> &t_data)
-{
-  std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
-  m_write_queue.insert(m_write_queue.end(), t_data.begin(), t_data.end());
-  m_io_service.post(std::bind(&SerialInterface::WriteBegin, this));
-}
+// void SerialInterface::Write(const std::vector<char> &t_data)
+// {
+//   std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
+//   m_write_queue.insert(m_write_queue.end(), t_data.begin(), t_data.end());
+//   m_io_service.post(std::bind(&SerialInterface::WriteBegin, this));
+// }
 
-void SerialInterface::WriteString(const std::string &t_string)
-{
-  std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
-  m_write_queue.insert(m_write_queue.end(), t_string.begin(), t_string.end());
-  m_io_service.post(std::bind(&SerialInterface::WriteBegin, this));
-}
+// void SerialInterface::WriteString(const std::string &t_string)
+// {
+//   std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
+//   m_write_queue.insert(m_write_queue.end(), t_string.begin(), t_string.end());
+//   m_io_service.post(std::bind(&SerialInterface::WriteBegin, this));
+// }
 
-void SerialInterface::WriteBegin()
-{
-  // Do nothing if writing operation is in progress
-  if (m_write_buffer == 0) {
-    std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
-    m_write_buffer_size = m_write_queue.size();
-    m_write_buffer.reset(new char[m_write_queue.size()]);
-    std::copy(m_write_queue.begin(), m_write_queue.end(), m_write_buffer.get());
-    m_write_queue.clear();
-    boost::asio::async_write(mp_serial_port,
-      boost::asio::buffer(m_write_buffer.get(), m_write_buffer_size),
-      boost::bind(&SerialInterface::WriteEnd, this, boost::asio::placeholders::error));
-  }
-}
+// void SerialInterface::WriteBegin()
+// {
+//   // Do nothing if writing operation is in progress
+//   if (m_write_buffer == 0) {
+//     std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
+//     m_write_buffer_size = m_write_queue.size();
+//     m_write_buffer.reset(new char[m_write_queue.size()]);
+//     std::copy(m_write_queue.begin(), m_write_queue.end(), m_write_buffer.get());
+//     m_write_queue.clear();
+//     boost::asio::async_write(mp_serial_port,
+//       boost::asio::buffer(m_write_buffer.get(), m_write_buffer_size),
+//       boost::bind(&SerialInterface::WriteEnd, this, boost::asio::placeholders::error));
+//   }
+// }
 
-void SerialInterface::WriteEnd(const boost::system::error_code &t_error)
-{
-  if (!t_error) {
-    std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
-    if (m_write_queue.empty()) {
-      m_write_buffer.reset();
-      m_write_buffer_size = 0;
-      return;
-    }
-    m_write_buffer_size = m_write_queue.size();
-    m_write_buffer.reset(new char[m_write_queue.size()]);
-    std::copy(m_write_queue.begin(), m_write_queue.end(), m_write_buffer.get());
-    m_write_queue.clear();
-    boost::asio::async_write(mp_serial_port,
-      boost::asio::buffer(m_write_buffer.get(), m_write_buffer_size),
-      boost::bind(&SerialInterface::WriteEnd, this, boost::asio::placeholders::error));
-  } else {
-    SetErrorStatus(true);
-    ClosePort();
-  }
-}
+// void SerialInterface::WriteEnd(const boost::system::error_code &t_error)
+// {
+//   if (!t_error) {
+//     std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
+//     if (m_write_queue.empty()) {
+//       m_write_buffer.reset();
+//       m_write_buffer_size = 0;
+//       return;
+//     }
+//     m_write_buffer_size = m_write_queue.size();
+//     m_write_buffer.reset(new char[m_write_queue.size()]);
+//     std::copy(m_write_queue.begin(), m_write_queue.end(), m_write_buffer.get());
+//     m_write_queue.clear();
+//     boost::asio::async_write(mp_serial_port,
+//       boost::asio::buffer(m_write_buffer.get(), m_write_buffer_size),
+//       boost::bind(&SerialInterface::WriteEnd, this, boost::asio::placeholders::error));
+//   } else {
+//     SetErrorStatus(true);
+//     ClosePort();
+//   }
+// }
 
 std::vector<char>::iterator SerialInterface::FindInBuffer(std::vector<char> &t_buffer, const std::string &t_string)
 {
