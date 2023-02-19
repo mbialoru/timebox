@@ -6,7 +6,7 @@ Exploring ways to control and modify windows system clock
 ==============
 */
 
-#if PROTO_WINCLOCKCONTROL
+#if PROTO_CLOCKCONTROL
 
 #include <boost/log/trivial.hpp>
 #include <gtest/gtest.h>

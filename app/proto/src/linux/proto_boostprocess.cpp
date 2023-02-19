@@ -14,7 +14,6 @@ boost::process as an alternative to less secure popen
 #include <gtest/gtest.h>
 #include <string>
 
-#if defined(__unix__)
 TEST(Proto_boostprocess, capture_output)
 {
   // NOTE: Do not launch in docker container
@@ -28,15 +27,5 @@ TEST(Proto_boostprocess, capture_output)
     GTEST_FAIL();
   }
 }
-#elif defined(_WIN64) && !defined(__CYGWIN__)
-TEST(Proto_boostprocess, capture_output)
-{
-  // NOTE: First launch cmd/powershell and pass command as argument to it
-  boost::asio::io_context ios;
-  std::future<std::string> output;
-  boost::process::system("cmd /c dir", boost::process::std_out > output, ios);
-  auto res = output.get();
-  std::cout << res;
-}
-#endif
+
 #endif
