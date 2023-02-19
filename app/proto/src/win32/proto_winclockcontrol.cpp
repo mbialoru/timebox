@@ -5,8 +5,9 @@
 Exploring ways to control and modify windows system clock
 ==============
 */
+
 #if PROTO_WINCLOCKCONTROL
-#if defined(_WIN64) && !defined(__CYGWIN__)
+
 #include <boost/log/trivial.hpp>
 #include <gtest/gtest.h>
 #include <sysinfoapi.h>
@@ -177,5 +178,4 @@ TEST(Proto_winclockcontrol, setting_system_clock_adjustments)
   test_object.PrototypeTestMethod_B();
 }
 
-#endif
 #endif

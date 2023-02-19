@@ -1,5 +1,5 @@
 file(GLOB SRCS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-target_sources(lib${PROJECT_NAME} PRIVATE ${SRCS})
+target_sources(${PROJECT_NAME}_proto PRIVATE ${SRCS})
 
 if(TARGET_PLATFORM MATCHES "LINUX")
   add_subdirectory(linux)
