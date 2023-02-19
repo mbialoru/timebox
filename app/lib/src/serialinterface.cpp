@@ -168,7 +168,7 @@ void SerialInterface::ReadEnd(const boost::system::error_code &t_error, std::siz
   }
 }
 
-// FIXME: Convert from shared_array to shared_ptr, compile error otherwise
+// TODO: Convert from shared_array to shared_ptr, compile error otherwise
 // void SerialInterface::Write(const char *t_data, std::size_t t_buffer_size)
 // {
 //   std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
