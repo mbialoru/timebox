@@ -11,5 +11,6 @@ Trying to combine required WinMain in GUI apps on Windows with imgui/SDL
 #include <gtest/gtest.h>
 #include <windows.h>
 
+int main() {}
 
 #endif
