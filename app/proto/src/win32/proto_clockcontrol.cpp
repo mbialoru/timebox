@@ -165,13 +165,13 @@ private:
 
 }// namespace TimeBox
 
-TEST(Proto_winclockcontrol, printing_system_clock_adjustments)
+TEST(Proto_clockcontrol, printing_system_clock_adjustments)
 {
   TimeBox::WinClockController test_object(500);
   test_object.PrototypeTestMethod_A();
 }
 
-TEST(Proto_winclockcontrol, setting_system_clock_adjustments)
+TEST(Proto_clockcontrol, setting_system_clock_adjustments)
 {
   if (!TimeBox::CheckAdminPrivileges()) { GTEST_SKIP() << "Requires Admin privileges"; }
   TimeBox::WinClockController test_object(500);
