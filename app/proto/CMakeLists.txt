@@ -3,19 +3,15 @@ enable_testing()
 
 set(CTEST_TEST_TIMEOUT 20) # if triggered, log files won't be written
 
-add_executable(${PROJECT_NAME}_proto)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/proto)
 
-add_subdirectory(include)
-add_subdirectory(src)
+if(TARGET_PLATFORM MATCHES "LINUX")
+  add_subdirectory(linux)
+elseif(TARGET_PLATFORM MATCHES "WIN32")
+  add_subdirectory(win32)
+endif()
 
-target_link_libraries(
-  ${PROJECT_NAME}_proto PRIVATE project_options project_warnings
-                                lib${PROJECT_NAME})
-
-target_link_system_libraries(
-  ${PROJECT_NAME}_proto PRIVATE Boost::headers Threads::Threads gtest
-  gtest_main
-  # IMGUI SDL2
-)
-
-gtest_discover_tests(${PROJECT_NAME}_proto)
+add_subdirectory(00_experiment)
+add_subdirectory(01_imgui)
+add_subdirectory(02_regex)
+add_subdirectory(03_timefromstr)

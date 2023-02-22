@@ -1,0 +1,3 @@
+add_subdirectory(W00_boostprocess)
+add_subdirectory(W01_clockcontrol)
+add_subdirectory(W02_winmain)
