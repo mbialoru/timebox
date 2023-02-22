@@ -1,4 +1,4 @@
-project(W01_clockcontrol)
+project(PROTO_W01_clockcontrol)
 
 add_executable(${PROJECT_NAME})
 

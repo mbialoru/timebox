@@ -1,4 +1,4 @@
-project(03_timefromstr)
+project(PROTO_03_timefromstr)
 
 add_executable(${PROJECT_NAME})
 

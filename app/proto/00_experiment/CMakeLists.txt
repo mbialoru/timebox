@@ -1,4 +1,4 @@
-project(00_experiment)
+project(PROTO_00_experiment)
 
 add_executable(${PROJECT_NAME})
 

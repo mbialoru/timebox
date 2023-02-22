@@ -1,4 +1,4 @@
-project(W02_winmain)
+project(PROTO_W02_winmain)
 
 add_executable(${PROJECT_NAME})
 

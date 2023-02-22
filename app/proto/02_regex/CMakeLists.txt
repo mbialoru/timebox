@@ -1,4 +1,4 @@
-project(02_regex)
+project(PROTO_02_regex)
 
 add_executable(${PROJECT_NAME})
 

@@ -1,4 +1,4 @@
-project(W00_boostprocess)
+project(PROTO_W00_boostprocess)
 
 add_executable(${PROJECT_NAME})
 

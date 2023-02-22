@@ -1,4 +1,4 @@
-project(01_imgui)
+project(PROTO_01_imgui)
 
 add_executable(${PROJECT_NAME})
 
