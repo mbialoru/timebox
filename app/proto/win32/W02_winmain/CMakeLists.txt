@@ -9,4 +9,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE project_options project_warnings)
 
 target_link_system_libraries(${PROJECT_NAME} PRIVATE Boost::headers)
 
-gtest_discover_tests(${PROJECT_NAME})
+# Required for MinGW acceptance of wWinMain
+target_link_options(${PROJECT_NAME} PRIVATE -municode)
