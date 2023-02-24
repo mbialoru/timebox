@@ -37,7 +37,7 @@ int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
 #endif
 
   // Create window
-  SDL_WindowFlags window_flags = static_cast<SDL_WindowFlags>(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+  SDL_WindowFlags window_flags = static_cast<SDL_WindowFlags>(SDL_WINDOW_ALLOW_HIGHDPI);
   SDL_Window *window = SDL_CreateWindow(std::string(BuildInformation::PROJECT_NAME).c_str(),
     SDL_WINDOWPOS_CENTERED,
     SDL_WINDOWPOS_CENTERED,
