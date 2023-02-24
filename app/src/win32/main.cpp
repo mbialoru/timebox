@@ -1,15 +1,10 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 #include <boost/log/trivial.hpp>
+#include <d3d11.h>
 #include <imgui.h>
-#include <imgui_impl_opengl3.h>
+#include <imgui_impl_dx11.h>
 #include <imgui_impl_sdl.h>
-
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <SDL_opengles2.h>
-#else
-#include <SDL_opengl.h>
-#endif
 
 #include "application.hpp"
 #include "config.hpp"
@@ -17,7 +12,8 @@
 
 using namespace TimeBox;
 
-int main(const int t_argc, const char *t_argv[])
+// main()
+int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
 {
   // Setup SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
@@ -25,65 +21,43 @@ int main(const int t_argc, const char *t_argv[])
     return EXIT_FAILURE;
   }
 
-  // Decide GL+GLSL versions
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-  // GL ES 2.0 + GLSL 100
-  const char *glsl_version = "#version 100";
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#elif defined(__APPLE__)
-  // GL 3.2 Core + GLSL 150
-  const char *glsl_version = "#version 150";
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);// Always required on Mac
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-#else
-  // GL 3.0 + GLSL 130
-  const char *glsl_version = "#version 130";
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+  // From 2.0.18: Enable native IME.
+#ifdef SDL_HINT_IME_SHOW_UI
+  SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 #endif
 
-  // Create window with graphics context
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-  SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-  SDL_WindowFlags window_flags = static_cast<SDL_WindowFlags>(SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
-
+  // Create window
+  SDL_WindowFlags window_flags = static_cast<SDL_WindowFlags>(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
   SDL_Window *window = SDL_CreateWindow(std::string(BuildInformation::PROJECT_NAME).c_str(),
     SDL_WINDOWPOS_CENTERED,
     SDL_WINDOWPOS_CENTERED,
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
     window_flags);
-  SDL_GLContext gl_context = SDL_GL_CreateContext(window);
-  SDL_GL_MakeCurrent(window, gl_context);
-  SDL_GL_SetSwapInterval(1);// Enable vsync
-
-  // Win32API compatibility glue code
   SDL_SysWMinfo wm_info;
   SDL_VERSION(&wm_info.version);
   SDL_GetWindowWMInfo(window, &wm_info);
-  HWND window_handle = wm_info.info.win.window;
-  ShowWindow(window_handle, 0);
+  HWND window_handle{ wm_info.info.win.window };
+
+  // Initialize Direct3D
+  D3DContext d3d_context;
+  if (not CreateDeviceD3D(window_handle, d3d_context)) {
+    DestroyDeviceD3D(d3d_context);
+    BOOST_LOG_TRIVIAL(error) << "Failed to create D3D device !";
+    return EXIT_FAILURE;
+  }
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
-  (void)io;
 
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
 
   // Setup Platform/Renderer backends
-  ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
-  ImGui_ImplOpenGL3_Init(glsl_version);
+  ImGui_ImplSDL2_InitForD3D(window);
+  ImGui_ImplDX11_Init(d3d_context.p_d3d_device, d3d_context.p_d3d_device_context);
 
   // Variables for ImGui
   static const Uint32 max_fps{ 20 };
@@ -116,7 +90,7 @@ int main(const int t_argc, const char *t_argv[])
     }
 
     // Start the Dear ImGui frame
-    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplDX11_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
@@ -128,31 +102,25 @@ int main(const int t_argc, const char *t_argv[])
 
     // Rendering - This is our Viewport
     ImGui::Render();
-    glViewport(0, 0, static_cast<int>(io.DisplaySize.x), static_cast<int>(io.DisplaySize.y));
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_GL_SwapWindow(window);
+    d3d_context.p_d3d_device_context->OMSetRenderTargets(1, &d3d_context.p_render_target_view, NULL);
+    d3d_context.p_d3d_device_context->ClearRenderTargetView(d3d_context.p_render_target_view, NULL);
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+    d3d_context.p_swap_chain->Present(1, 0);// VSync
 
     // FPS limiter
     if (this_frametime - last_frametime < 1000 / max_fps) SDL_Delay(1000 / max_fps - this_frametime + last_frametime);
   }
 
   // Cleanup
-
   DestroyContext(context);
 
-  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplDX11_Shutdown();
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
 
-  SDL_GL_DeleteContext(gl_context);
+  DestroyDeviceD3D(d3d_context);
   SDL_DestroyWindow(window);
   SDL_Quit();
 
   return EXIT_SUCCESS;
-}
-
-INT WINAPI wWinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, PWSTR /*pCmdLine*/, INT /*nCmdShow*/)
-{
-  int exit_result = main(0, NULL);
-  return exit_result;
 }

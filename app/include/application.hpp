@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <d3d11.h>
 #include <fstream>
 #include <imgui.h>
 
@@ -40,10 +41,24 @@ struct AppContext
   bool display_connect_dialog;
 };
 
+struct D3DContext
+{
+  ID3D11Device *p_d3d_device{ nullptr };
+  ID3D11DeviceContext *p_d3d_device_context{ nullptr };
+  IDXGISwapChain *p_swap_chain{ nullptr };
+  ID3D11RenderTargetView *p_render_target_view{ nullptr };
+};
+
 AppContext InitializeContext();
 void DestroyContext(AppContext &);
 void SaveHistoryToFile(std::unique_ptr<TimeBox::ClockController>);
 void CenterWindow(std::size_t, std::size_t);
+
+// DirectX 11 helpers
+bool CreateDeviceD3D(HWND, D3DContext);
+void DestroyDeviceD3D(D3DContext);
+void CreateRenderTarget(D3DContext);
+void DestroyRenderTarget(D3DContext);
 
 // Dialog windows
 void MainDialog(AppContext &);
