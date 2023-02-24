@@ -11,7 +11,6 @@
 #include <d3d11.h>
 #include <stdio.h>
 
-
 // Data
 static ID3D11Device *g_pd3dDevice = NULL;
 static ID3D11DeviceContext *g_pd3dDeviceContext = NULL;

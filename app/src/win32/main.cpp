@@ -12,6 +12,16 @@
 
 using namespace TimeBox;
 
+static ID3D11Device *p_d3d_device{ NULL };
+static IDXGISwapChain *p_swap_chain{ NULL };
+static ID3D11DeviceContext *p_d3d_device_context{ NULL };
+static ID3D11RenderTargetView *p_render_target_view{ NULL };
+
+bool CreateDeviceD3D(HWND);
+void DestroyDeviceD3D();
+void CreateRenderTarget();
+void DestroyRenderTarget();
+
 // main()
 int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
 {
@@ -40,9 +50,8 @@ int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
   HWND window_handle{ wm_info.info.win.window };
 
   // Initialize Direct3D
-  D3DContext d3d_context;
-  if (not CreateDeviceD3D(window_handle, d3d_context)) {
-    DestroyDeviceD3D(d3d_context);
+  if (not CreateDeviceD3D(window_handle)) {
+    DestroyDeviceD3D();
     BOOST_LOG_TRIVIAL(error) << "Failed to create D3D device !";
     return EXIT_FAILURE;
   }
@@ -57,11 +66,12 @@ int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
 
   // Setup Platform/Renderer backends
   ImGui_ImplSDL2_InitForD3D(window);
-  ImGui_ImplDX11_Init(d3d_context.p_d3d_device, d3d_context.p_d3d_device_context);
+  ImGui_ImplDX11_Init(p_d3d_device, p_d3d_device_context);
 
   // Variables for ImGui
   static const Uint32 max_fps{ 20 };
   static Uint32 last_frametime, this_frametime;
+  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
   // Application context
   AppContext context = InitializeContext();
@@ -102,10 +112,13 @@ int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
 
     // Rendering - This is our Viewport
     ImGui::Render();
-    d3d_context.p_d3d_device_context->OMSetRenderTargets(1, &d3d_context.p_render_target_view, NULL);
-    d3d_context.p_d3d_device_context->ClearRenderTargetView(d3d_context.p_render_target_view, NULL);
+    const float clear_color_with_alpha[4] = {
+      clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w
+    };
+    p_d3d_device_context->OMSetRenderTargets(1, &p_render_target_view, NULL);
+    p_d3d_device_context->ClearRenderTargetView(p_render_target_view, clear_color_with_alpha);
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-    d3d_context.p_swap_chain->Present(1, 0);// VSync
+    p_swap_chain->Present(1, 0);// VSync
 
     // FPS limiter
     if (this_frametime - last_frametime < 1000 / max_fps) SDL_Delay(1000 / max_fps - this_frametime + last_frametime);
@@ -118,9 +131,87 @@ int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
 
-  DestroyDeviceD3D(d3d_context);
+  DestroyDeviceD3D();
   SDL_DestroyWindow(window);
   SDL_Quit();
 
   return EXIT_SUCCESS;
+}
+
+bool CreateDeviceD3D(HWND t_hwnd)
+{
+  // Setup swap chain
+  DXGI_SWAP_CHAIN_DESC sd;
+  ZeroMemory(&sd, sizeof(sd));
+  sd.BufferCount = 2;
+  sd.BufferDesc.Width = 0;
+  sd.BufferDesc.Height = 0;
+  sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  sd.BufferDesc.RefreshRate.Numerator = 60;
+  sd.BufferDesc.RefreshRate.Denominator = 1;
+  sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+  sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  sd.OutputWindow = t_hwnd;
+  sd.SampleDesc.Count = 1;
+  sd.SampleDesc.Quality = 0;
+  sd.Windowed = TRUE;
+  sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+  UINT createDeviceFlags = 0;
+  // createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+  D3D_FEATURE_LEVEL featureLevel;
+  const D3D_FEATURE_LEVEL featureLevelArray[2] = {
+    D3D_FEATURE_LEVEL_11_0,
+    D3D_FEATURE_LEVEL_10_0,
+  };
+  if (D3D11CreateDeviceAndSwapChain(NULL,
+        D3D_DRIVER_TYPE_HARDWARE,
+        NULL,
+        createDeviceFlags,
+        featureLevelArray,
+        2,
+        D3D11_SDK_VERSION,
+        &sd,
+        &p_swap_chain,
+        &p_d3d_device,
+        &featureLevel,
+        &p_d3d_device_context)
+      != S_OK)
+    return false;
+
+  CreateRenderTarget();
+  return true;
+}
+
+void DestroyDeviceD3D()
+{
+  DestroyRenderTarget();
+  if (p_swap_chain) {
+    p_swap_chain->Release();
+    p_swap_chain = NULL;
+  }
+  if (p_d3d_device_context) {
+    p_d3d_device_context->Release();
+    p_d3d_device_context = NULL;
+  }
+  if (p_d3d_device) {
+    p_d3d_device->Release();
+    p_d3d_device = NULL;
+  }
+}
+
+void CreateRenderTarget()
+{
+  ID3D11Texture2D *pBackBuffer;
+  p_swap_chain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+  p_d3d_device->CreateRenderTargetView(pBackBuffer, NULL, &p_render_target_view);
+  pBackBuffer->Release();
+}
+
+void DestroyRenderTarget()
+{
+  if (p_render_target_view) {
+    p_render_target_view->Release();
+    p_render_target_view = NULL;
+  }
 }
