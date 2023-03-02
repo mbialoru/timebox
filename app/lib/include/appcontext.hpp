@@ -1,20 +1,21 @@
-#ifndef APPLICATION_HPP
-#define APPLICATION_HPP
+#ifndef APPCONTEXT_HPP
+#define APPCONTEXT_HPP
 
 #pragma once
-
-#include <fstream>
-#include <imgui.h>
 
 #include "clockcontroller.hpp"
 #include "config.hpp"
 #include "serialinterface.hpp"
 #include "utilities.hpp"
 
-namespace TimeBox {
-
-struct AppContext
+class AppContext
 {
+public:
+  AppContext();
+  ~AppContext() = default;
+
+  void Reset();
+
   // Application variables
   bool ntp_running;
   bool using_docker;
@@ -40,19 +41,4 @@ struct AppContext
   bool display_connect_dialog;
 };
 
-AppContext InitializeContext();
-void DestroyContext(AppContext &);
-void SaveHistoryToFile(std::unique_ptr<TimeBox::ClockController>);
-void CenterWindow(std::size_t, std::size_t);
-
-// Dialog windows
-void MainDialog(AppContext &);
-void ConnectDialog(AppContext &);
-void AboutDialog(AppContext &);
-
-// Popups
-void WarningPopup(AppContext &);
-
-}// namespace TimeBox
-
-#endif// APPLICATION_HPP
+#endif// APPCONTEXT_HPP

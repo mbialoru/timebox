@@ -18,7 +18,6 @@ struct BuildInformation
   static constexpr std::string_view COMPILER{ "@CMAKE_CXX_COMPILER_ID@" };
   static constexpr std::string_view COMPILER_VERSION{ "@CMAKE_CXX_COMPILER_VERSION@" };
   static constexpr std::string_view BUILD_DATE{ "@BUILD_TIME@" };
-  static constexpr std::string_view BUILD_HASH{ "@BUILD_HASH@" };
 };
 
 static constexpr std::size_t WINDOW_HEIGHT{ 600 };

@@ -1,37 +1,6 @@
-#include "application.hpp"
+#include "gui_frontend.hpp"
 
 using namespace TimeBox;
-
-AppContext TimeBox::InitializeContext()
-{
-  AppContext context;
-
-  context.admin_privileges = CheckAdminPrivileges();
-  context.using_docker = CheckIfUsingDocker();
-  context.ntp_running = CheckNTPService();
-
-  context.baud_rate = 0;
-  for (const auto &baud_rate : baud_rate_list) { context.baud_rate_string_list.push_back(std::to_string(baud_rate)); }
-
-  context.application_run = true;
-  context.disabled_warning_popup = false;
-  context.connection_established = false;
-
-  context.display_about_dialog = false;
-  context.display_connect_dialog = false;
-
-  context.main_window_name = std::string(BuildInformation().PROJECT_NAME);
-
-  std::make_shared<PID<double>>(0.0, 0.0, 0.0, 0.0).swap(context.p_pid);
-
-  return context;
-}
-
-void TimeBox::DestroyContext(AppContext &t_context)
-{
-  t_context.p_serial_reader.reset();
-  t_context.p_clock_controller.reset();
-}
 
 void TimeBox::CenterWindow(std::size_t t_height, std::size_t t_width)
 {
@@ -117,17 +86,17 @@ void TimeBox::MainDialog(AppContext &t_context)
   ImGui::Separator();
 
   // TODO: Fix history saving to file and implement autosave every X steps
-  if (t_context.p_clock_controller != nullptr && !t_context.p_clock_controller->GetDifferenceHistory().empty()) {
-    if (ImGui::Button("Save History")) {
-      std::fstream output_file;
-      output_file.open("timebox_history.log", std::ios::out);
-      for (const auto entry : t_context.p_clock_controller->GetDifferenceHistory()) {
-        output_file << std::to_string(entry.count()).c_str();
-        output_file << "\n";
-      }
-      output_file.close();
-    }
-  }
+  // if (t_context.p_clock_controller != nullptr && !t_context.p_clock_controller->GetDifferenceHistory().empty()) {
+  //   if (ImGui::Button("Save History")) {
+  //     std::fstream output_file;
+  //     output_file.open("timebox_history.log", std::ios::out);
+  //     for (const auto entry : t_context.p_clock_controller->GetDifferenceHistory()) {
+  //       output_file << std::to_string(entry.count()).c_str();
+  //       output_file << "\n";
+  //     }
+  //     output_file.close();
+  //   }
+  // }
 
   if (ImGui::Button("Connect")) { t_context.display_connect_dialog = true; }
   ImGui::SameLine();
@@ -275,23 +244,19 @@ void TimeBox::AboutDialog(AppContext &t_context)
     ImGui::TextWrapped("Frametime %.3f ms/frame (%.1f FPS)",
       static_cast<double>(1000.0f / ImGui::GetIO().Framerate),
       static_cast<double>(ImGui::GetIO().Framerate));
-    ImGui::TextWrapped(std::string(BuildInformation().PROJECT_NAME).c_str());
-    ImGui::TextWrapped("Version: ",
+    ImGui::TextWrapped("Project: %s", std::string(BuildInformation().PROJECT_NAME).c_str());
+    ImGui::TextWrapped("Version: %s %s",
       std::string(BuildInformation().PROJECT_VERSION).c_str(),
-      " ",
       std::string(BuildInformation().PROJECT_VERSION_ADDENDUM).c_str());
-    ImGui::TextWrapped("Branch: ", std::string(BuildInformation().GIT_BRANCH).c_str());
-    ImGui::TextWrapped("Commit: ", std::string(BuildInformation().GIT_SHORT_SHA).c_str());
-    ImGui::TextWrapped("Compiler: ",
+    ImGui::TextWrapped("Branch: %s", std::string(BuildInformation().GIT_BRANCH).c_str());
+    ImGui::TextWrapped("Commit: %s", std::string(BuildInformation().GIT_SHORT_SHA).c_str());
+    ImGui::TextWrapped("Compiler: %s %s",
       std::string(BuildInformation().COMPILER).c_str(),
-      " ",
       std::string(BuildInformation().COMPILER_VERSION).c_str());
-    ImGui::TextWrapped("Platform: ", std::string(BuildInformation().PLATFORM).c_str());
-    ImGui::TextWrapped("Build: ",
+    ImGui::TextWrapped("Platform: %s", std::string(BuildInformation().PLATFORM).c_str());
+    ImGui::TextWrapped("Build: %s %s",
       std::string(BuildInformation().BUILD_TYPE).c_str(),
-      " ",
       std::string(BuildInformation().BUILD_DATE).c_str());
-    ImGui::TextWrapped("Build Hash: ", std::string(BuildInformation().BUILD_HASH).c_str());
     ImGui::TextWrapped("dear imgui says hello! (%s) (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
 
     if (ImGui::BeginPopupContextWindow()) {
