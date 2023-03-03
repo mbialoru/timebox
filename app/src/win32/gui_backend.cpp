@@ -2,6 +2,27 @@
 
 using namespace TimeBox;
 
+void TimeBox::Cleanup(SDL_Window *tp_sdl_window, D3DContext &tr_d3d_context)
+{
+  ImGui_ImplDX11_Shutdown();
+  ImGui_ImplSDL2_Shutdown();
+  ImGui::DestroyContext();
+
+  DestroyDeviceD3D(tr_d3d_context);
+  SDL_DestroyWindow(tp_sdl_window);
+  SDL_Quit();
+}
+
+void TimeBox::Render(D3DContext &tr_d3d_context)
+{
+  ImGui::Render();
+  tr_d3d_context.p_d3d_device_context->OMSetRenderTargets(1, &(tr_d3d_context.p_render_target_view), NULL);
+  tr_d3d_context.p_d3d_device_context->ClearRenderTargetView(
+    tr_d3d_context.p_render_target_view, clear_color_with_alpha);
+  ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+  tr_d3d_context.p_swap_chain->Present(1, 0);// VSync
+}
+
 bool TimeBox::CreateDeviceD3D(HWND t_hwnd, D3DContext &tr_context)
 {
   // Setup swap chain
@@ -83,7 +104,7 @@ void TimeBox::DestroyRenderTarget(D3DContext &tr_context)
 void TimeBox::InitializeSDL()
 {
   // SDL Init
-  if (not SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER)) {
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER)) {
     BOOST_LOG_TRIVIAL(error) << SDL_GetError();
     throw std::runtime_error("Cannot initialize SDL backend");
   }
@@ -103,4 +124,50 @@ SDL_Window *
   return window;
 }
 
-HWND TimeBox::Win32WindowHandle(SDL_Window *tp_sdl_window) {}
+HWND TimeBox::Win32WindowHandle(SDL_Window *tp_sdl_window)
+{
+  SDL_SysWMinfo wm_info;
+  SDL_VERSION(&wm_info.version);
+  SDL_GetWindowWMInfo(tp_sdl_window, &wm_info);
+  HWND win32_window_handle{ wm_info.info.win.window };
+  return win32_window_handle;
+}
+
+void TimeBox::HandleSDLEvent(SDL_Window *tp_sdl_window, AppContext &tr_app_context)
+{
+  // Poll and handle events (inputs, window resize, etc.)
+  // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your
+  // inputs.
+  // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite
+  // your copy of the mouse data.
+  // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or
+  // clear/overwrite your copy of the keyboard data. Generally you may always pass all inputs to dear imgui, and hide
+  // them from your application based on those two flags.
+  SDL_Event event;
+  while (SDL_PollEvent(&event)) {
+    ImGui_ImplSDL2_ProcessEvent(&event);
+    switch (event.type) {
+    case SDL_QUIT:
+      tr_app_context.application_run = true;
+      break;
+
+    case SDL_WINDOWEVENT:
+      if (event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(tp_sdl_window))
+        tr_app_context.application_run = false;
+      break;
+
+    default:
+      break;
+    }
+  }
+}
+
+void TimeBox::InitializeImGUI(SDL_Window *tp_sdl_window, D3DContext &tr_d3d_context)
+{
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  // ImGuiIO &io = ImGui::GetIO();
+  ImGui::StyleColorsDark();
+  ImGui_ImplSDL2_InitForD3D(tp_sdl_window);
+  ImGui_ImplDX11_Init(tr_d3d_context.p_d3d_device, tr_d3d_context.p_d3d_device_context);
+}

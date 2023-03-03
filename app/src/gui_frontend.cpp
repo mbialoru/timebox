@@ -13,6 +13,14 @@ void TimeBox::CenterWindow(std::size_t t_height, std::size_t t_width)
   ImGui::SetNextWindowPos(ImVec2((WINDOW_HEIGHT - t_height) / 2, (WINDOW_WIDTH - t_width) / 2));
 }
 
+void TimeBox::HandleGUI(AppContext &tr_app_context)
+{
+  MainDialog(tr_app_context);
+  ConnectDialog(tr_app_context);
+  WarningPopup(tr_app_context);
+  AboutDialog(tr_app_context);
+}
+
 void TimeBox::MainDialog(AppContext &tr_context)
 {
   std::string window_title{ BuildInformation().PROJECT_NAME };

@@ -12,6 +12,9 @@ namespace TimeBox {
 // Utility functions
 void CenterWindow(std::size_t, std::size_t);
 
+// Master GUI handler function
+void HandleGUI(AppContext &);
+
 // Dialog windows
 void MainDialog(AppContext &);
 void ConnectDialog(AppContext &);
