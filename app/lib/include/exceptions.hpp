@@ -12,7 +12,8 @@ namespace TimeBox {
 class NotImplementedException : public std::exception
 {
 public:
-  explicit NotImplementedException(const char *t_msg = "Function, method or feature not yet implemented") : m_msg(t_msg)
+  explicit NotImplementedException(const char *tp_msg = "Function, method or feature not yet implemented")
+    : m_msg(tp_msg)
   {
     BOOST_LOG_TRIVIAL(error) << m_msg;
   }
@@ -25,7 +26,7 @@ private:
 class TimexOperationError : public std::exception
 {
 public:
-  explicit TimexOperationError(const char *t_msg = "Error during operation with timex struct") : m_msg(t_msg)
+  explicit TimexOperationError(const char *tp_msg = "Error during operation with timex struct") : m_msg(tp_msg)
   {
     BOOST_LOG_TRIVIAL(error) << m_msg;
     BOOST_LOG_TRIVIAL(error) << "errno " << errno;
@@ -39,7 +40,7 @@ private:
 class InsufficientPermissionsError : public std::exception
 {
 public:
-  explicit InsufficientPermissionsError(const char *t_msg = "Operation not permitted") : m_msg(t_msg)
+  explicit InsufficientPermissionsError(const char *tp_msg = "Operation not permitted") : m_msg(tp_msg)
   {
     BOOST_LOG_TRIVIAL(error) << m_msg;
   }
@@ -53,8 +54,8 @@ class DeviceDirectoryNotExist : public std::exception
 {
 public:
   explicit DeviceDirectoryNotExist(
-    const char *t_msg = "Device directory doesn't exist - check platform and do not run in docker")
-    : m_msg(t_msg)
+    const char *tp_msg = "Device directory doesn't exist - check platform and do not run in docker")
+    : m_msg(tp_msg)
   {
     BOOST_LOG_TRIVIAL(error) << m_msg;
   }
@@ -67,7 +68,7 @@ private:
 class NTPServiceOperationError : public std::exception
 {
 public:
-  explicit NTPServiceOperationError(const char *t_msg = "Could not perform operation with NTP Service") : m_msg(t_msg)
+  explicit NTPServiceOperationError(const char *tp_msg = "Could not perform operation with NTP Service") : m_msg(tp_msg)
   {
     BOOST_LOG_TRIVIAL(error) << m_msg;
   }

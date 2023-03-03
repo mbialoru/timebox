@@ -11,7 +11,7 @@
 using namespace TimeBox;
 
 // Initialize D3D Context
-static D3DContext d3d_context;
+static D3DContext s_d3d_context;
 
 // main()
 int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
@@ -41,8 +41,8 @@ int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
   HWND window_handle{ wm_info.info.win.window };
 
   // Initialize Direct3D
-  if (not CreateDeviceD3D(window_handle, d3d_context)) {
-    DestroyDeviceD3D(d3d_context);
+  if (not CreateDeviceD3D(window_handle, s_d3d_context)) {
+    DestroyDeviceD3D(s_d3d_context);
     BOOST_LOG_TRIVIAL(error) << "Failed to create D3D device !";
     return EXIT_FAILURE;
   }
@@ -57,7 +57,7 @@ int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
 
   // Setup Platform/Renderer backends
   ImGui_ImplSDL2_InitForD3D(window);
-  ImGui_ImplDX11_Init(d3d_context.p_d3d_device, d3d_context.p_d3d_device_context);
+  ImGui_ImplDX11_Init(s_d3d_context.p_d3d_device, s_d3d_context.p_d3d_device_context);
 
   // Application context
   AppContext context;
@@ -65,8 +65,8 @@ int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
   // Main loop
   while (context.application_run) {
     // FPS limiter
-    last_frametime = this_frametime;
-    this_frametime = SDL_GetTicks();
+    s_last_frametime = s_this_frametime;
+    s_this_frametime = SDL_GetTicks();
 
     // Poll and handle events (inputs, window resize, etc.)
     // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your
@@ -98,13 +98,15 @@ int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
 
     // Rendering - This is our Viewport
     ImGui::Render();
-    d3d_context.p_d3d_device_context->OMSetRenderTargets(1, &(d3d_context.p_render_target_view), NULL);
-    d3d_context.p_d3d_device_context->ClearRenderTargetView(d3d_context.p_render_target_view, clear_color_with_alpha);
+    s_d3d_context.p_d3d_device_context->OMSetRenderTargets(1, &(s_d3d_context.p_render_target_view), NULL);
+    s_d3d_context.p_d3d_device_context->ClearRenderTargetView(
+      s_d3d_context.p_render_target_view, clear_color_with_alpha);
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-    d3d_context.p_swap_chain->Present(1, 0);// VSync
+    s_d3d_context.p_swap_chain->Present(1, 0);// VSync
 
     // FPS limiter
-    if (this_frametime - last_frametime < 1000 / max_fps) SDL_Delay(1000 / max_fps - this_frametime + last_frametime);
+    if (s_this_frametime - s_last_frametime < 1000 / s_max_fps)
+      SDL_Delay(1000 / s_max_fps - s_this_frametime + s_last_frametime);
   }
 
   // Cleanup
@@ -113,7 +115,7 @@ int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
 
-  DestroyDeviceD3D(d3d_context);
+  DestroyDeviceD3D(s_d3d_context);
   SDL_DestroyWindow(window);
   SDL_Quit();
 

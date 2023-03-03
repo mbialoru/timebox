@@ -16,7 +16,7 @@
 
 using namespace TimeBox;
 
-int main(const int t_argc, const char *t_argv[])
+int main(const int t_argc, const char *tp_argv[])
 {
   // Setup SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
@@ -78,8 +78,8 @@ int main(const int t_argc, const char *t_argv[])
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Variables for ImGui
-  static const Uint32 max_fps{ 20 };
-  static Uint32 last_frametime, this_frametime;
+  static const Uint32 s_max_fps{ 20 };
+  static Uint32 s_last_frametime, s_this_frametime;
 
   // Application context
   AppContext context = InitializeContext();
@@ -87,8 +87,8 @@ int main(const int t_argc, const char *t_argv[])
   // Main loop
   while (context.application_run) {
     // FPS limiter
-    last_frametime = this_frametime;
-    this_frametime = SDL_GetTicks();
+    s_last_frametime = s_this_frametime;
+    s_this_frametime = SDL_GetTicks();
 
     // Poll and handle events (inputs, window resize, etc.)
     // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your
@@ -125,7 +125,8 @@ int main(const int t_argc, const char *t_argv[])
     SDL_GL_SwapWindow(window);
 
     // FPS limiter
-    if (this_frametime - last_frametime < 1000 / max_fps) SDL_Delay(1000 / max_fps - this_frametime + last_frametime);
+    if (s_this_frametime - s_last_frametime < 1000 / s_max_fps)
+      SDL_Delay(1000 / s_max_fps - s_this_frametime + s_last_frametime);
   }
 
   // Cleanup

@@ -23,7 +23,7 @@
   class names should be followed.
 
 * Arguments should be prepended with ‘t_’, rest of the name should follow
-  snake_case.
+  snake_case. Remaining prefix adding rules add their corresponding part after `t`
 
 * Optional arguments should be prepended with ‘o_’ rest of the name should
   follow snake_case.

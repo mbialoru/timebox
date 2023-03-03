@@ -114,9 +114,9 @@ std::vector<std::string> TimeBox::GetSerialDevicesList()
   return port_names;
 }
 
-void TimeBox::WindowsErrorDebugLog(const char *t_method_name, const char *t_addendum)
+void TimeBox::WindowsErrorDebugLog(const char *tp_method_name, const char *tp_addendum)
 {
-  std::string error_message{ std::string(t_method_name, " failed: ") };
+  std::string error_message{ std::string(tp_method_name, " failed: ") };
   auto error_code{ GetLastError() };
 
   switch (error_code) {
@@ -153,9 +153,9 @@ void TimeBox::WindowsErrorDebugLog(const char *t_method_name, const char *t_adde
     break;
   }
 
-  if (t_addendum != nullptr) {
+  if (tp_addendum != nullptr) {
     error_message.append(" Addendum: ");
-    error_message.append(t_addendum);
+    error_message.append(tp_addendum);
   }
 
   BOOST_LOG_TRIVIAL(error) << error_message;

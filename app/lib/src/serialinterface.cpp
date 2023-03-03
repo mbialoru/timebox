@@ -26,18 +26,18 @@ SerialInterface::~SerialInterface()
   }
 }
 
-void SerialInterface::Open(const char *t_device,
+void SerialInterface::Open(const char *tp_device,
   std::size_t t_baud,
   std::optional<boost::asio::serial_port_base::parity> to_parity,
   std::optional<boost::asio::serial_port_base::character_size> to_character_size,
   std::optional<boost::asio::serial_port_base::flow_control> to_flow_control,
   std::optional<boost::asio::serial_port_base::stop_bits> to_stop_bits)
 {
-  std::string device{ t_device };
+  std::string device{ tp_device };
   Open(device, t_baud, to_parity, to_character_size, to_flow_control, to_stop_bits);
 }
 
-void SerialInterface::Open(const std::string &t_device,
+void SerialInterface::Open(const std::string &tr_device,
   std::size_t t_baud,
   std::optional<boost::asio::serial_port_base::parity> to_parity,
   std::optional<boost::asio::serial_port_base::character_size> to_character_size,
@@ -47,7 +47,7 @@ void SerialInterface::Open(const std::string &t_device,
   if (IsOpen()) { Close(); }
 
   SetErrorStatus(true);// In case of exception - it stays true
-  mp_serial_port->open(t_device);
+  mp_serial_port->open(tr_device);
   mp_serial_port->set_option(boost::asio::serial_port_base::baud_rate(static_cast<unsigned>(t_baud)));
   mp_serial_port->set_option(to_parity.value_or(m_parity));
   mp_serial_port->set_option(to_character_size.value_or(m_character_size));
@@ -109,12 +109,12 @@ bool SerialInterface::ErrorStatus() const
   return m_error_flag;
 }
 
-std::size_t SerialInterface::Read(char *t_buffer, std::size_t t_buffer_size)
+std::size_t SerialInterface::Read(char *tp_buffer, std::size_t t_buffer_size)
 {
   std::scoped_lock<std::mutex> lock(m_read_queue_mutex);
   std::size_t offset{ std::min(t_buffer_size, m_read_queue.size()) };
   std::vector<char>::iterator iterator{ m_read_queue.begin() + offset };
-  std::copy(m_read_queue.begin(), iterator, t_buffer);
+  std::copy(m_read_queue.begin(), iterator, tp_buffer);
   m_read_queue.erase(m_read_queue.begin(), iterator);
   return offset;
 }
@@ -135,13 +135,13 @@ std::string SerialInterface::ReadString()
   return read_buffer;
 }
 
-std::string SerialInterface::ReadStringUntil(const std::string &t_flag)
+std::string SerialInterface::ReadStringUntil(const std::string &tr_flag)
 {
   std::scoped_lock<std::mutex> lock(m_read_queue_mutex);
-  std::vector<char>::iterator iterator{ FindInBuffer(m_read_queue, t_flag) };
+  std::vector<char>::iterator iterator{ FindInBuffer(m_read_queue, tr_flag) };
   if (iterator == m_read_queue.end()) { return std::string(""); }// NOTE: could throw exception instead of empty string
   std::string result(m_read_queue.begin(), iterator);
-  iterator += t_flag.size();// remove flag from buffer
+  iterator += tr_flag.size();// remove flag from buffer
   m_read_queue.erase(m_read_queue.begin(), iterator);
   return result;
 }
@@ -153,9 +153,9 @@ void SerialInterface::ReadBegin()
       &SerialInterface::ReadEnd, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }
 
-void SerialInterface::ReadEnd(const boost::system::error_code &t_error, std::size_t t_bytes)
+void SerialInterface::ReadEnd(const boost::system::error_code &tr_error, std::size_t t_bytes)
 {
-  if (t_error) {
+  if (tr_error) {
     if (IsOpen()) {
       Close();
       SetErrorStatus(true);
@@ -169,24 +169,24 @@ void SerialInterface::ReadEnd(const boost::system::error_code &t_error, std::siz
 }
 
 // TODO: Convert from shared_array to shared_ptr, compile error otherwise
-// void SerialInterface::Write(const char *t_data, std::size_t t_buffer_size)
+// void SerialInterface::Write(const char *tp_data, std::size_t t_buffer_size)
 // {
 //   std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
-//   m_write_queue.insert(m_write_queue.end(), t_data, t_data + t_buffer_size);
+//   m_write_queue.insert(m_write_queue.end(), tp_data, tp_data + t_buffer_size);
 //   m_io_service.post(std::bind(&SerialInterface::WriteBegin, this));
 // }
 
-// void SerialInterface::Write(const std::vector<char> &t_data)
+// void SerialInterface::Write(const std::vector<char> &tr_data)
 // {
 //   std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
-//   m_write_queue.insert(m_write_queue.end(), t_data.begin(), t_data.end());
+//   m_write_queue.insert(m_write_queue.end(), tr_data.begin(), tr_data.end());
 //   m_io_service.post(std::bind(&SerialInterface::WriteBegin, this));
 // }
 
-// void SerialInterface::WriteString(const std::string &t_string)
+// void SerialInterface::WriteString(const std::string &tr_string)
 // {
 //   std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
-//   m_write_queue.insert(m_write_queue.end(), t_string.begin(), t_string.end());
+//   m_write_queue.insert(m_write_queue.end(), tr_string.begin(), tr_string.end());
 //   m_io_service.post(std::bind(&SerialInterface::WriteBegin, this));
 // }
 
@@ -205,9 +205,9 @@ void SerialInterface::ReadEnd(const boost::system::error_code &t_error, std::siz
 //   }
 // }
 
-// void SerialInterface::WriteEnd(const boost::system::error_code &t_error)
+// void SerialInterface::WriteEnd(const boost::system::error_code &tr_error)
 // {
-//   if (!t_error) {
+//   if (!tr_error) {
 //     std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
 //     if (m_write_queue.empty()) {
 //       m_write_buffer.reset();
@@ -227,20 +227,20 @@ void SerialInterface::ReadEnd(const boost::system::error_code &t_error, std::siz
 //   }
 // }
 
-std::vector<char>::iterator SerialInterface::FindInBuffer(std::vector<char> &t_buffer, const std::string &t_string)
+std::vector<char>::iterator SerialInterface::FindInBuffer(std::vector<char> &tr_buffer, const std::string &tr_string)
 {
-  if (t_string.size() == 0) { return t_buffer.end(); }
+  if (tr_string.size() == 0) { return tr_buffer.end(); }
   bool mismatch{ false };
-  std::vector<char>::iterator iterator{ t_buffer.begin() };
+  std::vector<char>::iterator iterator{ tr_buffer.begin() };
 
   while (true) {
-    std::vector<char>::iterator result{ std::find(iterator, t_buffer.end(), t_string[0]) };
-    if (result == t_buffer.end()) { return t_buffer.end(); }
+    std::vector<char>::iterator result{ std::find(iterator, tr_buffer.end(), tr_string[0]) };
+    if (result == tr_buffer.end()) { return tr_buffer.end(); }
 
-    for (std::size_t i = 0; i < t_string.size(); i++) {
+    for (std::size_t i = 0; i < tr_string.size(); i++) {
       std::vector<char>::iterator tmp{ result + i };
-      if (result == t_buffer.end()) { return t_buffer.end(); }
-      if (t_string[i] != *tmp) {
+      if (result == tr_buffer.end()) { return tr_buffer.end(); }
+      if (tr_string[i] != *tmp) {
         mismatch = true;
         iterator = result + 1;
         break;

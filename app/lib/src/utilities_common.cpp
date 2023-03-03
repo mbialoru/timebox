@@ -2,11 +2,11 @@
 
 using namespace TimeBox;
 
-std::string TimeBox::RenderNonPrintableCharacters(const std::string &t_input_string)
+std::string TimeBox::RenderNonPrintableCharacters(const std::string &tr_input_string)
 {
   std::string result;
   std::string character_represent;
-  for (auto &character : t_input_string) {
+  for (auto &character : tr_input_string) {
     switch (static_cast<int>(character)) {
     case 0:// NULL
       character_represent = "\\0";
@@ -33,10 +33,10 @@ std::string TimeBox::RenderNonPrintableCharacters(const std::string &t_input_str
   return result;
 }
 
-std::string TimeBox::RenderStringASCIICodes(const std::string &t_input_string)
+std::string TimeBox::RenderStringASCIICodes(const std::string &tr_input_string)
 {
   std::string result;
-  for (auto &character : t_input_string) {
+  for (auto &character : tr_input_string) {
     result.append(std::to_string(static_cast<int>(character)));
     result.append(" ");
   }

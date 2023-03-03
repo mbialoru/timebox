@@ -29,7 +29,7 @@ ClockController::~ClockController()
 
 timex ClockController::GetTimex() const { return m_timex; }
 
-void ClockController::SetSystemTimex(timex *t_timex) const { AdjtimexWrapper(t_timex); }
+void ClockController::SetSystemTimex(timex *tp_timex) const { AdjtimexWrapper(tp_timex); }
 
 void ClockController::AdjustKernelTick(const std::size_t t_tick)
 {
@@ -45,14 +45,14 @@ void ClockController::AdjustKernelTick(const std::size_t t_tick)
   BOOST_LOG_TRIVIAL(debug) << "Successfully changed kernel tick to " << t_tick;
 }
 
-bool ClockController::AdjtimexWrapper(timex *t_tm) const
+bool ClockController::AdjtimexWrapper(timex *tp_tm) const
 {
   bool success{ false };
   std::size_t attempt{ 0 };
   while (not success) {
     if (attempt == 100) { throw TimexOperationError(); }
 
-    success = !static_cast<bool>(adjtimex(t_tm));
+    success = !static_cast<bool>(adjtimex(tp_tm));
     attempt++;
 
     switch (errno) {

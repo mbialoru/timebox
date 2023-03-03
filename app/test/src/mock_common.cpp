@@ -76,7 +76,7 @@ MockSerialReader::~MockSerialReader()
   Close();
 }
 
-void MockSerialReader::Open(const std::string &t_device, std::size_t t_baudrate)
+void MockSerialReader::Open(const std::string &tr_device, std::size_t t_baudrate)
 {
   m_is_paused = false;
   m_port_open = true;

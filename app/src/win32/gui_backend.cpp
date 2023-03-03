@@ -2,7 +2,7 @@
 
 using namespace TimeBox;
 
-bool TimeBox::CreateDeviceD3D(HWND t_hwnd, D3DContext &t_context)
+bool TimeBox::CreateDeviceD3D(HWND t_hwnd, D3DContext &tr_context)
 {
   // Setup swap chain
   DXGI_SWAP_CHAIN_DESC sd;
@@ -36,46 +36,71 @@ bool TimeBox::CreateDeviceD3D(HWND t_hwnd, D3DContext &t_context)
         2,
         D3D11_SDK_VERSION,
         &sd,
-        &(t_context.p_swap_chain),
-        &(t_context.p_d3d_device),
+        &(tr_context.p_swap_chain),
+        &(tr_context.p_d3d_device),
         &featureLevel,
-        &(t_context.p_d3d_device_context))
+        &(tr_context.p_d3d_device_context))
       != S_OK)
     return false;
 
-  CreateRenderTarget(t_context);
+  CreateRenderTarget(tr_context);
   return true;
 }
 
-void TimeBox::DestroyDeviceD3D(D3DContext &t_context)
+void TimeBox::DestroyDeviceD3D(D3DContext &tr_context)
 {
-  DestroyRenderTarget(t_context);
-  if (t_context.p_swap_chain) {
-    t_context.p_swap_chain->Release();
-    t_context.p_swap_chain = NULL;
+  DestroyRenderTarget(tr_context);
+  if (tr_context.p_swap_chain) {
+    tr_context.p_swap_chain->Release();
+    tr_context.p_swap_chain = NULL;
   }
-  if (t_context.p_d3d_device_context) {
-    t_context.p_d3d_device_context->Release();
-    t_context.p_d3d_device_context = NULL;
+  if (tr_context.p_d3d_device_context) {
+    tr_context.p_d3d_device_context->Release();
+    tr_context.p_d3d_device_context = NULL;
   }
-  if (t_context.p_d3d_device) {
-    t_context.p_d3d_device->Release();
-    t_context.p_d3d_device = NULL;
+  if (tr_context.p_d3d_device) {
+    tr_context.p_d3d_device->Release();
+    tr_context.p_d3d_device = NULL;
   }
 }
 
-void TimeBox::CreateRenderTarget(D3DContext &t_context)
+void TimeBox::CreateRenderTarget(D3DContext &tr_context)
 {
   ID3D11Texture2D *pBackBuffer;
-  t_context.p_swap_chain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
-  t_context.p_d3d_device->CreateRenderTargetView(pBackBuffer, NULL, &(t_context.p_render_target_view));
+  tr_context.p_swap_chain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+  tr_context.p_d3d_device->CreateRenderTargetView(pBackBuffer, NULL, &(tr_context.p_render_target_view));
   pBackBuffer->Release();
 }
 
-void TimeBox::DestroyRenderTarget(D3DContext &t_context)
+void TimeBox::DestroyRenderTarget(D3DContext &tr_context)
 {
-  if (t_context.p_render_target_view) {
-    t_context.p_render_target_view->Release();
-    t_context.p_render_target_view = NULL;
+  if (tr_context.p_render_target_view) {
+    tr_context.p_render_target_view->Release();
+    tr_context.p_render_target_view = NULL;
   }
 }
+
+void TimeBox::InitializeSDL()
+{
+  // SDL Init
+  if (not SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER)) {
+    BOOST_LOG_TRIVIAL(error) << SDL_GetError();
+    throw std::runtime_error("Cannot initialize SDL backend");
+  }
+
+  // From SDL 2.0.18: Enable native IME.
+#ifdef SDL_HINT_IME_SHOW_UI
+  SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
+#endif
+}
+
+SDL_Window *
+  TimeBox::CreateSDLWindow(const std::string &tr_name, const std::size_t &tr_height, const std::size_t &tr_width)
+{
+  SDL_WindowFlags window_flags{ static_cast<SDL_WindowFlags>(SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI) };
+  SDL_Window *window{ SDL_CreateWindow(
+    tr_name.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, tr_height, tr_width, window_flags) };
+  return window;
+}
+
+HWND TimeBox::Win32WindowHandle(SDL_Window *tp_sdl_window) {}

@@ -13,7 +13,7 @@ void TimeBox::CenterWindow(std::size_t t_height, std::size_t t_width)
   ImGui::SetNextWindowPos(ImVec2((WINDOW_HEIGHT - t_height) / 2, (WINDOW_WIDTH - t_width) / 2));
 }
 
-void TimeBox::MainDialog(AppContext &t_context)
+void TimeBox::MainDialog(AppContext &tr_context)
 {
   std::string window_title{ BuildInformation().PROJECT_NAME };
   window_title[0] = toupper(window_title[0]);
@@ -28,27 +28,27 @@ void TimeBox::MainDialog(AppContext &t_context)
   window_flags |= ImGuiWindowFlags_NoResize;
   window_flags |= ImGuiWindowFlags_NoMove;
 
-  ImGui::Begin(window_title.c_str(), &t_context.application_run, window_flags);
+  ImGui::Begin(window_title.c_str(), &tr_context.application_run, window_flags);
   ImGui::SetWindowPos(ImVec2(0, 0));
   ImGui::SetWindowSize(ImVec2(WINDOW_HEIGHT, WINDOW_WIDTH));
 
   // Main dialog content
-  if (t_context.connection_established) {
+  if (tr_context.connection_established) {
     ImGui::Text("Connection status:");
     ImGui::SameLine();
     ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "connected");
     ImGui::SameLine();
-    ImGui::Text(t_context.serial_port.c_str());
+    ImGui::Text(tr_context.serial_port.c_str());
     ImGui::Separator();
 
     // TODO: Bring out time difference and adjustment history
-    if (!t_context.p_clock_controller->GetDifferenceHistory().empty()
-        && !t_context.p_clock_controller->GetAdjustmentHistory().empty()) {
-      ImGui::Text("Clock difference %ld ms", t_context.p_clock_controller->GetDifferenceHistory().back());
+    if (!tr_context.p_clock_controller->GetDifferenceHistory().empty()
+        && !tr_context.p_clock_controller->GetAdjustmentHistory().empty()) {
+      ImGui::Text("Clock difference %ld ms", tr_context.p_clock_controller->GetDifferenceHistory().back());
       ImGui::Text("Clock adjustment %lu (%.3f %%speed)",
-        t_context.p_clock_controller->GetAdjustmentHistory().back(),
-        (static_cast<double>(t_context.p_clock_controller->GetAdjustmentHistory().back())
-          - t_context.p_clock_controller->GetInitialAdjustment())
+        tr_context.p_clock_controller->GetAdjustmentHistory().back(),
+        (static_cast<double>(tr_context.p_clock_controller->GetAdjustmentHistory().back())
+          - tr_context.p_clock_controller->GetInitialAdjustment())
             / 100
           + 100);
       ImGui::Separator();
@@ -68,20 +68,20 @@ void TimeBox::MainDialog(AppContext &t_context)
   ImGui::SliderFloat("P term", &term_p, -10.0f, 10.0f, "%.3f", flags);
   ImGui::SliderFloat("I term", &term_i, -10.0f, 10.0f, "%.3f", flags);
   ImGui::SliderFloat("D term", &term_d, -10.0f, 10.0f, "%.3f", flags);
-  if (ImGui::Button("Apply")) { t_context.p_pid->SetTerms(term_p, term_i, term_d); }
+  if (ImGui::Button("Apply")) { tr_context.p_pid->SetTerms(term_p, term_i, term_d); }
   ImGui::SameLine();
   if (ImGui::Button("Reset")) {
     term_p = 0.0;
     term_i = 0.0;
     term_d = 0.0;
-    t_context.p_pid->SetTerms(term_p, term_i, term_d);
+    tr_context.p_pid->SetTerms(term_p, term_i, term_d);
   }
   ImGui::SameLine();
   if (ImGui::Button("Auto")) { throw NotImplementedException(); }
   ImGui::SameLine();
   ImGui::Spacing();
   ImGui::SameLine();
-  auto [p, i, d] = t_context.p_pid->GetTerms();
+  auto [p, i, d] = tr_context.p_pid->GetTerms();
   ImGui::Text("P: %.3f I: %.3f D: %.3f", p, i, d);
   ImGui::Separator();
 
@@ -98,22 +98,22 @@ void TimeBox::MainDialog(AppContext &t_context)
   //   }
   // }
 
-  if (ImGui::Button("Connect")) { t_context.display_connect_dialog = true; }
+  if (ImGui::Button("Connect")) { tr_context.display_connect_dialog = true; }
   ImGui::SameLine();
-  if (ImGui::Button("Quit")) { t_context.application_run = false; }
+  if (ImGui::Button("Quit")) { tr_context.application_run = false; }
 
   // Main dialog context menu
   if (ImGui::BeginPopupContextWindow()) {
-    if (ImGui::MenuItem("Quit")) t_context.application_run = false;
-    if (ImGui::MenuItem("About")) t_context.display_about_dialog = true;
+    if (ImGui::MenuItem("Quit")) tr_context.application_run = false;
+    if (ImGui::MenuItem("About")) tr_context.display_about_dialog = true;
     ImGui::EndPopup();
   }
   ImGui::End();
 }
 
-void TimeBox::ConnectDialog(AppContext &t_context)
+void TimeBox::ConnectDialog(AppContext &tr_context)
 {
-  if (t_context.display_connect_dialog) {
+  if (tr_context.display_connect_dialog) {
     ImGuiWindowFlags window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoCollapse;
 
@@ -123,19 +123,19 @@ void TimeBox::ConnectDialog(AppContext &t_context)
     static std::size_t current_item_index_port{ 0 };
     static std::size_t current_item_index_baud{ 0 };
 
-    ImGui::Begin("Connect", &t_context.display_connect_dialog, window_flags);
+    ImGui::Begin("Connect", &tr_context.display_connect_dialog, window_flags);
     {
       // Baud rate choosing combo
-      const char *preview_value_baud = t_context.baud_rate_string_list[current_item_index_baud].c_str();
-      t_context.baud_rate = std::stoul(t_context.baud_rate_string_list[current_item_index_baud]);
+      const char *preview_value_baud = tr_context.baud_rate_string_list[current_item_index_baud].c_str();
+      tr_context.baud_rate = std::stoul(tr_context.baud_rate_string_list[current_item_index_baud]);
       if (ImGui::BeginCombo("Baud rate", preview_value_baud)) {
-        for (std::size_t i{ 0 }; i < t_context.baud_rate_string_list.size(); ++i) {
+        for (std::size_t i{ 0 }; i < tr_context.baud_rate_string_list.size(); ++i) {
           const bool is_selected = (current_item_index_baud == i);
-          if (ImGui::Selectable(t_context.baud_rate_string_list[i].c_str(), is_selected)) {
+          if (ImGui::Selectable(tr_context.baud_rate_string_list[i].c_str(), is_selected)) {
             current_item_index_baud = i;
           }
           if (is_selected) {
-            t_context.baud_rate = std::stoul(t_context.baud_rate_string_list[i]);
+            tr_context.baud_rate = std::stoul(tr_context.baud_rate_string_list[i]);
             ImGui::SetItemDefaultFocus();
           }
         }
@@ -143,17 +143,17 @@ void TimeBox::ConnectDialog(AppContext &t_context)
       }
 
       // Serial port choosing combo
-      if (ImGui::Button("Scan ports")) { t_context.serial_port_list = GetSerialDevicesList(); }
+      if (ImGui::Button("Scan ports")) { tr_context.serial_port_list = GetSerialDevicesList(); }
       ImGui::SameLine();
-      if (!t_context.serial_port_list.empty()) {
-        const char *preview_value_port = t_context.serial_port_list[current_item_index_port].c_str();
-        t_context.serial_port = t_context.serial_port_list[current_item_index_port];
+      if (!tr_context.serial_port_list.empty()) {
+        const char *preview_value_port = tr_context.serial_port_list[current_item_index_port].c_str();
+        tr_context.serial_port = tr_context.serial_port_list[current_item_index_port];
         if (ImGui::BeginCombo("##", preview_value_port)) {
-          for (std::size_t i{ 0 }; i < t_context.serial_port_list.size(); ++i) {
+          for (std::size_t i{ 0 }; i < tr_context.serial_port_list.size(); ++i) {
             const bool is_selected = (current_item_index_port == i);
-            if (ImGui::Selectable(t_context.serial_port_list[i].c_str(), is_selected)) { current_item_index_port = i; }
+            if (ImGui::Selectable(tr_context.serial_port_list[i].c_str(), is_selected)) { current_item_index_port = i; }
             if (is_selected) {
-              t_context.serial_port = t_context.serial_port_list[i];
+              tr_context.serial_port = tr_context.serial_port_list[i];
               ImGui::SetItemDefaultFocus();
             }
           }
@@ -161,33 +161,33 @@ void TimeBox::ConnectDialog(AppContext &t_context)
         }
       }
 
-      if (t_context.serial_port != "" && t_context.baud_rate != 0) {
+      if (tr_context.serial_port != "" && tr_context.baud_rate != 0) {
         ImGui::Text("Port: ");
         ImGui::SameLine();
-        ImGui::Text(t_context.serial_port.c_str());
+        ImGui::Text(tr_context.serial_port.c_str());
         ImGui::Text("Baud: ");
         ImGui::SameLine();
-        ImGui::Text(std::to_string(t_context.baud_rate).c_str());
+        ImGui::Text(std::to_string(tr_context.baud_rate).c_str());
 
         if (ImGui::Button("Connect")) {
-          t_context.p_clock_controller = std::make_unique<ClockController>(0, t_context.p_pid, 0.001);
-          t_context.p_serial_reader = std::make_unique<SerialInterface>(
-            std::bind(&ClockController::AdjustClock, t_context.p_clock_controller.get(), std::placeholders::_1));
+          tr_context.p_clock_controller = std::make_unique<ClockController>(0, tr_context.p_pid, 0.001);
+          tr_context.p_serial_reader = std::make_unique<SerialInterface>(
+            std::bind(&ClockController::AdjustClock, tr_context.p_clock_controller.get(), std::placeholders::_1));
 
           try {
-            t_context.p_serial_reader->Open(t_context.serial_port, t_context.baud_rate);
+            tr_context.p_serial_reader->Open(tr_context.serial_port, tr_context.baud_rate);
           } catch (const std::exception &e) {
             BOOST_LOG_TRIVIAL(error) << e.what();
             throw e;
           }
 
-          t_context.connection_established = true;
+          tr_context.connection_established = true;
         }
 
-        if (t_context.connection_established) {
+        if (tr_context.connection_established) {
           if (ImGui::Button("Disconnect")) {
-            t_context.p_serial_reader.reset();
-            t_context.connection_established = false;
+            tr_context.p_serial_reader.reset();
+            tr_context.connection_established = false;
           }
         }
       }
@@ -196,10 +196,10 @@ void TimeBox::ConnectDialog(AppContext &t_context)
   }
 }
 
-void TimeBox::WarningPopup(AppContext &t_context)
+void TimeBox::WarningPopup(AppContext &tr_context)
 {
-  if ((!t_context.admin_privileges || t_context.ntp_running || t_context.using_docker)
-      && !t_context.disabled_warning_popup) {
+  if ((!tr_context.admin_privileges || tr_context.ntp_running || tr_context.using_docker)
+      && !tr_context.disabled_warning_popup) {
 
     ImGuiWindowFlags window_flags{ 0 };
     window_flags |= ImGuiWindowFlags_NoDecoration;
@@ -214,21 +214,21 @@ void TimeBox::WarningPopup(AppContext &t_context)
     ImGui::Text("Warning");
     ImGui::Separator();
 
-    if (!t_context.admin_privileges) { ImGui::TextWrapped("Program is not running with administrator privileges"); }
-    if (t_context.ntp_running) { ImGui::TextWrapped("NTP service is running"); }
-    if (t_context.using_docker) { ImGui::TextWrapped("Application is running in docker container"); }
+    if (!tr_context.admin_privileges) { ImGui::TextWrapped("Program is not running with administrator privileges"); }
+    if (tr_context.ntp_running) { ImGui::TextWrapped("NTP service is running"); }
+    if (tr_context.using_docker) { ImGui::TextWrapped("Application is running in docker container"); }
 
     if (ImGui::BeginPopupContextWindow()) {
-      if (ImGui::MenuItem("Disable warning")) { t_context.disabled_warning_popup = true; }
+      if (ImGui::MenuItem("Disable warning")) { tr_context.disabled_warning_popup = true; }
       ImGui::EndPopup();
     }
     ImGui::End();
   }
 }
 
-void TimeBox::AboutDialog(AppContext &t_context)
+void TimeBox::AboutDialog(AppContext &tr_context)
 {
-  if (t_context.display_about_dialog) {
+  if (tr_context.display_about_dialog) {
     ImGui::SetNextWindowBgAlpha(0.35f);
     ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH * 0.75, 200));
     ImGui::SetNextWindowPos(ImVec2((WINDOW_WIDTH - WINDOW_WIDTH * 0.75) / 2, WINDOW_HEIGHT / 2 - 100));
@@ -260,7 +260,7 @@ void TimeBox::AboutDialog(AppContext &t_context)
     ImGui::TextWrapped("dear imgui says hello! (%s) (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
 
     if (ImGui::BeginPopupContextWindow()) {
-      if (ImGui::MenuItem("Close")) { t_context.display_about_dialog = false; }
+      if (ImGui::MenuItem("Close")) { tr_context.display_about_dialog = false; }
       ImGui::EndPopup();
     }
     ImGui::End();
