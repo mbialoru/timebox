@@ -18,7 +18,6 @@
 namespace TimeBox {
 
 // Variables for ImGui
-static const uint32_t s_max_fps{ 20 };
 static ImVec4 s_clear_color{ ImVec4(0.45f, 0.55f, 0.60f, 1.00f) };
 const float clear_color_with_alpha[4] = { s_clear_color.x * s_clear_color.w,
   s_clear_color.y *s_clear_color.w,

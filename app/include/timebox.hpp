@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <fstream>
+
 #include "appcontext.hpp"
 #include "clockcontroller.hpp"
 #include "config.hpp"
@@ -11,7 +13,7 @@
 
 namespace TimeBox {
 
-// void SaveHistoryToFile(std::unique_ptr<ClockController>); // TODO: still looking for a good place to place it
+void SaveHistoryToFile(std::unique_ptr<ClockController>);
 void MainLoop(SDL_Window *, AppContext &, D3DContext &);
 
 }// namespace TimeBox
