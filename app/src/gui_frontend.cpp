@@ -130,10 +130,8 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
 
     ImGui::Begin("Connect", &tr_context.display_connect_dialog, window_flags);
     {
-      static std::size_t current_item_index_port{ 0 };
-      static std::size_t current_item_index_baud{ 0 };
-
       // Baud rate choosing combo
+      static std::size_t current_item_index_baud{ 0 };
       const char *preview_value_baud = tr_context.baud_rate_string_list[current_item_index_baud].c_str();
       tr_context.baud_rate = std::stoul(tr_context.baud_rate_string_list[current_item_index_baud]);
       if (ImGui::BeginCombo("Baud rate", preview_value_baud)) {
@@ -154,6 +152,7 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
       if (ImGui::Button("Scan ports")) { tr_context.serial_port_list = GetSerialDevicesList(); }
       ImGui::SameLine();
       if (!tr_context.serial_port_list.empty()) {
+        static std::size_t current_item_index_port{ 0 };
         const char *preview_value_port = tr_context.serial_port_list[current_item_index_port].c_str();
         tr_context.serial_port = tr_context.serial_port_list[current_item_index_port];
         if (ImGui::BeginCombo("##", preview_value_port)) {
@@ -170,20 +169,22 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
       }
 
       if (tr_context.serial_port != "" && tr_context.baud_rate != 0) {
-        ImGui::Text("Port: ");
+        ImGui::Text("%s", "Port: ");
         ImGui::SameLine();
-        ImGui::Text(tr_context.serial_port.c_str());
+        ImGui::Text("%s", tr_context.serial_port.c_str());
         ImGui::Text("Baud: ");
         ImGui::SameLine();
-        ImGui::Text(std::to_string(tr_context.baud_rate).c_str());
+        ImGui::Text("%s", std::to_string(tr_context.baud_rate).c_str());
 
         if (ImGui::Button("Connect")) {
           tr_context.p_clock_controller = std::make_unique<ClockController>(0, tr_context.p_pid, 0.001);
-          // Limit PID to increments of +/- 10% speed
 
-          auto initial_adjustment{ tr_context.p_clock_controller->GetInitialAdjustment() };
-          tr_context.p_pid->SetLimits(
-            initial_adjustment * 0.9 - initial_adjustment, initial_adjustment * 1.1 - initial_adjustment);
+          // TODO: Fix the max and min increment calculation
+          // Limit PID to increments of +/- 10% speed
+          // auto initial_adjustment{ tr_context.p_clock_controller->GetInitialAdjustment() };
+          // double upper_limit{ initial_adjustment * (-0.1) };
+          // double lower_limit{ initial_adjustment * 0.1 };
+          tr_context.p_pid->SetLimits(-100, 100);
 
           tr_context.p_serial_reader = std::make_unique<SerialInterface>(
             std::bind(&ClockController::AdjustClock, tr_context.p_clock_controller.get(), std::placeholders::_1));

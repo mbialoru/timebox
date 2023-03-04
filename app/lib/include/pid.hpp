@@ -81,7 +81,7 @@ template<typename T> void PID<T>::SetErrorGuard(const double t_error_guard) { m_
 
 template<typename T> std::pair<T, T> PID<T>::GetLimits() const
 {
-  return std::pair<T, T>{ m_upper_limit, m_lower_limit };
+  return std::pair<T, T>{ m_lower_limit, m_upper_limit };
 }
 
 template<typename T> void PID<T>::SetLimits(const T t_lower_limit, const T t_upper_limit)

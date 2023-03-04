@@ -90,11 +90,11 @@ void ClockController::PrintCurrentClockAdjustments() const
 
 void ClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment)
 {
-  auto [upper_limit, lower_limit]{ mp_pid->GetLimits() };
-  if (t_ppm_adjustment > upper_limit || t_ppm_adjustment < lower_limit) {
-    BOOST_LOG_TRIVIAL(error) << "PPM clock adjustment outside of operational range !";
-    return;
-  }
+  // auto [lower_limit, upper_limit]{ mp_pid->GetLimits() };
+  // if (t_ppm_adjustment >= (upper_limit * 1.05) || t_ppm_adjustment <= (lower_limit * 1.05)) {
+  //   BOOST_LOG_TRIVIAL(error) << "PPM clock adjustment outside of operational range !";
+  //   return;
+  // }
 
   double scaling_factor{ static_cast<double>(m_performance_counter_frequency.QuadPart / m_micro_per_second) };
   DWORD adjustment_units{ static_cast<DWORD>(std::abs(t_ppm_adjustment * scaling_factor)) };
