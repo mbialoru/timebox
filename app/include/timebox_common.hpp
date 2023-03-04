@@ -1,5 +1,5 @@
-#ifndef TIMEBOX_HPP
-#define TIMEBOX_HPP
+#ifndef TIMEBOX_COMMON_HPP
+#define TIMEBOX_COMMON_HPP
 
 #pragma once
 
@@ -14,8 +14,7 @@
 namespace TimeBox {
 
 void SaveHistoryToFile(std::unique_ptr<ClockController>);
-void MainLoop(SDL_Window *, AppContext &, D3DContext &);
 
 }// namespace TimeBox
 
-#endif// TIMEBOX_HPP
+#endif// TIMEBOX_COMMON_HPP

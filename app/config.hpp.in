@@ -1,6 +1,7 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
+#include <cstdlib>
 #include <memory>
 #include <string_view>
 
@@ -22,6 +23,8 @@ struct BuildInformation
 
 static constexpr std::size_t WINDOW_HEIGHT{ 600 };
 static constexpr std::size_t WINDOW_WIDTH{ 600 };
+
+static constexpr uint32_t MAX_FPS{ 20 };
 
 }// namespace TimeBox
 
