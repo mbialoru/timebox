@@ -90,7 +90,8 @@ void ClockController::PrintCurrentClockAdjustments() const
 
 void ClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment)
 {
-  if (t_ppm_adjustment > 1000 || t_ppm_adjustment < -1000) {
+  auto [upper_limit, lower_limit]{ mp_pid->GetLimits() };
+  if (t_ppm_adjustment > upper_limit || t_ppm_adjustment < lower_limit) {
     BOOST_LOG_TRIVIAL(error) << "PPM clock adjustment outside of operational range !";
     return;
   }

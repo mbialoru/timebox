@@ -128,11 +128,11 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
     ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2));
     CenterWindow(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 
-    static std::size_t current_item_index_port{ 0 };
-    static std::size_t current_item_index_baud{ 0 };
-
     ImGui::Begin("Connect", &tr_context.display_connect_dialog, window_flags);
     {
+      static std::size_t current_item_index_port{ 0 };
+      static std::size_t current_item_index_baud{ 0 };
+
       // Baud rate choosing combo
       const char *preview_value_baud = tr_context.baud_rate_string_list[current_item_index_baud].c_str();
       tr_context.baud_rate = std::stoul(tr_context.baud_rate_string_list[current_item_index_baud]);
@@ -179,6 +179,12 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
 
         if (ImGui::Button("Connect")) {
           tr_context.p_clock_controller = std::make_unique<ClockController>(0, tr_context.p_pid, 0.001);
+          // Limit PID to increments of +/- 10% speed
+
+          auto initial_adjustment{ tr_context.p_clock_controller->GetInitialAdjustment() };
+          tr_context.p_pid->SetLimits(
+            initial_adjustment * 0.9 - initial_adjustment, initial_adjustment * 1.1 - initial_adjustment);
+
           tr_context.p_serial_reader = std::make_unique<SerialInterface>(
             std::bind(&ClockController::AdjustClock, tr_context.p_clock_controller.get(), std::placeholders::_1));
 
