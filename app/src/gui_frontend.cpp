@@ -168,7 +168,7 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
         }
       }
 
-      if (tr_context.serial_port != "" && tr_context.baud_rate != 0) {
+      if (not tr_context.serial_port.empty() && tr_context.baud_rate != 0) {
         ImGui::Text("%s", "Port: ");
         ImGui::SameLine();
         ImGui::Text("%s", tr_context.serial_port.c_str());
@@ -179,12 +179,9 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
         if (ImGui::Button("Connect")) {
           tr_context.p_clock_controller = std::make_unique<ClockController>(0, tr_context.p_pid, 0.001);
 
-          // TODO: Fix the max and min increment calculation
-          // Limit PID to increments of +/- 10% speed
-          // auto initial_adjustment{ tr_context.p_clock_controller->GetInitialAdjustment() };
-          // double upper_limit{ initial_adjustment * (-0.1) };
-          // double lower_limit{ initial_adjustment * 0.1 };
-          tr_context.p_pid->SetLimits(-100, 100);
+          // Limit PID settings +/- 10% speed
+          auto initial_adjustment{ tr_context.p_clock_controller->GetInitialAdjustment() };
+          tr_context.p_pid->SetLimits(initial_adjustment * 0.9, initial_adjustment * 1.1);
 
           tr_context.p_serial_reader = std::make_unique<SerialInterface>(
             std::bind(&ClockController::AdjustClock, tr_context.p_clock_controller.get(), std::placeholders::_1));
@@ -195,13 +192,15 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
             BOOST_LOG_TRIVIAL(error) << e.what();
             throw e;
           }
-
           tr_context.connection_established = true;
         }
 
         if (tr_context.connection_established) {
           if (ImGui::Button("Disconnect")) {
-            tr_context.p_serial_reader.reset();
+            if (tr_context.p_serial_reader->IsOpen()) {
+              tr_context.p_serial_reader->FlushIOBuffers();
+              tr_context.p_serial_reader.reset();
+            }
             tr_context.connection_established = false;
           }
         }

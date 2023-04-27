@@ -1,4 +1,5 @@
 #include "clockcontroller.hpp"
+#include <cmath>
 
 using namespace TimeBox;
 
@@ -41,30 +42,42 @@ ClockController::~ClockController()
 
 void ClockController::AdjustClock(const TimeboxReadout t_readout)
 {
-  auto [time_string, time_stamp] = t_readout;
-  auto now = std::chrono::system_clock::now();
-  auto last_call_difference = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_last_call);
+  static std::chrono::system_clock::time_point last_time_stamp;
+  auto [time_string, time_stamp]{ t_readout };
+  auto now{ std::chrono::system_clock::now() };
+  auto last_call_difference{ std::chrono::duration_cast<std::chrono::milliseconds>(now - m_last_call) };
   if (std::llabs(last_call_difference.count()) < m_minimal_delay) {
     BOOST_LOG_TRIVIAL(warning) << "Too soon to last AdjustClock call ! " << last_call_difference.count() << " ms";
     return;
   }
 
-  auto from_str = ConvertStringToTimepoint(time_string);
-  auto time_difference = std::chrono::duration_cast<std::chrono::microseconds>(now - from_str);
+  auto from_str{ ConvertStringToTimepoint(time_string) };
+  auto time_difference{ std::chrono::duration_cast<std::chrono::microseconds>(now - from_str) };
+  auto time_stamp_diff{ std::chrono::duration_cast<std::chrono::milliseconds>(time_stamp - last_time_stamp) };
+
+  if (std::isnan(time_difference.count())) { throw std::runtime_error("Encountered clock difference as NaN !"); }
+  if (std::isnan(time_stamp_diff.count())) { throw std::runtime_error("Encountered time stamp difference as NaN !"); }
+
   m_difference_history.push_back(time_difference);
+  BOOST_LOG_TRIVIAL(debug) << "Time stamp difference is " << time_stamp_diff.count() << " milliseconds";
   BOOST_LOG_TRIVIAL(debug) << "Clock difference is " << time_difference.count() << " microseconds";
 
-  auto processing_time =
-    std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - time_stamp);
+  auto processing_time{ std::chrono::duration_cast<std::chrono::microseconds>(
+    std::chrono::system_clock::now() - time_stamp) };
   BOOST_LOG_TRIVIAL(debug) << "Processing time was " << processing_time.count() << " microseconds";
 
-  mp_pid->UpdateLimited(static_cast<double>(time_difference.count()), 1);// For now we assume t_tick is always 1s (PPS)
+  double time_stamp_diff_seconds{ static_cast<double>(time_stamp_diff.count() / 1000) };
+
+  // Ideally only first tick should have some weird values - hence ternary style operator if
+  mp_pid->UpdateLimited(
+    static_cast<double>(time_difference.count()), (time_stamp_diff_seconds >= 0) ? time_stamp_diff_seconds : 1.0);
   auto pid_output = mp_pid->GetOutputLimited();
   auto pid_output_raw = mp_pid->GetOutputRaw();
   BOOST_LOG_TRIVIAL(debug) << "PID output is " << pid_output;
   BOOST_LOG_TRIVIAL(debug) << "Raw PID output is " << pid_output_raw;
   SystemTimeAdjustmentWrapper(static_cast<long>(pid_output));
   m_last_call = now;
+  last_time_stamp = time_stamp;
 }
 
 void ClockController::PrintCurrentClockAdjustments() const
@@ -90,11 +103,11 @@ void ClockController::PrintCurrentClockAdjustments() const
 
 void ClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment)
 {
-  // auto [lower_limit, upper_limit]{ mp_pid->GetLimits() };
-  // if (t_ppm_adjustment >= (upper_limit * 1.05) || t_ppm_adjustment <= (lower_limit * 1.05)) {
-  //   BOOST_LOG_TRIVIAL(error) << "PPM clock adjustment outside of operational range !";
-  //   return;
-  // }
+  auto [lower_limit, upper_limit]{ mp_pid->GetLimits() };
+  if (t_ppm_adjustment > upper_limit || t_ppm_adjustment < lower_limit) {
+    BOOST_LOG_TRIVIAL(error) << "PPM clock adjustment outside of operational range !";
+    return;
+  }
 
   double scaling_factor{ static_cast<double>(m_performance_counter_frequency.QuadPart / m_micro_per_second) };
   DWORD adjustment_units{ static_cast<DWORD>(std::abs(t_ppm_adjustment * scaling_factor)) };
