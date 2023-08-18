@@ -69,10 +69,10 @@ void ClockController::AdjustClock(const TimeboxReadout t_readout)
   double time_stamp_diff_seconds{ static_cast<double>(time_stamp_diff.count() / 1000) };
 
   // Ideally only first tick should have some weird values - hence ternary style operator if
-  mp_pid->UpdateLimited(
+  mp_pid->update_limited(
     static_cast<double>(time_difference.count()), (time_stamp_diff_seconds >= 0) ? time_stamp_diff_seconds : 1.0);
-  auto pid_output = mp_pid->GetOutputLimited();
-  auto pid_output_raw = mp_pid->GetOutputRaw();
+  auto pid_output = mp_pid->get_output_limited();
+  auto pid_output_raw = mp_pid->get_output_raw();
   BOOST_LOG_TRIVIAL(debug) << "PID output is " << pid_output;
   BOOST_LOG_TRIVIAL(debug) << "Raw PID output is " << pid_output_raw;
   SystemTimeAdjustmentWrapper(static_cast<long>(pid_output));
@@ -103,7 +103,7 @@ void ClockController::PrintCurrentClockAdjustments() const
 
 void ClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment)
 {
-  auto [lower_limit, upper_limit]{ mp_pid->GetLimits() };
+  auto [lower_limit, upper_limit]{ mp_pid->get_limits() };
   if (t_ppm_adjustment > upper_limit || t_ppm_adjustment < lower_limit) {
     BOOST_LOG_TRIVIAL(error) << "PPM clock adjustment outside of operational range !";
     return;

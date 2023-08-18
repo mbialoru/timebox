@@ -29,10 +29,10 @@ RUN apt-get install -y build-essential binutils autoconf automake cmake \
     cppcheck ccache gdb valgrind
 
 # Install Python
-RUN apt-get install -y python2 python3 python3-pip python3-venv
+RUN apt-get install -y python3 python3-pip python3-venv
 
 # Python packages
-RUN pip install --upgrade pip setuptools autopep8 conan cmakelang cppclean
+RUN pip install --upgrade pip setuptools autopep8 conan cmakelang cppclean --break-system-packages
 
 # Install GCC
 ARG GCC_VER="12"
@@ -75,7 +75,7 @@ RUN make && make install
 
 # include-what-you-use
 WORKDIR /tools
-RUN git clone https://github.com/include-what-you-use/include-what-you-use.git
+RUN git clone --branch 0.19 https://github.com/include-what-you-use/include-what-you-use.git
 WORKDIR /tools/include-what-you-use
 RUN mkdir build
 WORKDIR /tools/include-what-you-use/build

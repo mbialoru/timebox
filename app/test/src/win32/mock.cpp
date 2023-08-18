@@ -6,7 +6,7 @@ MockClockController::MockClockController()
   : BaseClockController(500), m_time_adjustment(15600),
     mp_pid(std::move(std::make_shared<PID<double>>(1.0, 0.5, 1.0, 0))), m_timepoint(std::chrono::system_clock::now())
 {
-  mp_pid->SetLimits(-1000, 1000);
+  mp_pid->set_limits(-1000, 1000);
 }
 
 MockClockController::~MockClockController() = default;
@@ -29,9 +29,9 @@ void MockClockController::AdjustClock(TimeboxReadout t_readout)
   auto processing_time = std::chrono::system_clock::now() - time_stamp;
   BOOST_LOG_TRIVIAL(debug) << "Processing time was " << processing_time.count() << " nanoseconds";
 
-  mp_pid->UpdateLimited(static_cast<double>(diff.count()), 1);
-  auto pid_output = mp_pid->GetOutputLimited();
-  auto pid_output_raw = mp_pid->GetOutputRaw();
+  mp_pid->update_limited(static_cast<double>(diff.count()), 1);
+  auto pid_output = mp_pid->get_output_limited();
+  auto pid_output_raw = mp_pid->get_output_raw();
   BOOST_LOG_TRIVIAL(debug) << "PID output is " << pid_output;
   BOOST_LOG_TRIVIAL(debug) << "Raw PID output is " << pid_output_raw;
   m_time_adjustment += static_cast<DWORD>(pid_output);

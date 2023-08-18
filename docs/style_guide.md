@@ -7,12 +7,28 @@
 * Use upper case letters as word separators, lower case for the rest of the word
   in the class name.
 
-* The first character in the class name must be upper case.
+* The first character in the class name must be upper case, PascalCase style.
 
 * No underscores (‘_’) are permitted in the class name.
 
 * The private attribute name in class should be prepended with the characters
   ‘m_’.
+
+* In a class, place attributes after methods. Place static elements before
+  non-static ones. Separate groups of methods or attributes, group by type.
+
+* Source files should contain only one #include clause.
+
+* Header files should separate include clauses grouping ones from standard
+  library and external dependencies. Standard library should come first.
+
+* Angle brackets are used for not our own includes, quotes however are for our
+  own files.
+
+* Try to include __only__ header files.
+
+* When declaring a method/function in header file do not strip the declaration
+  of variable names. This is to help with IDE autosuggestion.
 
 * After prepending ‘m_’, rest of the name should be snake_case.
 
@@ -20,7 +36,8 @@
   pointers.
 
 * Each method / function name should begin with a verb, then same rules like for
-  class names should be followed.
+  variable names should be followed. This rule does not apply for constructors
+  and destructors for obvious reasons.
 
 * Arguments should be prepended with ‘t_’, rest of the name should follow
   snake_case. Remaining prefix adding rules add their corresponding part after `t`
@@ -39,7 +56,8 @@
 * No keywords can be used for variable names.
 
 * Pointer variables should be prepended with ‘p_’ and place the asterisk ‘*’
-  close to the variable name instead of pointer type.
+  close to the variable name instead of pointer type. This also applies for
+  smart pointers.
 
 * Reference variables should be prepended with ‘r_’. This helps to differentiate
   between the method returning a modifiable object and the same method returning
@@ -59,8 +77,8 @@
   implementation in .ipp file if it is necessary, however setups like these
   can get ugly with include directories in build systems.
 
-* Do not use filenames that already exist in /user/include. or any predefined
-  header file name.
+* Do not use filenames that already exist in /user/include, or any predefined
+  standard header file name.
 
 # Illustrations
 * Class
@@ -79,7 +97,7 @@
     MAX_INT, TWO_PI, etc.
 
 # Examples
-* Class and Class Attributes names
+* Classes and class attribute names
     * The class name should be a noun.
     * Use upper case letters as word separators, lower case for the rest of the
       word.
@@ -90,41 +108,63 @@
     class Rectangle
     {
     public:
-        int area;
-        int perimeter;
+      int area;
+      int perimeter;
 
     private:
-        int m_length;
-        int m_width;
+      int m_length;
+      int m_width;
+    };
+    ```
+* Class elements ordering
+  * In a class, place attributes after methods. Place static elements before
+    non-static ones. Separate groups of methods or attributes, group by type.
+
+    ```cpp
+    class DataProcessor
+    {
+    public:
+      DataProcessor();
+
+      void process_data();
+      void package_results();
+
+      int last_status;
+    private:
+      static constexpr std::size_t S_MAX_DATA_CHUNK_SIZE{ 64000 };
+
+      bool validate_parsed_data();
+
+      int m_error_code;
     };
     ```
 
-* Functions and Function Argument names
+* Functions and function argument names
     Usually, every function in C++ performs one or more actions, so the name of
     the function should clearly hint what it does. Each method / function name
     should begin with a verb.
 
     * Prefixes are sometimes useful. For example,
-      * Get- get value.
-      * Set- set value.
+      * get_ get value.
+      * set_ set value.
 
-    The same name convention is used as that for the class names.
+    The same name convention is used as that for the variable/attribute names.
     ```cpp
-    int GetValue();
-    int SolveEquation();
+    int get_value();
+    int solve_equation();
     ```
 
     Arguments should be prepended with ‘t_’, rest of the name should follow snake_case.
 
     ```cpp
-    int ConnectToDatabase(int t_access_mode, std::string t_database_address);
+    int connect_to_database(int t_access_mode, std::string t_database_address);
     ```
 
     Optional arguments should be prepended with ‘o_’ rest of the name should follow
     snake_case.
-    
+
     ```cpp
-    int OpenFile(std::string t_filename, std::string to_mode);
+    int open_file(std::string t_filename, std::string to_mode);
     ```
 
 * Variables
@@ -143,11 +183,13 @@
     ```
 
     Pointer variables should be prepended with ‘p_’ and place the asterisk ‘*’
-    close to the variable name instead of pointer type.
+    close to the variable name instead of pointer type. This also applies for
+    smart pointers.
 
     ```cpp
     int *p_name;
-    int *p_age, address; // Here only pAge is a pointer variable !
+    int *p_age, address; // Here only p_age is a pointer variable !
+    std::unique_ptr<double> p_length;
     ```
 
     Reference variables should be prepended with ‘r_’. This helps to
@@ -170,6 +212,37 @@
     const double TWO_PI = 6.28318531;
     ```
 
+* Includes
+  * Source files should contain only one include clause.
+  * Header files should separate include clauses grouping ones from standard
+    library and external dependencies. Standard library should come first.
+  * Angle brackets are used for not our own includes, quotes however are for our
+    own files.
+  * Try to include __only__ header files.
+
+    ```cpp
+    // file: my_header.hpp
+    #ifndef MY_HEADER_HPP
+    #define MY_HEADER_HPP
+
+    #pragma once
+
+    #include <iostream>
+    #include <vector>
+
+    #include <fmt/core.h>
+
+    /* code */
+
+    #endif//MY_HEADER_HPP
+    ```
+
+    ```cpp
+    // file: my_source.cpp
+    #include "my_header.hpp"
+
+    /* code */
+    ```
 * File naming
     * No special character is allowed in the file name except for underscore
       (‘_’) and dash (‘-‘).

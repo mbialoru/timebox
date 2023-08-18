@@ -76,20 +76,20 @@ void TimeBox::MainDialog(AppContext &tr_context)
   ImGui::SliderFloat("P term", &term_p, -10.0f, 10.0f, "%.3f", flags);
   ImGui::SliderFloat("I term", &term_i, -10.0f, 10.0f, "%.3f", flags);
   ImGui::SliderFloat("D term", &term_d, -10.0f, 10.0f, "%.3f", flags);
-  if (ImGui::Button("Apply")) { tr_context.p_pid->SetTerms(term_p, term_i, term_d); }
+  if (ImGui::Button("Apply")) { tr_context.p_pid->set_terms(term_p, term_i, term_d); }
   ImGui::SameLine();
   if (ImGui::Button("Reset")) {
     term_p = 0.0;
     term_i = 0.0;
     term_d = 0.0;
-    tr_context.p_pid->SetTerms(term_p, term_i, term_d);
+    tr_context.p_pid->set_terms(term_p, term_i, term_d);
   }
   ImGui::SameLine();
   if (ImGui::Button("Auto")) { throw NotImplementedException(); }
   ImGui::SameLine();
   ImGui::Spacing();
   ImGui::SameLine();
-  auto [p, i, d] = tr_context.p_pid->GetTerms();
+  auto [p, i, d] = tr_context.p_pid->get_terms();
   ImGui::Text("P: %.3f I: %.3f D: %.3f", p, i, d);
   ImGui::Separator();
 
@@ -181,7 +181,7 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
 
           // Limit PID settings +/- 10% speed
           auto initial_adjustment{ tr_context.p_clock_controller->GetInitialAdjustment() };
-          tr_context.p_pid->SetLimits(initial_adjustment * 0.9, initial_adjustment * 1.1);
+          tr_context.p_pid->set_limits(initial_adjustment * 0.9, initial_adjustment * 1.1);
 
           tr_context.p_serial_reader = std::make_unique<SerialInterface>(
             std::bind(&ClockController::AdjustClock, tr_context.p_clock_controller.get(), std::placeholders::_1));

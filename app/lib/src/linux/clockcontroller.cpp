@@ -96,9 +96,9 @@ void ClockController::AdjustClock(const TimeboxReadout t_readout)
   auto processing_time = std::chrono::system_clock::now() - time_stamp;
   BOOST_LOG_TRIVIAL(debug) << "Processing time was " << processing_time.count() << " nanoseconds";
 
-  mp_pid->UpdateLimited(static_cast<double>(diff.count()), 1);// For now we assume t_tick is always 1s (PPS)
-  auto pid_output = mp_pid->GetOutputLimited();
-  auto pid_output_raw = mp_pid->GetOutputRaw();
+  mp_pid->update_limited(static_cast<double>(diff.count()), 1);// For now we assume t_tick is always 1s (PPS)
+  auto pid_output = mp_pid->get_output_limited();
+  auto pid_output_raw = mp_pid->get_output_raw();
   BOOST_LOG_TRIVIAL(debug) << "PID output is " << pid_output;
   BOOST_LOG_TRIVIAL(debug) << "Raw PID output is " << pid_output_raw;
   AdjustKernelTick(static_cast<std::size_t>(pid_output));

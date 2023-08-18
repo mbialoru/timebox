@@ -33,7 +33,7 @@
         "--security-opt",
         "seccomp=unconfined",
         "--net=host",
-        "--ipc=host"
+        "--ipc=host"//,
         // "--device=/dev/ttyACM0"
     ],
     "remoteEnv": {
