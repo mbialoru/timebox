@@ -42,7 +42,7 @@ ClockController::~ClockController()
 
 void ClockController::adjust_clock(const TimeboxReadout t_readout)
 {
-  static std::chrono::system_clock::time_point last_time_stamp;
+  static std::chrono::system_clock::time_point s_last_time_stamp;
   auto [time_string, time_stamp]{ t_readout };
   auto now{ std::chrono::system_clock::now() };
   auto last_call_difference{ std::chrono::duration_cast<std::chrono::milliseconds>(now - m_last_call) };
@@ -53,7 +53,7 @@ void ClockController::adjust_clock(const TimeboxReadout t_readout)
 
   auto from_str{ string_to_timepoint(time_string) };
   auto time_difference{ std::chrono::duration_cast<std::chrono::microseconds>(now - from_str) };
-  auto time_stamp_diff{ std::chrono::duration_cast<std::chrono::milliseconds>(time_stamp - last_time_stamp) };
+  auto time_stamp_diff{ std::chrono::duration_cast<std::chrono::milliseconds>(time_stamp - s_last_time_stamp) };
 
   if (std::isnan(time_difference.count())) { throw std::runtime_error("Encountered clock difference as NaN !"); }
   if (std::isnan(time_stamp_diff.count())) { throw std::runtime_error("Encountered time stamp difference as NaN !"); }
@@ -77,7 +77,44 @@ void ClockController::adjust_clock(const TimeboxReadout t_readout)
   BOOST_LOG_TRIVIAL(debug) << "Raw PID output is " << pid_output_raw;
   system_time_adjustment_wrapper(static_cast<long>(pid_output));
   m_last_call = now;
-  last_time_stamp = time_stamp;
+  s_last_time_stamp = time_stamp;
+}
+
+HRESULT ClockController::update_process_token()
+{
+  HRESULT hresult;
+  HANDLE process_token{ nullptr };
+  TOKEN_PRIVILEGES token_privileges{ 0 };
+  LUID luid;
+
+  if (not LookupPrivilegeValue(NULL, SE_SYSTEMTIME_NAME, &luid)) {
+    hresult = HRESULT_FROM_WIN32(GetLastError());
+    BOOST_LOG_TRIVIAL(error) << "Failed to lookup privilege value, error code: " << hresult;
+    return hresult;
+  }
+
+  // get token for our process
+  if (not OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &process_token)) {
+    hresult = HRESULT_FROM_WIN32(GetLastError());
+    BOOST_LOG_TRIVIAL(error) << "Failed to open process token, error code: " << hresult;
+    return hresult;
+  }
+
+  // enable SE_SYSTEMTIME_NAME privilege
+  token_privileges.PrivilegeCount = 1;
+  token_privileges.Privileges[0].Luid = luid;
+  token_privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+  if (not AdjustTokenPrivileges(process_token, FALSE, &token_privileges, sizeof(token_privileges), NULL, NULL)) {
+    BOOST_LOG_TRIVIAL(error) << "Failed to adjust process token privileges, error code: "
+                             << HRESULT_FROM_WIN32(GetLastError());
+  } else {
+    hresult = S_OK;
+    BOOST_LOG_TRIVIAL(debug) << "Added SYSTEMTIME privilege to the process token";
+  }
+
+  if (process_token != nullptr) { CloseHandle(process_token); }
+  return hresult;
 }
 
 void ClockController::print_current_clock_adjustments() const
@@ -140,41 +177,4 @@ void ClockController::system_time_adjustment_wrapper(const long t_ppm_adjustment
     return;
   }
   m_adjustment_history.push_back(t_ppm_adjustment);
-}
-
-HRESULT ClockController::update_process_token()
-{
-  HRESULT hresult;
-  HANDLE process_token{ nullptr };
-  TOKEN_PRIVILEGES token_privileges{ 0 };
-  LUID luid;
-
-  if (not LookupPrivilegeValue(NULL, SE_SYSTEMTIME_NAME, &luid)) {
-    hresult = HRESULT_FROM_WIN32(GetLastError());
-    BOOST_LOG_TRIVIAL(error) << "Failed to lookup privilege value, error code: " << hresult;
-    return hresult;
-  }
-
-  // get token for our process
-  if (not OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &process_token)) {
-    hresult = HRESULT_FROM_WIN32(GetLastError());
-    BOOST_LOG_TRIVIAL(error) << "Failed to open process token, error code: " << hresult;
-    return hresult;
-  }
-
-  // enable SE_SYSTEMTIME_NAME privilege
-  token_privileges.PrivilegeCount = 1;
-  token_privileges.Privileges[0].Luid = luid;
-  token_privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-
-  if (not AdjustTokenPrivileges(process_token, FALSE, &token_privileges, sizeof(token_privileges), NULL, NULL)) {
-    BOOST_LOG_TRIVIAL(error) << "Failed to adjust process token privileges, error code: "
-                             << HRESULT_FROM_WIN32(GetLastError());
-  } else {
-    hresult = S_OK;
-    BOOST_LOG_TRIVIAL(debug) << "Added SYSTEMTIME privilege to the process token";
-  }
-
-  if (process_token != nullptr) { CloseHandle(process_token); }
-  return hresult;
 }

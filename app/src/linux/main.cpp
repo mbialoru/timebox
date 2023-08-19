@@ -27,21 +27,24 @@ int main(const int t_argc, const char *tp_argv[])
   // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
   // GL ES 2.0 + GLSL 100
-  const char *glsl_version = "#version 100";
+  const char* glsl_version = "#version 100";
+
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 #elif defined(__APPLE__)
   // GL 3.2 Core + GLSL 150
-  const char *glsl_version = "#version 150";
+  const char* glsl_version = "#version 150";
+
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);// Always required on Mac
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 #else
   // GL 3.0 + GLSL 130
-  const char *glsl_version = "#version 130";
+  const char* glsl_version = "#version 130";
+
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -52,6 +55,7 @@ int main(const int t_argc, const char *tp_argv[])
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
   SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
   SDL_WindowFlags window_flags = static_cast<SDL_WindowFlags>(SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
 
   SDL_Window *window = SDL_CreateWindow(std::string(BuildInformation::PROJECT_NAME).c_str(),
@@ -61,13 +65,16 @@ int main(const int t_argc, const char *tp_argv[])
     WINDOW_WIDTH,
     window_flags);
   SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+
   SDL_GL_MakeCurrent(window, gl_context);
   SDL_GL_SetSwapInterval(1);// Enable vsync
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  ImGuiIO &io = ImGui::GetIO();
+
+  ImGuiIO& io = ImGui::GetIO();
+
   (void)io;
 
   // Setup Dear ImGui style
@@ -99,11 +106,14 @@ int main(const int t_argc, const char *tp_argv[])
     // clear/overwrite your copy of the keyboard data. Generally you may always pass all inputs to dear imgui, and hide
     // them from your application based on those two flags.
     SDL_Event event;
+
     while (SDL_PollEvent(&event)) {
       ImGui_ImplSDL2_ProcessEvent(&event);
+
       if (event.type == SDL_QUIT) context.application_run = true;
+
       if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE
-          && event.window.windowID == SDL_GetWindowID(window))
+        && event.window.windowID == SDL_GetWindowID(window))
         context.application_run = false;
     }
 
@@ -113,10 +123,10 @@ int main(const int t_argc, const char *tp_argv[])
     ImGui::NewFrame();
 
     // GUI parts
-    MainDialog(context);
-    ConnectDialog(context);
-    WarningPopup(context);
-    AboutDialog(context);
+    main_dialog(context);
+    connect_dialog(context);
+    warning_popup(context);
+    about_dialog(context);
 
     // Rendering - This is our Viewport
     ImGui::Render();
@@ -130,7 +140,6 @@ int main(const int t_argc, const char *tp_argv[])
   }
 
   // Cleanup
-
   DestroyContext(context);
 
   ImGui_ImplOpenGL3_Shutdown();

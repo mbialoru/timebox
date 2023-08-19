@@ -2,23 +2,24 @@
 
 using namespace TimeBox;
 
-void TimeBox::MainLoop(SDL_Window *tp_sdl_window, AppContext &tr_app_context, D3DContext &tr_d3d_context)
+void TimeBox::main_loop(SDL_Window *tp_sdl_window, AppContext &tr_app_context, D3DContext &tr_d3d_context)
 {
   while (tr_app_context.application_run) {
     // FPS limiter
     static uint32_t s_last_frametime, s_this_frametime;
+
     s_last_frametime = s_this_frametime;
     s_this_frametime = SDL_GetTicks();
 
-    HandleSDLEvent(tp_sdl_window, tr_app_context);
+    handle_sdl_event(tp_sdl_window, tr_app_context);
 
     // Start the Dear ImGui frame
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-    HandleGUI(tr_app_context);
-    Render(tr_d3d_context);
+    handle_gui(tr_app_context);
+    render(tr_d3d_context);
 
     // FPS limiter
     if (s_this_frametime - s_last_frametime < 1000 / MAX_FPS)
@@ -27,5 +28,6 @@ void TimeBox::MainLoop(SDL_Window *tp_sdl_window, AppContext &tr_app_context, D3
 
   // Cleanup
   tr_app_context.Reset();
-  Cleanup(tp_sdl_window, tr_d3d_context);
+
+  cleanup(tp_sdl_window, tr_d3d_context);
 }

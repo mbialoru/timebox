@@ -13,7 +13,7 @@
 
 namespace TimeBox {
 
-void SaveHistoryToFile(std::unique_ptr<ClockController>);
+void save_history_to_file(std::unique_ptr<ClockController>);
 
 }// namespace TimeBox
 

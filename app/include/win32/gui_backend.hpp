@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <SDL.h>
-#include <SDL_syswm.h>
 #include <boost/log/trivial.hpp>
 #include <cstdint>
 #include <d3d11.h>
-#include <imgui.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_impl_sdl.h>
+#include <imgui.h>
+#include <SDL_syswm.h>
+#include <SDL.h>
 #include <stdexcept>
 
 #include "appcontext.hpp"
@@ -19,7 +19,8 @@ namespace TimeBox {
 
 // Variables for ImGui
 static ImVec4 s_clear_color{ ImVec4(0.45f, 0.55f, 0.60f, 1.00f) };
-const float clear_color_with_alpha[4] = { s_clear_color.x * s_clear_color.w,
+
+const float CLEAR_COLOR_ALPHA[4] = { s_clear_color.x * s_clear_color.w,
   s_clear_color.y *s_clear_color.w,
   s_clear_color.z *s_clear_color.w,
   s_clear_color.w };
@@ -32,23 +33,20 @@ struct D3DContext
   ID3D11RenderTargetView *p_render_target_view{ NULL };
 };
 
-void Cleanup(SDL_Window *, D3DContext &);
-void Render(D3DContext &);
+bool create_d3d_device(HWND, D3DContext&);
 
-// D3D helper functions
-bool CreateDeviceD3D(HWND, D3DContext &);
-void DestroyDeviceD3D(D3DContext &);
-void CreateRenderTarget(D3DContext &);
-void DestroyRenderTarget(D3DContext &);
+HWND win32_windows_handle(SDL_Window*);
 
-// SDL helper functions
-void InitializeSDL();
-SDL_Window *CreateSDLWindow(const std::string &, const std::size_t &, const std::size_t &);
-HWND Win32WindowHandle(SDL_Window *);
-void HandleSDLEvent(SDL_Window *, AppContext &);
+SDL_Window* create_sdl_window(const std::string&, const std::size_t&, const std::size_t&);
 
-// Dear ImGUI helper function
-void InitializeImGUI(SDL_Window *, D3DContext &);
+void cleanup(SDL_Window*, D3DContext&);
+void create_render_target(D3DContext&);
+void destroy_d3d_device(D3DContext &);
+void destroy_render_target(D3DContext &);
+void handle_sdl_event(SDL_Window *, AppContext &);
+void initialize_imgui(SDL_Window *, D3DContext &);
+void initialize_sdl();
+void render(D3DContext &);
 
 }// namespace TimeBox
 

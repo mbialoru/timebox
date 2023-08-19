@@ -30,7 +30,7 @@ bool TimeBox::check_admin_privileges()
 
 bool TimeBox::check_ntp_status()
 {
-  // For now it only detects systemd-timesyncd
+  // NOTE: For now it only detects systemd-timesyncd
   char line[100];
   FILE *f{ popen("pidof systemd-timesyncd", "r") };
 

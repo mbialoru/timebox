@@ -7,7 +7,7 @@
 
 namespace TimeBox {
 
-void MainLoop(SDL_Window *, AppContext &, D3DContext &);
+void main_loop(SDL_Window *, AppContext &, D3DContext &);
 
 }// namespace TimeBox
 

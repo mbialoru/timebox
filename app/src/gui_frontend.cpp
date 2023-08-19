@@ -2,7 +2,7 @@
 
 using namespace TimeBox;
 
-void TimeBox::CenterWindow(std::size_t t_height, std::size_t t_width)
+void TimeBox::center_window(std::size_t t_height, std::size_t t_width)
 {
   if (t_height > WINDOW_HEIGHT || t_width > WINDOW_WIDTH) {
     BOOST_LOG_TRIVIAL(warning) << "Window size too big, shrinking.";
@@ -13,15 +13,15 @@ void TimeBox::CenterWindow(std::size_t t_height, std::size_t t_width)
   ImGui::SetNextWindowPos(ImVec2((WINDOW_HEIGHT - t_height) / 2, (WINDOW_WIDTH - t_width) / 2));
 }
 
-void TimeBox::HandleGUI(AppContext &tr_app_context)
+void TimeBox::handle_gui(AppContext &tr_app_context)
 {
-  MainDialog(tr_app_context);
-  ConnectDialog(tr_app_context);
-  WarningPopup(tr_app_context);
-  AboutDialog(tr_app_context);
+  main_dialog(tr_app_context);
+  connect_dialog(tr_app_context);
+  warning_popup(tr_app_context);
+  about_dialog(tr_app_context);
 }
 
-void TimeBox::MainDialog(AppContext &tr_context)
+void TimeBox::main_dialog(AppContext &tr_context)
 {
   std::string window_title{ BuildInformation().PROJECT_NAME };
   window_title[0] = toupper(window_title[0]);
@@ -119,14 +119,14 @@ void TimeBox::MainDialog(AppContext &tr_context)
   ImGui::End();
 }
 
-void TimeBox::ConnectDialog(AppContext &tr_context)
+void TimeBox::connect_dialog(AppContext &tr_context)
 {
   if (tr_context.display_connect_dialog) {
     ImGuiWindowFlags window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoCollapse;
 
     ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2));
-    CenterWindow(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+    center_window(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 
     ImGui::Begin("Connect", &tr_context.display_connect_dialog, window_flags);
     {
@@ -210,7 +210,7 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
   }
 }
 
-void TimeBox::WarningPopup(AppContext &tr_context)
+void TimeBox::warning_popup(AppContext &tr_context)
 {
   if ((!tr_context.admin_privileges || tr_context.ntp_running || tr_context.using_docker)
       && !tr_context.disabled_warning_popup) {
@@ -240,7 +240,7 @@ void TimeBox::WarningPopup(AppContext &tr_context)
   }
 }
 
-void TimeBox::AboutDialog(AppContext &tr_context)
+void TimeBox::about_dialog(AppContext &tr_context)
 {
   if (tr_context.display_about_dialog) {
     ImGui::SetNextWindowBgAlpha(0.35f);

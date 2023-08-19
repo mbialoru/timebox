@@ -12,22 +12,24 @@ static AppContext s_app_context;
 int wWinMain(HINSTANCE, HINSTANCE, PWSTR, INT)
 {
   // Initialize application window
-  InitializeSDL();
-  SDL_Window *p_sdl_window{ CreateSDLWindow(std::string(BuildInformation::PROJECT_NAME), WINDOW_HEIGHT, WINDOW_WIDTH) };
-  HWND window_handle{ Win32WindowHandle(p_sdl_window) };
+  initialize_sdl();
+
+  SDL_Window* p_sdl_window{ create_sdl_window(std::string(BuildInformation::PROJECT_NAME), WINDOW_HEIGHT, WINDOW_WIDTH) };
+  HWND window_handle{ win32_windows_handle(p_sdl_window) };
 
   // Initialize Direct3D
-  if (not CreateDeviceD3D(window_handle, s_d3d_context)) {
-    DestroyDeviceD3D(s_d3d_context);
+  if (not create_d3d_device(window_handle, s_d3d_context)) {
+    destroy_d3d_device(s_d3d_context);
     BOOST_LOG_TRIVIAL(error) << "Failed to create D3D device !";
+
     return EXIT_FAILURE;
   }
 
   // Initialize Dear ImGui
-  InitializeImGUI(p_sdl_window, s_d3d_context);
+  initialize_imgui(p_sdl_window, s_d3d_context);
 
   // Main loop
-  MainLoop(p_sdl_window, s_app_context, s_d3d_context);
+  main_loop(p_sdl_window, s_app_context, s_d3d_context);
 
   return EXIT_SUCCESS;
 }

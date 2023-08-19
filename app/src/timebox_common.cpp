@@ -2,7 +2,7 @@
 
 using namespace TimeBox;
 
-void TimeBox::SaveHistoryToFile(std::unique_ptr<ClockController> tp_clock_controller)
+void TimeBox::save_history_to_file(std::unique_ptr<ClockController> tp_clock_controller)
 {
   if (tp_clock_controller != nullptr && !tp_clock_controller->get_difference_history().empty()) {
     std::fstream output_file;

@@ -14,6 +14,7 @@ bool TimeBox::check_if_using_docker()
 std::chrono::system_clock::time_point TimeBox::string_to_timepoint(const std::string t_time_string)
 {
   std::vector<std::string> tmp;
+
   time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   struct tm tm = *std::localtime(&now);
 
@@ -32,11 +33,14 @@ std::chrono::system_clock::time_point TimeBox::string_to_timepoint(const std::st
 std::string TimeBox::render_ascii_codes(const std::string &tr_input_string)
 {
   std::string result;
-  for (auto &character : tr_input_string) {
+
+  for (auto& character : tr_input_string) {
     result.append(std::to_string(static_cast<int>(character)));
     result.append(" ");
   }
+
   result.pop_back();
+
   return result;
 }
 
@@ -44,30 +48,39 @@ std::string TimeBox::render_nonprintable_characters(const std::string& tr_input_
 {
   std::string result;
   std::string character_represent;
-  for (auto &character : tr_input_string) {
+
+  for (auto& character : tr_input_string) {
     switch (static_cast<int>(character)) {
     case 0:// NULL
       character_represent = "\\0";
       break;
+
     case 9:// Tabulator
       character_represent = "\\t";
       break;
+
     case 10:// Line Feed LF
       character_represent = "\\n";
       break;
+
     case 13:// Carriage Return CR
       character_represent = "\\r";
       break;
+
     case 32:// Whitespace
       character_represent = "\\s";
       break;
+
     default:
       character_represent = character;
       break;
     }
+
     result.append(character_represent);
+
     character_represent.clear();
   }
+
   return result;
 }
 
@@ -75,6 +88,7 @@ std::string TimeBox::timepoint_to_string(const std::chrono::system_clock::time_p
 {
   time_t tmp = std::chrono::system_clock::to_time_t(t_timepoint);
   struct tm tm = *std::localtime(&tmp);
+
   std::string res{ std::to_string(tm.tm_hour) + ":" + std::to_string(tm.tm_min) + ":" + std::to_string(tm.tm_sec) };
 
   return res;

@@ -18,9 +18,9 @@ static IDXGISwapChain *g_pSwapChain = NULL;
 static ID3D11RenderTargetView *g_mainRenderTargetView = NULL;
 
 // Forward declarations of helper functions
-bool CreateDeviceD3D(HWND hWnd);
+bool create_d3d_device(HWND hWnd);
 void CleanupDeviceD3D();
-void CreateRenderTarget();
+void create_render_target();
 void CleanupRenderTarget();
 
 // Main code
@@ -51,7 +51,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
   HWND hwnd = (HWND)wmInfo.info.win.window;
 
   // Initialize Direct3D
-  if (!CreateDeviceD3D(hwnd)) {
+  if (!create_d3d_device(hwnd)) {
     CleanupDeviceD3D();
     return 1;
   }
@@ -120,7 +120,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
         // Release all outstanding references to the swap chain's buffers before resizing.
         CleanupRenderTarget();
         g_pSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
-        CreateRenderTarget();
+        create_render_target();
       }
     }
 
@@ -168,11 +168,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 
     // Rendering
     ImGui::Render();
-    const float clear_color_with_alpha[4] = {
+    const float CLEAR_COLOR_ALPHA[4] = {
       clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w
     };
     g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, NULL);
-    g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
+    g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, CLEAR_COLOR_ALPHA);
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
     g_pSwapChain->Present(1, 0);// Present with vsync
@@ -192,7 +192,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 }
 
 // Helper functions to use DirectX11
-bool CreateDeviceD3D(HWND hWnd)
+bool create_d3d_device(HWND hWnd)
 {
   // Setup swap chain
   DXGI_SWAP_CHAIN_DESC sd;
@@ -233,7 +233,7 @@ bool CreateDeviceD3D(HWND hWnd)
       != S_OK)
     return false;
 
-  CreateRenderTarget();
+  create_render_target();
   return true;
 }
 
@@ -254,7 +254,7 @@ void CleanupDeviceD3D()
   }
 }
 
-void CreateRenderTarget()
+void create_render_target()
 {
   ID3D11Texture2D *pBackBuffer;
   g_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
