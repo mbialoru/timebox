@@ -79,7 +79,9 @@
         "unordered_set": "cpp",
         "regex": "cpp",
         "span": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "charconv": "cpp",
+        "format": "cpp"
     },
     "cmake.configureOnOpen": true
 }

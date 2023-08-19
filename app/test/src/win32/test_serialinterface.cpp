@@ -41,14 +41,14 @@ TEST_F(Test_SerialInterface, thread_callback)
 #if USING_REAL_HARDWARE
   SerialInterface sr{ std::bind(MyCallback, std::placeholders::_1) };
   sr.Open("COM3", 9600);
-  sr.FlushIOBuffers();
+  sr.flush_io_buffers();
 #else
   MockSerialReader sr{ std::bind(&Test_SerialInterface::CallbackDummy, this) };
 #endif
   std::this_thread::sleep_for(std::chrono::seconds(5));
   EXPECT_TRUE(callback_calls > 3);
 #if USING_REAL_HARDWARE
-  sr.FlushIOBuffers();
+  sr.flush_io_buffers();
   sr.Close();
 #endif
 }
@@ -58,14 +58,14 @@ TEST_F(Test_SerialInterface, using_free_function_callback)
 #if USING_REAL_HARDWARE
   SerialInterface sr{ std::bind(MyCallback, std::placeholders::_1) };
   sr.Open("COM3", 9600);
-  sr.FlushIOBuffers();
+  sr.flush_io_buffers();
 #else
   MockSerialReader sr{ std::bind(MyCallback, std::placeholders::_1) };
 #endif
   std::this_thread::sleep_for(std::chrono::seconds(5));
   EXPECT_TRUE(MyCallback_calls > 3);
 #if USING_REAL_HARDWARE
-  sr.FlushIOBuffers();
+  sr.flush_io_buffers();
   sr.Close();
 #endif
 }

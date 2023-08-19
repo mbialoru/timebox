@@ -187,7 +187,7 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
             std::bind(&ClockController::AdjustClock, tr_context.p_clock_controller.get(), std::placeholders::_1));
 
           try {
-            tr_context.p_serial_reader->Open(tr_context.serial_port, tr_context.baud_rate);
+            tr_context.p_serial_reader->open(tr_context.serial_port, tr_context.baud_rate);
           } catch (const std::exception &e) {
             BOOST_LOG_TRIVIAL(error) << e.what();
             throw e;
@@ -197,8 +197,8 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
 
         if (tr_context.connection_established) {
           if (ImGui::Button("Disconnect")) {
-            if (tr_context.p_serial_reader->IsOpen()) {
-              tr_context.p_serial_reader->FlushIOBuffers();
+            if (tr_context.p_serial_reader->is_open()) {
+              tr_context.p_serial_reader->flush_io_buffers();
               tr_context.p_serial_reader.reset();
             }
             tr_context.connection_established = false;

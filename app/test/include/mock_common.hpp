@@ -49,19 +49,19 @@ public:
   void Open(const char *, std::size_t);
   void Open(const std::string &, std::size_t);
   void Close();
-  bool IsOpen() const;
-  bool ErrorStatus() const;
+  bool is_open() const;
+  bool error_status() const;
 
-  void Write(const char *, std::size_t){};
-  void Write(const std::vector<char> &){};
-  void WriteString(const std::string &){};
+  void write(const char *, std::size_t){};
+  void write(const std::vector<char> &){};
+  void write_string(const std::string &){};
 
   std::vector<char> Read();
   std::size_t Read(char *, std::size_t);
-  std::string ReadString();
-  std::string ReadStringUntil(const std::string);
+  std::string read_string();
+  std::string read_string_until(const std::string);
 
-  static constexpr std::size_t read_buffer_size{ 512 };
+  static constexpr std::size_t S_READ_BUFFER_SIZE{ 512 };
 
 private:
   void Work() override;

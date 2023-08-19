@@ -88,9 +88,9 @@ void MockSerialReader::Close()
   m_port_open = false;
 }
 
-bool MockSerialReader::IsOpen() const { return m_port_open; }
+bool MockSerialReader::is_open() const { return m_port_open; }
 
-bool MockSerialReader::ErrorStatus() const { return m_error_flag; }
+bool MockSerialReader::error_status() const { return m_error_flag; }
 
 void MockSerialReader::Work()
 {
