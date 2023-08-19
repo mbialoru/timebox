@@ -4,10 +4,10 @@ using namespace TimeBox;
 
 void TimeBox::SaveHistoryToFile(std::unique_ptr<ClockController> tp_clock_controller)
 {
-  if (tp_clock_controller != nullptr && !tp_clock_controller->GetDifferenceHistory().empty()) {
+  if (tp_clock_controller != nullptr && !tp_clock_controller->get_difference_history().empty()) {
     std::fstream output_file;
     output_file.open("timebox_history.log", std::ios::out);
-    for (const auto &entry : tp_clock_controller->GetDifferenceHistory()) {
+    for (const auto &entry : tp_clock_controller->get_difference_history()) {
       output_file << std::to_string(entry.count()).c_str() << "\n";
     }
     output_file.close();

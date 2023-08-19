@@ -16,63 +16,69 @@
 namespace TimeBox {
 
 extern std::vector<std::size_t> baud_rate_list;
+
 typedef std::pair<std::string, std::chrono::system_clock::time_point> TimeboxReadout;
+
 const std::string correct_serial_readout_regex{ "[0-9]{1,2}\\:[0-9]{1,2}\\:[0-9]{1,2}\\.[0-9]{1,2}\\n?" };
 
-bool CheckAdminPrivileges();
-bool CheckIfUsingDocker();
-// TODO: These functions just ask to be wrapped into a class
-bool CheckNTPService();
-void PauseNTPService();
-void StartNTPService();
-std::string RenderNonPrintableCharacters(const std::string &);
-std::string RenderStringASCIICodes(const std::string &);
-std::vector<std::string> GetSerialDevicesList();
-std::chrono::system_clock::time_point ConvertStringToTimepoint(std::string);
-std::string ConvertTimepointToString(std::chrono::system_clock::time_point);
+bool check_admin_privileges();
+bool check_if_using_docker();
+bool check_ntp_status();
 
-template<typename T> struct TimingDecorator;
-template<typename... Args> struct TimingDecorator<void(Args...)>
-{
-  explicit TimingDecorator(std::function<void(Args...)> function) : m_function{ function } {}
+std::chrono::system_clock::time_point string_to_timepoint(std::string);
 
-  long int operator()(Args... args)
-  {
-    auto pre_call = std::chrono::system_clock::now();
-    m_function(args...);
-    auto post_call = std::chrono::system_clock::now();
-    std::chrono::duration time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(post_call - pre_call);
-    return time_diff.count();
-  }
+std::string render_ascii_codes(const std::string &);
+std::string render_nonprintable_characters(const std::string&);
+std::string timepoint_to_string(std::chrono::system_clock::time_point);
 
-  std::function<void(Args...)> m_function;
-};
+std::vector<std::string> get_serial_devices_list();
 
-template<typename T, typename... Args> struct TimingDecorator<T(Args...)>
-{
-  explicit TimingDecorator(std::function<T(Args...)> function) : m_function{ function } {}
+void pause_ntp_service();
+void start_ntp_service();
 
-  std::pair<T, long int> operator()(Args... args)
-  {
-    auto pre_call = std::chrono::system_clock::now();
-    T result = m_function(args...);
-    auto post_call = std::chrono::system_clock::now();
-    std::chrono::duration time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(post_call - pre_call);
-    return std::make_pair<T, long int>(std::move(result), time_diff.count());
-  }
+// TODO: Remove this dead code
+// template<typename T> struct TimingDecorator;
+// template<typename... Args> struct TimingDecorator<void(Args...)>
+// {
+//   explicit TimingDecorator(std::function<void(Args...)> function) : m_function{ function } {}
 
-  std::function<T(Args...)> m_function;
-};
+//   long int operator()(Args... args)
+//   {
+//     auto pre_call = std::chrono::system_clock::now();
+//     m_function(args...);
+//     auto post_call = std::chrono::system_clock::now();
+//     std::chrono::duration time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(post_call - pre_call);
+//     return time_diff.count();
+//   }
 
-template<typename... Args> auto WrapTimingDecorator(void (*function)(Args...))
-{
-  return TimingDecorator<void(Args...)>(std::function<void(Args...)>(function));
-}
+//   std::function<void(Args...)> m_function;
+// };
 
-template<typename T, typename... Args> auto WrapTimingDecorator(T (*function)(Args...))
-{
-  return TimingDecorator<T(Args...)>(std::function<T(Args...)>(function));
-}
+// template<typename T, typename... Args> struct TimingDecorator<T(Args...)>
+// {
+//   explicit TimingDecorator(std::function<T(Args...)> function) : m_function{ function } {}
+
+//   std::pair<T, long int> operator()(Args... args)
+//   {
+//     auto pre_call = std::chrono::system_clock::now();
+//     T result = m_function(args...);
+//     auto post_call = std::chrono::system_clock::now();
+//     std::chrono::duration time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(post_call - pre_call);
+//     return std::make_pair<T, long int>(std::move(result), time_diff.count());
+//   }
+
+//   std::function<T(Args...)> m_function;
+// };
+
+// template<typename... Args> auto WrapTimingDecorator(void (*function)(Args...))
+// {
+//   return TimingDecorator<void(Args...)>(std::function<void(Args...)>(function));
+// }
+
+// template<typename T, typename... Args> auto WrapTimingDecorator(T (*function)(Args...))
+// {
+//   return TimingDecorator<T(Args...)>(std::function<T(Args...)>(function));
+// }
 
 }// namespace TimeBox
 

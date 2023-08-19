@@ -17,8 +17,8 @@ class Test_ClockController : public ::testing::Test
 public:
   void SetUp() override
   {
-    if (CheckIfUsingDocker()) { GTEST_SKIP() << "Cannot run from Docker container !"; }
-    if (not CheckAdminPrivileges()) { GTEST_SKIP() << "Cannot run without admin privileges !"; }
+    if (check_if_using_docker()) { GTEST_SKIP() << "Cannot run from Docker container !"; }
+    if (not check_admin_privileges()) { GTEST_SKIP() << "Cannot run without admin privileges !"; }
   };
 };
 
@@ -33,10 +33,10 @@ TEST_F(Test_ClockController, adjust_clock)
   std::shared_ptr<PID<double>> p_pid{ std::make_shared<PID<double>>(2.0, 1.0, 0.001, 0) };
   std::unique_ptr<ClockController> p_clockcontroller{ std::make_unique<LinClockController>(0, p_pid, 0.001) };
 
-  TimeboxReadout readout{ ConvertTimepointToString(std::chrono::system_clock::now() - std::chrono::seconds(10)) + ".0",
+  TimeboxReadout readout{ timepoint_to_string(std::chrono::system_clock::now() - std::chrono::seconds(10)) + ".0",
     std::chrono::system_clock::now() };
   std::this_thread::sleep_for(std::chrono::milliseconds(600));
-  EXPECT_NO_THROW(p_clockcontroller->AdjustClock(readout));
+  EXPECT_NO_THROW(p_clockcontroller->adjust_clock(readout));
 
   t = timex();
   res = adjtimex(&t);

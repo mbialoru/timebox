@@ -8,8 +8,8 @@ ClockController::ClockController(const std::size_t t_minimal_delay,
   [[maybe_unused]] const double t_resolution)
   : BaseClockController(t_minimal_delay), mp_pid(std::move(t_pid))
 {
-  if (not CheckAdminPrivileges()) { throw InsufficientPermissionsError(); }
-  UpdateProcessTokenPrivileges();
+  if (not check_admin_privileges()) { throw InsufficientPermissionsError(); }
+  update_process_token();
 
   BOOL enabled_legacy{ 0 };
   DWORD time_increment_legacy{ 0 };
@@ -40,18 +40,18 @@ ClockController::~ClockController()
   }
 }
 
-void ClockController::AdjustClock(const TimeboxReadout t_readout)
+void ClockController::adjust_clock(const TimeboxReadout t_readout)
 {
   static std::chrono::system_clock::time_point last_time_stamp;
   auto [time_string, time_stamp]{ t_readout };
   auto now{ std::chrono::system_clock::now() };
   auto last_call_difference{ std::chrono::duration_cast<std::chrono::milliseconds>(now - m_last_call) };
   if (std::llabs(last_call_difference.count()) < m_minimal_delay) {
-    BOOST_LOG_TRIVIAL(warning) << "Too soon to last AdjustClock call ! " << last_call_difference.count() << " ms";
+    BOOST_LOG_TRIVIAL(warning) << "Too soon to last adjust_clock call ! " << last_call_difference.count() << " ms";
     return;
   }
 
-  auto from_str{ ConvertStringToTimepoint(time_string) };
+  auto from_str{ string_to_timepoint(time_string) };
   auto time_difference{ std::chrono::duration_cast<std::chrono::microseconds>(now - from_str) };
   auto time_stamp_diff{ std::chrono::duration_cast<std::chrono::milliseconds>(time_stamp - last_time_stamp) };
 
@@ -75,12 +75,12 @@ void ClockController::AdjustClock(const TimeboxReadout t_readout)
   auto pid_output_raw = mp_pid->get_output_raw();
   BOOST_LOG_TRIVIAL(debug) << "PID output is " << pid_output;
   BOOST_LOG_TRIVIAL(debug) << "Raw PID output is " << pid_output_raw;
-  SystemTimeAdjustmentWrapper(static_cast<long>(pid_output));
+  system_time_adjustment_wrapper(static_cast<long>(pid_output));
   m_last_call = now;
   last_time_stamp = time_stamp;
 }
 
-void ClockController::PrintCurrentClockAdjustments() const
+void ClockController::print_current_clock_adjustments() const
 {
   DWORD current_adjustment_legacy{ 0 };
   DWORD time_increment_legacy{ 0 };
@@ -101,7 +101,7 @@ void ClockController::PrintCurrentClockAdjustments() const
   BOOST_LOG_TRIVIAL(info) << message.str();
 }
 
-void ClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment)
+void ClockController::system_time_adjustment_wrapper(const long t_ppm_adjustment)
 {
   auto [lower_limit, upper_limit]{ mp_pid->get_limits() };
   if (t_ppm_adjustment > upper_limit || t_ppm_adjustment < lower_limit) {
@@ -109,7 +109,7 @@ void ClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment)
     return;
   }
 
-  double scaling_factor{ static_cast<double>(m_performance_counter_frequency.QuadPart / m_micro_per_second) };
+  double scaling_factor{ static_cast<double>(m_performance_counter_frequency.QuadPart / SM_MICRO_PER_SECOND) };
   DWORD adjustment_units{ static_cast<DWORD>(std::abs(t_ppm_adjustment * scaling_factor)) };
 
   BOOST_LOG_TRIVIAL(info) << "Adjusting system clock by " << std::to_string(t_ppm_adjustment) << " PPM ("
@@ -125,10 +125,10 @@ void ClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment)
       m_current_adjustment_legacy += adjustment_units;
     }
   } else {
-    if ((m_current_adjustment_legacy - adjustment_units) <= m_min_adjustment) {
+    if ((m_current_adjustment_legacy - adjustment_units) <= SM_MINIMAL_ADJUSTMENT) {
       m_current_adjustment_legacy -= adjustment_units;
     } else {
-      m_current_adjustment_legacy = m_min_adjustment;
+      m_current_adjustment_legacy = SM_MINIMAL_ADJUSTMENT;
     }
   }
 
@@ -142,7 +142,7 @@ void ClockController::SystemTimeAdjustmentWrapper(const long t_ppm_adjustment)
   m_adjustment_history.push_back(t_ppm_adjustment);
 }
 
-HRESULT ClockController::UpdateProcessTokenPrivileges()
+HRESULT ClockController::update_process_token()
 {
   HRESULT hresult;
   HANDLE process_token{ nullptr };

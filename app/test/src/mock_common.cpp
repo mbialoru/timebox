@@ -95,7 +95,7 @@ bool MockSerialReader::error_status() const { return m_error_flag; }
 void MockSerialReader::Work()
 {
   auto now = std::chrono::system_clock::now() - std::chrono::milliseconds(200);
-  m_callback(TimeboxReadout{ ConvertTimepointToString(now) + ".0", now });
+  m_callback(TimeboxReadout{ timepoint_to_string(now) + ".0", now });
   m_conditon_variable.notify_one();
   std::this_thread::sleep_for(std::chrono::seconds(1));
 }

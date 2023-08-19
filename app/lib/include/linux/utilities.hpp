@@ -10,9 +10,6 @@
 
 namespace TimeBox {
 
-bool CheckSudo();
-bool CheckIfUsingDocker();
-
 }// namespace TimeBox
 
 #endif// UTILITIES_HPP

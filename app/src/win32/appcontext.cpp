@@ -4,9 +4,9 @@ using namespace TimeBox;
 
 AppContext::AppContext()
 {
-  admin_privileges = CheckAdminPrivileges();
-  using_docker = CheckIfUsingDocker();
-  ntp_running = CheckNTPService();
+  admin_privileges = check_admin_privileges();
+  using_docker = check_if_using_docker();
+  ntp_running = check_ntp_status();
 
   baud_rate = 0;
   for (const auto &baud_rate : baud_rate_list) { baud_rate_string_list.push_back(std::to_string(baud_rate)); }

@@ -20,18 +20,22 @@ public:
   ClockController(std::size_t, std::shared_ptr<PID<double>>, double);
   ~ClockController();
 
-  void AdjustClock(TimeboxReadout) override;
+  void adjust_clock(TimeboxReadout) override;
 
 private:
-  HRESULT UpdateProcessTokenPrivileges();
-  void SystemTimeAdjustmentWrapper(long);
-  void PrintCurrentClockAdjustments() const;
+  HRESULT update_process_token();
 
-  DWORD m_initial_adjustment_legacy{ 0UL };
+  void print_current_clock_adjustments() const;
+  void system_time_adjustment_wrapper(long);
+
   DWORD m_current_adjustment_legacy{ 0UL };
+  DWORD m_initial_adjustment_legacy{ 0UL };
+
   LARGE_INTEGER m_performance_counter_frequency{ 0L };
-  static constexpr DWORD m_min_adjustment{ 0UL };
-  static constexpr DWORD m_micro_per_second{ 1000000UL };
+
+  static constexpr DWORD SM_MICRO_PER_SECOND{ 1000000UL };
+  static constexpr DWORD SM_MINIMAL_ADJUSTMENT{ 0UL };
+
   std::shared_ptr<PID<double>> mp_pid;
 };
 

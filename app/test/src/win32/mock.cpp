@@ -11,17 +11,17 @@ MockClockController::MockClockController()
 
 MockClockController::~MockClockController() = default;
 
-void MockClockController::AdjustClock(TimeboxReadout t_readout)
+void MockClockController::adjust_clock(TimeboxReadout t_readout)
 {
   auto [time_string, time_stamp] = t_readout;
   auto now = std::chrono::system_clock::now();
   auto last_call_difference = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_last_call);
   if (last_call_difference.count() < m_minimal_delay) {
-    BOOST_LOG_TRIVIAL(warning) << "Too soon to last AdjustClock call ! " << last_call_difference.count() << " ms";
+    BOOST_LOG_TRIVIAL(warning) << "Too soon to last adjust_clock call ! " << last_call_difference.count() << " ms";
     return;
   }
 
-  auto from_str = ConvertStringToTimepoint(time_string);
+  auto from_str = string_to_timepoint(time_string);
   auto diff = now - from_str;
   m_difference_history.push_back(diff);
   BOOST_LOG_TRIVIAL(debug) << "Clock difference is " << diff.count() << " nanoseconds";

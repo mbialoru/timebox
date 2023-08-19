@@ -20,7 +20,7 @@ public:
   ProtoClockController(const std::size_t t_minimal_delay) : BaseClockController(t_minimal_delay) {}
   ~ProtoClockController() = default;
 
-  void AdjustClock(TimeboxReadout) override{};
+  void adjust_clock(TimeboxReadout) override{};
 
   void PrototypeTestMethod_A() { GetCurrentClockAdjustments(); }
 
@@ -169,7 +169,7 @@ TEST(Proto_clockcontrol, printing_system_clock_adjustments)
 
 TEST(Proto_clockcontrol, setting_system_clock_adjustments)
 {
-  if (!TimeBox::CheckAdminPrivileges()) { GTEST_SKIP() << "Requires Admin privileges"; }
+  if (!TimeBox::check_admin_privileges()) { GTEST_SKIP() << "Requires Admin privileges"; }
   TimeBox::ProtoClockController test_object(500);
   test_object.PrototypeTestMethod_B();
 }

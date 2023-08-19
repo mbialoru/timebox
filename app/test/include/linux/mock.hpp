@@ -11,7 +11,7 @@ public:
   MockClockController();
   ~MockClockController();
 
-  void AdjustClock(TimeboxReadout) override;
+  void adjust_clock(TimeboxReadout) override;
 
 private:
   std::size_t m_tick;

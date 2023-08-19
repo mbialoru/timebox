@@ -19,7 +19,7 @@ std::map<int, int> TimeBox::baud_conversion_map{ { 0, B0 },
   { 19200, B19200 },
   { 38400, B38400 } };
 
-bool TimeBox::CheckAdminPrivileges()
+bool TimeBox::check_admin_privileges()
 {
   if (getuid() == 0 || geteuid() == 0) {
     return true;
@@ -28,13 +28,16 @@ bool TimeBox::CheckAdminPrivileges()
   }
 }
 
-bool TimeBox::CheckNTPService()
+bool TimeBox::check_ntp_status()
 {
   // For now it only detects systemd-timesyncd
   char line[100];
   FILE *f{ popen("pidof systemd-timesyncd", "r") };
+
   fgets(line, 100, f);
+
   auto pid{ static_cast<int>(strtol(line, NULL, 10)) };
+
   pclose(f);
 
   if (pid > 0) {
@@ -44,11 +47,11 @@ bool TimeBox::CheckNTPService()
   }
 }
 
-void TimeBox::PauseNTPService() { throw NotImplementedException(); }
+void TimeBox::pause_ntp_service() { throw NotImplementedException(); }
 
-void TimeBox::StartNTPService() { throw NotImplementedException(); }
+void TimeBox::start_ntp_service() { throw NotImplementedException(); }
 
-std::vector<std::string> TimeBox::GetSerialDevicesList()
+std::vector<std::string> TimeBox::get_serial_devices_list()
 {
   std::vector<std::string> port_names;
   const std::filesystem::path dev_directory{ "/dev/serial/by-id" };
@@ -73,23 +76,6 @@ std::vector<std::string> TimeBox::GetSerialDevicesList()
 
   std::sort(port_names.begin(), port_names.end());
   std::filesystem::current_path(current_directory);
+
   return port_names;
-}
-
-bool TimeBox::CheckSudo()
-{
-  if (getuid() == geteuid()) {
-    return false;
-  } else {
-    return true;
-  }
-}
-
-bool TimeBox::CheckIfUsingDocker()
-{
-  if (std::filesystem::exists(std::filesystem::path("/.dockerenv"))) {
-    return true;
-  } else {
-    return false;
-  }
 }

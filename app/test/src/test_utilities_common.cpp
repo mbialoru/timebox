@@ -23,8 +23,8 @@ TEST(Test_Utilities, string_to_timepoint)
 {
   std::string test_str_a{ "7:30:10.0" };
   std::string test_str_b{ "9:30:10.0" };
-  auto res_a = ConvertStringToTimepoint(test_str_a);
-  auto res_b = ConvertStringToTimepoint(test_str_b);
+  auto res_a = string_to_timepoint(test_str_a);
+  auto res_b = string_to_timepoint(test_str_b);
   auto diff = res_a - res_b;
   EXPECT_TRUE(diff.count() < 0);
 }
@@ -32,8 +32,8 @@ TEST(Test_Utilities, string_to_timepoint)
 TEST(Test_Utilities, timepoint_to_string)
 {
   std::string test_str{ "12:34:56.7" };
-  auto res = ConvertStringToTimepoint(test_str);
-  auto res_str = ConvertTimepointToString(res);
+  auto res = string_to_timepoint(test_str);
+  auto res_str = timepoint_to_string(res);
   EXPECT_EQ(res_str, "12:34:56");
 }
 
@@ -62,6 +62,6 @@ TEST(Test_Utilities, timing_decorator_void_type)
 TEST(Test_Utilities, debug_string_ascii_printing)
 {
   std::string test_object{ "\tThis is a test string\n" };
-  std::string result{ RenderNonPrintableCharacters(test_object) };
+  std::string result{ render_nonprintable_characters(test_object) };
   EXPECT_EQ(result, std::string("\\tThis\\sis\\sa\\stest\\sstring\\n"));
 }

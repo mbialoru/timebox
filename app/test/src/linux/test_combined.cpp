@@ -31,14 +31,14 @@ public:
 #if USING_REAL_HARDWARE
 TEST_F(Test_Combined, combined_test)
 {
-  if (not CheckAdminPrivileges()) { GTEST_SKIP() << "Skipping, requires admin privileges"; }
+  if (not check_admin_privileges()) { GTEST_SKIP() << "Skipping, requires admin privileges"; }
   GTEST_SKIP() << "Test not implemented";
 }
 #else
 TEST_F(Test_Combined, fake_combined_test)
 {
   MockClockController cc;
-  MockSerialReader sr{ std::bind(&MockClockController::AdjustClock, &cc, std::placeholders::_1) };
+  MockSerialReader sr{ std::bind(&MockClockController::adjust_clock, &cc, std::placeholders::_1) };
   std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 #endif

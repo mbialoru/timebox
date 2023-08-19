@@ -14,7 +14,7 @@ class Test_ClockController : public ::testing::Test
 public:
   void SetUp() override
   {
-    if (not CheckAdminPrivileges()) { GTEST_SKIP() << "Cannot run without admin privileges !"; }
+    if (not check_admin_privileges()) { GTEST_SKIP() << "Cannot run without admin privileges !"; }
   };
 };
 
@@ -35,10 +35,10 @@ TEST_F(Test_ClockController, adjust_clock)
 
   p_pid->set_limits(-1000, 1000);// Without limited PID, we get output of 0 from it
 
-  TimeboxReadout readout{ ConvertTimepointToString(std::chrono::system_clock::now() - std::chrono::seconds(10)) + ".0",
+  TimeboxReadout readout{ timepoint_to_string(std::chrono::system_clock::now() - std::chrono::seconds(10)) + ".0",
     std::chrono::system_clock::now() };
   std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  EXPECT_NO_THROW(p_clockcontroller->AdjustClock(readout));
+  EXPECT_NO_THROW(p_clockcontroller->adjust_clock(readout));
 
   if (not GetSystemTimeAdjustment(&current_adjustment_legacy, &time_increment_legacy, &enabled_legacy)) {
     BOOST_LOG_TRIVIAL(error) << "Failed to read system time adjustment" << HRESULT_FROM_WIN32(GetLastError());

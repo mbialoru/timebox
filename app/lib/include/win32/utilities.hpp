@@ -10,8 +10,8 @@
 
 namespace TimeBox {
 
-void WindowsErrorDebugLog(const char *, const char * = nullptr);
-void GetAvailableComPorts();
+void get_available_com_ports();
+void windows_error_debug_log(const char *, const char * = nullptr);
 
 }// namespace TimeBox
 

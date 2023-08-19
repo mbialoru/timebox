@@ -14,17 +14,25 @@ class BaseClockController
 public:
   BaseClockController(std::size_t) noexcept;
   virtual ~BaseClockController() = default;
-  virtual void AdjustClock(TimeboxReadout) = 0;
-  long GetInitialAdjustment() const;
-  std::vector<std::chrono::system_clock::duration> GetDifferenceHistory() const;
-  std::vector<long> GetAdjustmentHistory() const;
+
+  virtual void adjust_clock(TimeboxReadout) = 0;
+
+  long get_initial_adjustment() const;
+
+  std::vector<long> get_adjustment_history() const;
+
+  std::vector<std::chrono::system_clock::duration> get_difference_history() const;
 
 protected:
   long m_initial_adjustment;
-  std::size_t m_minimal_delay;
+
   std::chrono::system_clock::time_point m_last_call;
-  std::vector<std::chrono::system_clock::duration> m_difference_history;
+
+  std::size_t m_minimal_delay;
+
   std::vector<long> m_adjustment_history;
+
+  std::vector<std::chrono::system_clock::duration> m_difference_history;
 };
 
 }// namespace TimeBox

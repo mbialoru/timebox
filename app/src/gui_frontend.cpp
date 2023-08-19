@@ -50,13 +50,13 @@ void TimeBox::MainDialog(AppContext &tr_context)
     ImGui::Separator();
 
     // TODO: Bring out time difference and adjustment history
-    if (!tr_context.p_clock_controller->GetDifferenceHistory().empty()
-        && !tr_context.p_clock_controller->GetAdjustmentHistory().empty()) {
-      ImGui::Text("Clock difference %ld ms", tr_context.p_clock_controller->GetDifferenceHistory().back());
+    if (!tr_context.p_clock_controller->get_difference_history().empty()
+        && !tr_context.p_clock_controller->get_adjustment_history().empty()) {
+      ImGui::Text("Clock difference %ld ms", tr_context.p_clock_controller->get_difference_history().back());
       ImGui::Text("Clock adjustment %lu (%.3f %%speed)",
-        tr_context.p_clock_controller->GetAdjustmentHistory().back(),
-        (static_cast<double>(tr_context.p_clock_controller->GetAdjustmentHistory().back())
-          - tr_context.p_clock_controller->GetInitialAdjustment())
+        tr_context.p_clock_controller->get_adjustment_history().back(),
+        (static_cast<double>(tr_context.p_clock_controller->get_adjustment_history().back())
+          - tr_context.p_clock_controller->get_initial_adjustment())
             / 100
           + 100);
       ImGui::Separator();
@@ -94,11 +94,11 @@ void TimeBox::MainDialog(AppContext &tr_context)
   ImGui::Separator();
 
   // TODO: Fix history saving to file and implement autosave every X steps
-  // if (t_context.p_clock_controller != nullptr && !t_context.p_clock_controller->GetDifferenceHistory().empty()) {
+  // if (t_context.p_clock_controller != nullptr && !t_context.p_clock_controller->get_difference_history().empty()) {
   //   if (ImGui::Button("Save History")) {
   //     std::fstream output_file;
   //     output_file.open("timebox_history.log", std::ios::out);
-  //     for (const auto entry : t_context.p_clock_controller->GetDifferenceHistory()) {
+  //     for (const auto entry : t_context.p_clock_controller->get_difference_history()) {
   //       output_file << std::to_string(entry.count()).c_str();
   //       output_file << "\n";
   //     }
@@ -149,7 +149,7 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
       }
 
       // Serial port choosing combo
-      if (ImGui::Button("Scan ports")) { tr_context.serial_port_list = GetSerialDevicesList(); }
+      if (ImGui::Button("Scan ports")) { tr_context.serial_port_list = get_serial_devices_list(); }
       ImGui::SameLine();
       if (!tr_context.serial_port_list.empty()) {
         static std::size_t current_item_index_port{ 0 };
@@ -180,11 +180,11 @@ void TimeBox::ConnectDialog(AppContext &tr_context)
           tr_context.p_clock_controller = std::make_unique<ClockController>(0, tr_context.p_pid, 0.001);
 
           // Limit PID settings +/- 10% speed
-          auto initial_adjustment{ tr_context.p_clock_controller->GetInitialAdjustment() };
+          auto initial_adjustment{ tr_context.p_clock_controller->get_initial_adjustment() };
           tr_context.p_pid->set_limits(initial_adjustment * 0.9, initial_adjustment * 1.1);
 
           tr_context.p_serial_reader = std::make_unique<SerialInterface>(
-            std::bind(&ClockController::AdjustClock, tr_context.p_clock_controller.get(), std::placeholders::_1));
+            std::bind(&ClockController::adjust_clock, tr_context.p_clock_controller.get(), std::placeholders::_1));
 
           try {
             tr_context.p_serial_reader->open(tr_context.serial_port, tr_context.baud_rate);

@@ -12,7 +12,7 @@ public:
   MockClockController();
   ~MockClockController();
 
-  void AdjustClock(TimeboxReadout) override;
+  void adjust_clock(TimeboxReadout) override;
 
 private:
   DWORD m_time_adjustment;

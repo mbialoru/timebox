@@ -15,7 +15,10 @@
   ‘m_’.
 
 * In a class, place attributes after methods. Place static elements before
-  non-static ones. Separate groups of methods or attributes, group by type.
+  non-static ones `extern` as well as `virtual` should be declared first. Separate groups of methods or attributes, group by type.
+
+* When grouping by type, order groups however you see fit, try to keep the same
+  ordering between source/header.
 
 * Source files should contain only one #include clause.
 
