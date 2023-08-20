@@ -5,6 +5,6 @@
 #define USING_REAL_HARDWARE false
 
 // Constexpr
-constexpr bool LONG_TESTS = true;
+constexpr bool LONG_TESTS{ true };
 
 #endif// TEST_DEFINES_HPP

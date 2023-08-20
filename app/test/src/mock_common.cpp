@@ -18,7 +18,7 @@ ThreadWrapper::~ThreadWrapper()
 {
   BOOST_LOG_TRIVIAL(debug) << "Cancelling threads for " << m_name;
   m_worker_on = false;
-  m_conditon_variable.notify_one();
+  m_condition_variable.notify_one();
   if (m_worker.joinable()) { m_worker.join(); }
   if (m_tester.joinable()) { m_tester.join(); }
   m_lock.unlock();
@@ -44,7 +44,7 @@ void ThreadWrapper::test_loop()
   while (m_worker_on) {
     if (not m_is_paused) {
       test();
-      if (m_conditon_variable.wait_for(m_lock, std::chrono::milliseconds(m_pause_delay * 5))
+      if (m_condition_variable.wait_for(m_lock, std::chrono::milliseconds(m_pause_delay * 5))
           == std::cv_status::timeout) {
         BOOST_LOG_TRIVIAL(error) << m_timeout_message;
       };
@@ -96,6 +96,6 @@ void MockSerialReader::work()
 {
   auto now = std::chrono::system_clock::now() - std::chrono::milliseconds(200);
   m_callback(TimeboxReadout{ timepoint_to_string(now) + ".0", now });
-  m_conditon_variable.notify_one();
+  m_condition_variable.notify_one();
   std::this_thread::sleep_for(std::chrono::seconds(1));
 }

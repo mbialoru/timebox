@@ -8,14 +8,16 @@ namespace TimeBox {
 class MockClockController final : public BaseClockController
 {
 public:
-  MockClockController();
+  explicit MockClockController();
   ~MockClockController();
 
   void adjust_clock(TimeboxReadout) override;
 
 private:
   std::size_t m_tick;
+
   std::shared_ptr<PID<double>> mp_pid;
+
   std::chrono::system_clock::time_point m_timepoint;
 };
 

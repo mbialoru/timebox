@@ -34,7 +34,7 @@ protected:
 
   std::atomic<std::size_t> m_worker_tick;
 
-  std::condition_variable m_conditon_variable;
+  std::condition_variable m_condition_variable;
 
   std::mutex m_mutex;
 

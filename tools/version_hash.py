@@ -9,7 +9,6 @@ from typing import Union
 import datetime as dt
 import argparse
 import hashlib
-import glob
 import sys
 import os
 
