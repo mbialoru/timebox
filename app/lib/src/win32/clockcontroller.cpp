@@ -12,18 +12,23 @@ ClockController::ClockController(const std::size_t t_minimal_delay,
 
   BOOL enabled_legacy{ 0 };
   DWORD time_increment_legacy{ 0 };
+
   BOOST_LOG_TRIVIAL(debug) << "Reading initial system time adjustment";
+
   if (not GetSystemTimeAdjustment(&m_initial_adjustment_legacy, &time_increment_legacy, &enabled_legacy)) {
     BOOST_LOG_TRIVIAL(error) << "Failed to read system time adjustment, error code: "
                              << HRESULT_FROM_WIN32(GetLastError());
     return;
   }
+
   BOOST_LOG_TRIVIAL(debug) << "Obtained initial system time adjustment: "
                            << std::to_string(m_initial_adjustment_legacy);
 
   m_initial_adjustment = static_cast<long>(m_initial_adjustment_legacy);
   m_current_adjustment_legacy = m_initial_adjustment_legacy;
+
   std::ignore = QueryPerformanceFrequency(&m_performance_counter_frequency);
+
   BOOST_LOG_TRIVIAL(debug) << "System performance counter frequency: "
                            << std::to_string(m_performance_counter_frequency.QuadPart);
 }
@@ -68,7 +73,7 @@ void ClockController::adjust_clock(const TimeboxReadout t_readout)
   double time_stamp_diff_seconds{ static_cast<double>(time_stamp_diff.count() / 1000) };
 
   // NOTE: Ideally only first tick should have some weird values - hence ternary style operator if
-  mp_pid->update_limited(
+  mp_pid->update_raw(
     static_cast<double>(time_difference.count()), (time_stamp_diff_seconds >= 0) ? time_stamp_diff_seconds : 1.0);
 
   auto pid_output = mp_pid->get_output_limited();
@@ -176,10 +181,12 @@ void ClockController::system_time_adjustment_wrapper(const long t_ppm_adjustment
 
   BOOST_LOG_TRIVIAL(debug) << "Current adjustment legacy " << std::to_string(m_current_adjustment_legacy);
 
+  // carry out system time adjustment
   if (not SetSystemTimeAdjustment(m_current_adjustment_legacy, FALSE)) {
     BOOST_LOG_TRIVIAL(error) << "Failed to set system time adjustment, error code: "
                              << HRESULT_FROM_WIN32(GetLastError());
     return;
   }
+
   m_adjustment_history.push_back(t_ppm_adjustment);
 }

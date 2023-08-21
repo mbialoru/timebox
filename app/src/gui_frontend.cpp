@@ -179,8 +179,9 @@ void TimeBox::connect_dialog(AppContext &tr_context)
         if (ImGui::Button("Connect")) {
           tr_context.p_clock_controller = std::make_unique<ClockController>(0, tr_context.p_pid, 0.001);
 
-          // Limit PID settings +/- 10% speed
+          // Limit PID settings to +/- 10% of initial speed
           auto initial_adjustment{ tr_context.p_clock_controller->get_initial_adjustment() };
+
           tr_context.p_pid->set_limits(initial_adjustment * 0.9, initial_adjustment * 1.1);
 
           tr_context.p_serial_reader = std::make_unique<SerialInterface>(
@@ -192,6 +193,7 @@ void TimeBox::connect_dialog(AppContext &tr_context)
             BOOST_LOG_TRIVIAL(error) << e.what();
             throw e;
           }
+
           tr_context.connection_established = true;
         }
 
