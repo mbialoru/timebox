@@ -1,5 +1,4 @@
 #include "clockcontroller.hpp"
-#include <cmath>
 
 using namespace TimeBox;
 
@@ -22,7 +21,7 @@ ClockController::ClockController(const std::size_t t_minimal_delay,
   BOOST_LOG_TRIVIAL(debug) << "Obtained initial system time adjustment: "
                            << std::to_string(m_initial_adjustment_legacy);
 
-  m_initial_adjustment = m_initial_adjustment_legacy;
+  m_initial_adjustment = static_cast<long>(m_initial_adjustment_legacy);
   m_current_adjustment_legacy = m_initial_adjustment_legacy;
   std::ignore = QueryPerformanceFrequency(&m_performance_counter_frequency);
   BOOST_LOG_TRIVIAL(debug) << "System performance counter frequency: "
@@ -46,6 +45,7 @@ void ClockController::adjust_clock(const TimeboxReadout t_readout)
   auto [time_string, time_stamp]{ t_readout };
   auto now{ std::chrono::system_clock::now() };
   auto last_call_difference{ std::chrono::duration_cast<std::chrono::milliseconds>(now - m_last_call) };
+
   if (std::llabs(last_call_difference.count()) < m_minimal_delay) {
     BOOST_LOG_TRIVIAL(warning) << "Too soon to last adjust_clock call ! " << last_call_difference.count() << " ms";
     return;
@@ -55,27 +55,30 @@ void ClockController::adjust_clock(const TimeboxReadout t_readout)
   auto time_difference{ std::chrono::duration_cast<std::chrono::microseconds>(now - from_str) };
   auto time_stamp_diff{ std::chrono::duration_cast<std::chrono::milliseconds>(time_stamp - s_last_time_stamp) };
 
-  if (std::isnan(time_difference.count())) { throw std::runtime_error("Encountered clock difference as NaN !"); }
-  if (std::isnan(time_stamp_diff.count())) { throw std::runtime_error("Encountered time stamp difference as NaN !"); }
-
   m_difference_history.push_back(time_difference);
+
   BOOST_LOG_TRIVIAL(debug) << "Time stamp difference is " << time_stamp_diff.count() << " milliseconds";
   BOOST_LOG_TRIVIAL(debug) << "Clock difference is " << time_difference.count() << " microseconds";
 
   auto processing_time{ std::chrono::duration_cast<std::chrono::microseconds>(
     std::chrono::system_clock::now() - time_stamp) };
+
   BOOST_LOG_TRIVIAL(debug) << "Processing time was " << processing_time.count() << " microseconds";
 
   double time_stamp_diff_seconds{ static_cast<double>(time_stamp_diff.count() / 1000) };
 
-  // Ideally only first tick should have some weird values - hence ternary style operator if
+  // NOTE: Ideally only first tick should have some weird values - hence ternary style operator if
   mp_pid->update_limited(
     static_cast<double>(time_difference.count()), (time_stamp_diff_seconds >= 0) ? time_stamp_diff_seconds : 1.0);
+
   auto pid_output = mp_pid->get_output_limited();
   auto pid_output_raw = mp_pid->get_output_raw();
+
   BOOST_LOG_TRIVIAL(debug) << "PID output is " << pid_output;
   BOOST_LOG_TRIVIAL(debug) << "Raw PID output is " << pid_output_raw;
+
   system_time_adjustment_wrapper(static_cast<long>(pid_output));
+
   m_last_call = now;
   s_last_time_stamp = time_stamp;
 }
@@ -130,6 +133,7 @@ void ClockController::print_current_clock_adjustments() const
   }
 
   std::stringstream message;
+
   message << "Adjustment: " << std::to_string(current_adjustment_legacy) << " ";
   message << "Increment: " << std::to_string(time_increment_legacy) << " ";
   message << "Enabled: " << std::to_string(enabled_legacy) << " ";
@@ -141,8 +145,9 @@ void ClockController::print_current_clock_adjustments() const
 void ClockController::system_time_adjustment_wrapper(const long t_ppm_adjustment)
 {
   auto [lower_limit, upper_limit]{ mp_pid->get_limits() };
+
   if (t_ppm_adjustment > upper_limit || t_ppm_adjustment < lower_limit) {
-    BOOST_LOG_TRIVIAL(error) << "PPM clock adjustment outside of operational range !";
+    BOOST_LOG_TRIVIAL(error) << "PPM clock adjustment outside of operational range";
     return;
   }
 
@@ -153,7 +158,7 @@ void ClockController::system_time_adjustment_wrapper(const long t_ppm_adjustment
                           << ((t_ppm_adjustment >= 0) ? "+" : "-") << std::to_string(adjustment_units)
                           << " adjustment units";
 
-  // NOTE: DWORD (unsigned long) size limitations, prevent wraparound
+  // NOTE: DWORD (unsigned long) size limitations, prevent wrap around
   // ref: https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2
   if (t_ppm_adjustment > 0) {
     if ((m_current_adjustment_legacy + adjustment_units) >= std::numeric_limits<unsigned long>::max()) {
