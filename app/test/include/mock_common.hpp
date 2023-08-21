@@ -40,7 +40,7 @@ protected:
 
   std::size_t m_startup_delay, m_pause_delay;
 
-  std::string m_name, m_timeout_message{ "Reached watchdog timeout !" };
+  std::string m_name, m_timeout_message{ "Reached watchdog timeout" };
 
   std::thread m_worker, m_tester;
 
@@ -57,7 +57,7 @@ public:
   bool is_open() const;
 
   void close();
-  void open(const char*, std::size_t);
+  void open(const char *, std::size_t);
   void open(const std::string &, std::size_t);
   void write_string(const std::string &){};
   void write(const char *, std::size_t){};
@@ -65,7 +65,7 @@ public:
 
   std::vector<char> read();
 
-  std::size_t read(char*, std::size_t);
+  std::size_t read(char *, std::size_t);
 
   std::string read_string();
   std::string read_string_until(const std::string);

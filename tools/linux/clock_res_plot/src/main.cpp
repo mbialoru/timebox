@@ -58,7 +58,7 @@ int main(int argc, char **argv)
   }
 
   if (doMaskOperation) {
-    if (Verbose) { cout << "Setting CPU mask to CPU 0 only!" << endl; }
+    if (Verbose) { cout << "Setting CPU mask to CPU 0 only" << endl; }
     CPU_ZERO(&mask);
     CPU_SET(0, &mask);
     assert((rc = sched_setaffinity(0, sizeof(mask), &mask)) == 0);

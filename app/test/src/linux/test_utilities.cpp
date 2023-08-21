@@ -16,6 +16,6 @@ TEST(Test_Utilities, timesync_service_running)
 
 TEST(Test_Utilities, serial_devices_list)
 {
-  if (check_if_using_docker()) { GTEST_SKIP() << "Cannot run from Docker container !"; }
+  if (check_if_using_docker()) { GTEST_SKIP() << "Cannot run from Docker container"; }
   GTEST_SKIP() << "Test not implemented";
 }

@@ -16,8 +16,7 @@ void TimeBox::render(D3DContext &tr_d3d_context)
 {
   ImGui::Render();
   tr_d3d_context.p_d3d_device_context->OMSetRenderTargets(1, &(tr_d3d_context.p_render_target_view), NULL);
-  tr_d3d_context.p_d3d_device_context->ClearRenderTargetView(
-    tr_d3d_context.p_render_target_view, CLEAR_COLOR_ALPHA);
+  tr_d3d_context.p_d3d_device_context->ClearRenderTargetView(tr_d3d_context.p_render_target_view, CLEAR_COLOR_ALPHA);
   ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
   tr_d3d_context.p_swap_chain->Present(1, 0);// VSync
 }
@@ -53,7 +52,7 @@ bool TimeBox::create_d3d_device(HWND t_hwnd, D3DContext &tr_context)
   };
 
   if (D3D11CreateDeviceAndSwapChain(NULL,
-    D3D_DRIVER_TYPE_HARDWARE,
+        D3D_DRIVER_TYPE_HARDWARE,
         NULL,
         createDeviceFlags,
         featureLevelArray,
@@ -97,7 +96,7 @@ void TimeBox::create_render_target(D3DContext &tr_context)
 
   tr_context.p_swap_chain->GetBuffer(0, IID_PPV_ARGS(&p_back_buffer));
   tr_context.p_d3d_device->CreateRenderTargetView(p_back_buffer, NULL, &(tr_context.p_render_target_view));
-  pBackBuffer->Release();
+  p_back_buffer->Release();
 }
 
 void TimeBox::destroy_render_target(D3DContext &tr_context)

@@ -14,7 +14,7 @@ class Test_ClockController : public ::testing::Test
 public:
   void SetUp() override
   {
-    if (not check_admin_privileges()) { GTEST_SKIP() << "Cannot run without admin privileges !"; }
+    if (not check_admin_privileges()) { GTEST_SKIP() << "Cannot run without admin privileges"; }
   };
 };
 
