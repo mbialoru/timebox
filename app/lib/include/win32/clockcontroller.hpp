@@ -30,6 +30,8 @@ private:
 
   DWORD m_current_adjustment_legacy{ 0UL };
   DWORD m_initial_adjustment_legacy{ 0UL };
+  DWORD m_lowest_adjustment_legacy{ 0UL };
+  DWORD m_highest_adjustment_legacy{ 0UL };
 
   LARGE_INTEGER m_performance_counter_frequency{ 0L };
 

@@ -26,6 +26,8 @@ ClockController::ClockController(const std::size_t t_minimal_delay,
 
   m_initial_adjustment = static_cast<long>(m_initial_adjustment_legacy);
   m_current_adjustment_legacy = m_initial_adjustment_legacy;
+  m_lowest_adjustment_legacy = 0.9 * m_initial_adjustment;
+  m_highest_adjustment_legacy = 1.1 * m_initial_adjustment;
 
   std::ignore = QueryPerformanceFrequency(&m_performance_counter_frequency);
 
@@ -73,7 +75,7 @@ void ClockController::adjust_clock(const TimeboxReadout t_readout)
   double time_stamp_diff_seconds{ static_cast<double>(time_stamp_diff.count() / 1000) };
 
   // NOTE: Ideally only first tick should have some weird values - hence ternary style operator if
-  mp_pid->update_raw(
+  mp_pid->update_limited(
     static_cast<double>(time_difference.count()), (time_stamp_diff_seconds >= 0) ? time_stamp_diff_seconds : 1.0);
 
   auto pid_output = mp_pid->get_output_limited();
@@ -147,35 +149,35 @@ void ClockController::print_current_clock_adjustments() const
   BOOST_LOG_TRIVIAL(info) << message.str();
 }
 
-void ClockController::system_time_adjustment_wrapper(const long t_ppm_adjustment)
+void ClockController::system_time_adjustment_wrapper(const long t_adjustment)
 {
+  double adjustment_percentage{ (static_cast<double>(m_current_adjustment_legacy) + t_adjustment)
+                                / static_cast<double>(m_initial_adjustment_legacy) * 100 };
+
+  BOOST_LOG_TRIVIAL(info) << "Adjusting system clock by " << std::to_string(t_adjustment) << " adjustment units"
+                          << " (" << adjustment_percentage << "% speed)";
+
   auto [lower_limit, upper_limit]{ mp_pid->get_limits() };
 
-  if (t_ppm_adjustment > upper_limit || t_ppm_adjustment < lower_limit) {
-    BOOST_LOG_TRIVIAL(error) << "PPM clock adjustment outside of operational range";
-    return;
+  if (t_adjustment > upper_limit || t_adjustment < lower_limit) {
+    BOOST_LOG_TRIVIAL(warning) << "PPM clock adjustment outside of operational range";
+    BOOST_LOG_TRIVIAL(debug) << "Clock adjustment limits: " << std::to_string(lower_limit) << " "
+                             << std::to_string(upper_limit);
   }
-
-  double scaling_factor{ static_cast<double>(m_performance_counter_frequency.QuadPart / SM_MICRO_PER_SECOND) };
-  DWORD adjustment_units{ static_cast<DWORD>(std::abs(t_ppm_adjustment * scaling_factor)) };
-
-  BOOST_LOG_TRIVIAL(info) << "Adjusting system clock by " << std::to_string(t_ppm_adjustment) << " PPM ("
-                          << ((t_ppm_adjustment >= 0) ? "+" : "-") << std::to_string(adjustment_units)
-                          << " adjustment units";
 
   // NOTE: DWORD (unsigned long) size limitations, prevent wrap around
   // ref: https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2
-  if (t_ppm_adjustment > 0) {
-    if ((m_current_adjustment_legacy + adjustment_units) >= std::numeric_limits<unsigned long>::max()) {
-      m_current_adjustment_legacy = std::numeric_limits<unsigned long>::max();
+  if (t_adjustment > 0) {
+    if ((m_current_adjustment_legacy + t_adjustment) >= m_highest_adjustment_legacy) {
+      m_current_adjustment_legacy = m_highest_adjustment_legacy;
     } else {
-      m_current_adjustment_legacy += adjustment_units;
+      m_current_adjustment_legacy += t_adjustment;
     }
   } else {
-    if ((m_current_adjustment_legacy - adjustment_units) <= SM_MINIMAL_ADJUSTMENT) {
-      m_current_adjustment_legacy -= adjustment_units;
+    if ((m_current_adjustment_legacy + t_adjustment) <= m_lowest_adjustment_legacy) {
+      m_current_adjustment_legacy = m_lowest_adjustment_legacy;
     } else {
-      m_current_adjustment_legacy = SM_MINIMAL_ADJUSTMENT;
+      m_current_adjustment_legacy += t_adjustment;
     }
   }
 
@@ -188,5 +190,5 @@ void ClockController::system_time_adjustment_wrapper(const long t_ppm_adjustment
     return;
   }
 
-  m_adjustment_history.push_back(t_ppm_adjustment);
+  m_adjustment_history.push_back(t_adjustment);
 }
