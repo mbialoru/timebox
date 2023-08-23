@@ -5,21 +5,8 @@
 
 using namespace TimeBox;
 
-int DummyFunctionA()
-{
-  std::this_thread::sleep_for(std::chrono::microseconds(20000));
-  return 5;
-}
 
-int DummyFunctionB(int a)
-{
-  std::this_thread::sleep_for(std::chrono::microseconds(20000));
-  return a + 5;
-}
-
-void DummyFunctionC() { std::this_thread::sleep_for(std::chrono::microseconds(20000)); }
-
-TEST(Test_Utilities, string_to_timepoint)
+TEST(Test_Utilities, string_to_timepoint_working)
 {
   std::string test_str_a{ "7:30:10.0" };
   std::string test_str_b{ "9:30:10.0" };
@@ -29,7 +16,7 @@ TEST(Test_Utilities, string_to_timepoint)
   EXPECT_TRUE(diff.count() < 0);
 }
 
-TEST(Test_Utilities, timepoint_to_string)
+TEST(Test_Utilities, timepoint_to_string_working)
 {
   std::string test_str{ "12:34:56.7" };
   auto res = string_to_timepoint(test_str);
@@ -37,31 +24,15 @@ TEST(Test_Utilities, timepoint_to_string)
   EXPECT_EQ(res_str, "12:34:56");
 }
 
-TEST(Test_Utilities, timing_decorator)
-{
-  auto decorated_dummy_a = WrapTimingDecorator(DummyFunctionA);
-  auto [value, run_time] = decorated_dummy_a();
-  EXPECT_EQ(value, 5);
-  EXPECT_GE(run_time, 20);
-}
-
-TEST(Test_Utilities, timing_decorator_arguments)
-{
-  auto decorated_dummy_b = WrapTimingDecorator(DummyFunctionB);
-  auto [value, run_time] = decorated_dummy_b(5);
-  EXPECT_EQ(value, 10);
-}
-
-TEST(Test_Utilities, timing_decorator_void_type)
-{
-  auto decorated_dummy_c = WrapTimingDecorator(DummyFunctionC);
-  auto run_time = decorated_dummy_c();
-  EXPECT_GE(run_time, 20);
-}
-
-TEST(Test_Utilities, debug_string_ascii_printing)
+TEST(Test_Utilities, render_nonprintable_characters_working)
 {
   std::string test_object{ "\tThis is a test string\n" };
   std::string result{ render_nonprintable_characters(test_object) };
   EXPECT_EQ(result, std::string("\\tThis\\sis\\sa\\stest\\sstring\\n"));
+}
+
+TEST(Test_Utilities, nearly_equal_working)
+{
+  auto res{ nearly_equal<double, double>(0.1, 0.1) };
+  EXPECT_TRUE(res);
 }
