@@ -2,12 +2,11 @@
 
 using namespace TimeBox;
 
-ClockController::ClockController(const std::size_t t_minimal_delay,
-  std::shared_ptr<PID<double>> t_pid,
-  [[maybe_unused]] const double t_resolution)
+ClockController::ClockController(const std::size_t t_minimal_delay, std::shared_ptr<PID<double>> t_pid)
   : BaseClockController(t_minimal_delay), mp_pid(std::move(t_pid))
 {
   if (not check_admin_privileges()) { throw InsufficientPermissionsError(); }
+
   update_process_token();
 
   BOOL enabled_legacy{ 0 };

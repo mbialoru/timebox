@@ -5,7 +5,6 @@
 
 using namespace TimeBox;
 
-
 TEST(Test_Utilities, string_to_timepoint_working)
 {
   std::string test_str_a{ "7:30:10.0" };

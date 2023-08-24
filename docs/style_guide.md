@@ -73,6 +73,8 @@
 * No special character is allowed in the file name except for underscore (‘_’)
   or dash (‘-‘).
 
+* Avoid initializing multiple variables in one line to avoid common problems with initial value or pointer types
+
 * The file name should end with the .cc (or .h for headers) extension in the
   end or should end with the .cpp extension (.hpp for headers).
 
@@ -207,6 +209,13 @@
     Static variables should be prepended with ‘s_’.
     ```cpp
     static int s_count;
+    ```
+    
+    Avoid initializing multiple variables in one line to avoid common problems 
+    with initial value or pointer types.
+    ```cpp
+    int* a, b, c; // only a is a pointer !
+    int a, b, c = 0; // only c is initialized !
     ```
 
 * Constants

@@ -9,7 +9,6 @@
 #include "pid.hpp"
 #include "utilities.hpp"
 
-
 using namespace TimeBox;
 
 class Test_ClockController : public ::testing::Test

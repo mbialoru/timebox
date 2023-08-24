@@ -12,7 +12,7 @@ namespace TimeBox {
 class BaseClockController
 {
 public:
-  BaseClockController(std::size_t) noexcept;
+  BaseClockController(const std::size_t t_minimal_delay) noexcept;
   virtual ~BaseClockController() = default;
 
   virtual void adjust_clock(TimeboxReadout) = 0;

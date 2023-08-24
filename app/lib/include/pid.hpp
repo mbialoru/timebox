@@ -41,9 +41,13 @@ private:
   T m_middle_limit;
   T m_limit_difference;
 
-  double m_kp, m_ki, m_kd;
+  double m_kp;
+  double m_ki;
+  double m_kd;
   double m_error_guard{ 0 };
-  double m_p_term{ 0 }, m_i_term{ 0 }, m_d_term{ 0 };
+  double m_p_term{ 0 };
+  double m_i_term{ 0 };
+  double m_d_term{ 0 };
 };
 
 template<typename T>

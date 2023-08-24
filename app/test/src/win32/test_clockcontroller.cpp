@@ -31,7 +31,7 @@ TEST_F(Test_ClockController, adjust_clock)
   }
 
   std::shared_ptr<PID<double>> p_pid{ std::make_shared<PID<double>>(2.0, 1.0, 0.001, 0) };
-  std::unique_ptr<ClockController> p_clockcontroller{ std::make_unique<ClockController>(0, p_pid, 0.001) };
+  std::unique_ptr<ClockController> p_clockcontroller{ std::make_unique<ClockController>(0, p_pid) };
 
   auto adjustment_limit{ p_clockcontroller->get_initial_adjustment() * 0.1 };
 

@@ -13,12 +13,146 @@ void TimeBox::center_window(std::size_t t_height, std::size_t t_width)
   ImGui::SetNextWindowPos(ImVec2((WINDOW_HEIGHT - t_height) / 2, (WINDOW_WIDTH - t_width) / 2));
 }
 
-void TimeBox::handle_gui(AppContext &tr_app_context)
+void TimeBox::handle_gui(AppContext &tr_context)
 {
-  main_dialog(tr_app_context);
-  connect_dialog(tr_app_context);
-  warning_popup(tr_app_context);
-  about_dialog(tr_app_context);
+  main_dialog(tr_context);
+  connect_dialog(tr_context);
+  warning_popup(tr_context);
+  about_dialog(tr_context);
+}
+
+void TimeBox::about_dialog(AppContext &tr_context)
+{
+  if (tr_context.display_about_dialog) {
+    ImGui::SetNextWindowBgAlpha(0.35f);
+    ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH * 0.75, 200));
+    ImGui::SetNextWindowPos(ImVec2((WINDOW_WIDTH - WINDOW_WIDTH * 0.75) / 2, WINDOW_HEIGHT / 2 - 100));
+
+    ImGuiWindowFlags window_flags = 0;
+    window_flags |= ImGuiWindowFlags_NoDecoration;
+    window_flags |= ImGuiWindowFlags_NoFocusOnAppearing;
+
+    ImGui::Begin("About", static_cast<bool *>(nullptr), window_flags);
+    ImGui::Text("About");
+    ImGui::Separator();
+
+    ImGui::TextWrapped("Frametime %.3f ms/frame (%.1f FPS)",
+      static_cast<double>(1000.0f / ImGui::GetIO().Framerate),
+      static_cast<double>(ImGui::GetIO().Framerate));
+    ImGui::TextWrapped("Project: %s", std::string(BuildInformation().PROJECT_NAME).c_str());
+    ImGui::TextWrapped("Version: %s %s",
+      std::string(BuildInformation().PROJECT_VERSION).c_str(),
+      std::string(BuildInformation().PROJECT_VERSION_ADDENDUM).c_str());
+    ImGui::TextWrapped("Branch: %s", std::string(BuildInformation().GIT_BRANCH).c_str());
+    ImGui::TextWrapped("Commit: %s", std::string(BuildInformation().GIT_SHORT_SHA).c_str());
+    ImGui::TextWrapped("Compiler: %s %s",
+      std::string(BuildInformation().COMPILER).c_str(),
+      std::string(BuildInformation().COMPILER_VERSION).c_str());
+    ImGui::TextWrapped("Platform: %s", std::string(BuildInformation().PLATFORM).c_str());
+    ImGui::TextWrapped("Build: %s %s",
+      std::string(BuildInformation().BUILD_TYPE).c_str(),
+      std::string(BuildInformation().BUILD_DATE).c_str());
+    ImGui::TextWrapped("dear imgui says hello! (%s) (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
+
+    if (ImGui::BeginPopupContextWindow()) {
+      if (ImGui::MenuItem("Close")) { tr_context.display_about_dialog = false; }
+      ImGui::EndPopup();
+    }
+    ImGui::End();
+  }
+}
+
+void TimeBox::connect_dialog(AppContext &tr_context)
+{
+  if (tr_context.display_connect_dialog) {
+    ImGuiWindowFlags window_flags = 0;
+    window_flags |= ImGuiWindowFlags_NoCollapse;
+
+    ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2));
+    center_window(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+
+    ImGui::Begin("Connect", &tr_context.display_connect_dialog, window_flags);
+    {
+      // Baud rate choosing combo
+      static std::size_t current_item_index_baud{ 0 };
+      const char *preview_value_baud = tr_context.baud_rate_string_list[current_item_index_baud].c_str();
+      tr_context.baud_rate = std::stoul(tr_context.baud_rate_string_list[current_item_index_baud]);
+      if (ImGui::BeginCombo("Baud rate", preview_value_baud)) {
+        for (std::size_t i{ 0 }; i < tr_context.baud_rate_string_list.size(); ++i) {
+          const bool is_selected = (current_item_index_baud == i);
+          if (ImGui::Selectable(tr_context.baud_rate_string_list[i].c_str(), is_selected)) {
+            current_item_index_baud = i;
+          }
+          if (is_selected) {
+            tr_context.baud_rate = std::stoul(tr_context.baud_rate_string_list[i]);
+            ImGui::SetItemDefaultFocus();
+          }
+        }
+        ImGui::EndCombo();
+      }
+
+      // Serial port choosing combo
+      if (ImGui::Button("Scan ports")) { tr_context.serial_port_list = get_serial_devices_list(); }
+      ImGui::SameLine();
+      if (!tr_context.serial_port_list.empty()) {
+        static std::size_t current_item_index_port{ 0 };
+        const char *preview_value_port = tr_context.serial_port_list[current_item_index_port].c_str();
+        tr_context.serial_port = tr_context.serial_port_list[current_item_index_port];
+        if (ImGui::BeginCombo("##", preview_value_port)) {
+          for (std::size_t i{ 0 }; i < tr_context.serial_port_list.size(); ++i) {
+            const bool is_selected = (current_item_index_port == i);
+            if (ImGui::Selectable(tr_context.serial_port_list[i].c_str(), is_selected)) { current_item_index_port = i; }
+            if (is_selected) {
+              tr_context.serial_port = tr_context.serial_port_list[i];
+              ImGui::SetItemDefaultFocus();
+            }
+          }
+          ImGui::EndCombo();
+        }
+      }
+
+      if (not tr_context.serial_port.empty() && tr_context.baud_rate != 0) {
+        ImGui::Text("%s", "Port: ");
+        ImGui::SameLine();
+        ImGui::Text("%s", tr_context.serial_port.c_str());
+        ImGui::Text("Baud: ");
+        ImGui::SameLine();
+        ImGui::Text("%s", std::to_string(tr_context.baud_rate).c_str());
+
+        if (ImGui::Button("Connect")) {
+          tr_context.p_clock_controller = std::make_unique<ClockController>(0, tr_context.p_pid, 0.001);
+
+          // Limit PID settings to +/- 10% of initial speed
+          auto adjustment_limit{ tr_context.p_clock_controller->get_initial_adjustment() * 0.1 };
+
+          tr_context.p_pid->set_limits(-adjustment_limit, adjustment_limit);
+
+          tr_context.p_serial_reader = std::make_unique<SerialInterface>(
+            std::bind(&ClockController::adjust_clock, tr_context.p_clock_controller.get(), std::placeholders::_1));
+
+          try {
+            tr_context.p_serial_reader->open(tr_context.serial_port, tr_context.baud_rate);
+          } catch (const std::exception &e) {
+            BOOST_LOG_TRIVIAL(error) << e.what();
+            throw e;
+          }
+
+          tr_context.connection_established = true;
+        }
+
+        if (tr_context.connection_established) {
+          if (ImGui::Button("Disconnect")) {
+            if (tr_context.p_serial_reader->is_open()) {
+              tr_context.p_serial_reader->flush_io_buffers();
+              tr_context.p_serial_reader.reset();
+            }
+            tr_context.connection_established = false;
+          }
+        }
+      }
+    }
+    ImGui::End();
+  }
 }
 
 void TimeBox::main_dialog(AppContext &tr_context)
@@ -119,99 +253,6 @@ void TimeBox::main_dialog(AppContext &tr_context)
   ImGui::End();
 }
 
-void TimeBox::connect_dialog(AppContext &tr_context)
-{
-  if (tr_context.display_connect_dialog) {
-    ImGuiWindowFlags window_flags = 0;
-    window_flags |= ImGuiWindowFlags_NoCollapse;
-
-    ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2));
-    center_window(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
-
-    ImGui::Begin("Connect", &tr_context.display_connect_dialog, window_flags);
-    {
-      // Baud rate choosing combo
-      static std::size_t current_item_index_baud{ 0 };
-      const char *preview_value_baud = tr_context.baud_rate_string_list[current_item_index_baud].c_str();
-      tr_context.baud_rate = std::stoul(tr_context.baud_rate_string_list[current_item_index_baud]);
-      if (ImGui::BeginCombo("Baud rate", preview_value_baud)) {
-        for (std::size_t i{ 0 }; i < tr_context.baud_rate_string_list.size(); ++i) {
-          const bool is_selected = (current_item_index_baud == i);
-          if (ImGui::Selectable(tr_context.baud_rate_string_list[i].c_str(), is_selected)) {
-            current_item_index_baud = i;
-          }
-          if (is_selected) {
-            tr_context.baud_rate = std::stoul(tr_context.baud_rate_string_list[i]);
-            ImGui::SetItemDefaultFocus();
-          }
-        }
-        ImGui::EndCombo();
-      }
-
-      // Serial port choosing combo
-      if (ImGui::Button("Scan ports")) { tr_context.serial_port_list = get_serial_devices_list(); }
-      ImGui::SameLine();
-      if (!tr_context.serial_port_list.empty()) {
-        static std::size_t current_item_index_port{ 0 };
-        const char *preview_value_port = tr_context.serial_port_list[current_item_index_port].c_str();
-        tr_context.serial_port = tr_context.serial_port_list[current_item_index_port];
-        if (ImGui::BeginCombo("##", preview_value_port)) {
-          for (std::size_t i{ 0 }; i < tr_context.serial_port_list.size(); ++i) {
-            const bool is_selected = (current_item_index_port == i);
-            if (ImGui::Selectable(tr_context.serial_port_list[i].c_str(), is_selected)) { current_item_index_port = i; }
-            if (is_selected) {
-              tr_context.serial_port = tr_context.serial_port_list[i];
-              ImGui::SetItemDefaultFocus();
-            }
-          }
-          ImGui::EndCombo();
-        }
-      }
-
-      if (not tr_context.serial_port.empty() && tr_context.baud_rate != 0) {
-        ImGui::Text("%s", "Port: ");
-        ImGui::SameLine();
-        ImGui::Text("%s", tr_context.serial_port.c_str());
-        ImGui::Text("Baud: ");
-        ImGui::SameLine();
-        ImGui::Text("%s", std::to_string(tr_context.baud_rate).c_str());
-
-        if (ImGui::Button("Connect")) {
-          tr_context.p_clock_controller = std::make_unique<ClockController>(0, tr_context.p_pid, 0.001);
-
-          // Limit PID settings to +/- 10% of initial speed
-          auto adjustment_limit{ tr_context.p_clock_controller->get_initial_adjustment() * 0.1 };
-
-          tr_context.p_pid->set_limits(-adjustment_limit, adjustment_limit);
-
-          tr_context.p_serial_reader = std::make_unique<SerialInterface>(
-            std::bind(&ClockController::adjust_clock, tr_context.p_clock_controller.get(), std::placeholders::_1));
-
-          try {
-            tr_context.p_serial_reader->open(tr_context.serial_port, tr_context.baud_rate);
-          } catch (const std::exception &e) {
-            BOOST_LOG_TRIVIAL(error) << e.what();
-            throw e;
-          }
-
-          tr_context.connection_established = true;
-        }
-
-        if (tr_context.connection_established) {
-          if (ImGui::Button("Disconnect")) {
-            if (tr_context.p_serial_reader->is_open()) {
-              tr_context.p_serial_reader->flush_io_buffers();
-              tr_context.p_serial_reader.reset();
-            }
-            tr_context.connection_established = false;
-          }
-        }
-      }
-    }
-    ImGui::End();
-  }
-}
-
 void TimeBox::warning_popup(AppContext &tr_context)
 {
   if ((!tr_context.admin_privileges || tr_context.ntp_running || tr_context.using_docker)
@@ -236,47 +277,6 @@ void TimeBox::warning_popup(AppContext &tr_context)
 
     if (ImGui::BeginPopupContextWindow()) {
       if (ImGui::MenuItem("Disable warning")) { tr_context.disabled_warning_popup = true; }
-      ImGui::EndPopup();
-    }
-    ImGui::End();
-  }
-}
-
-void TimeBox::about_dialog(AppContext &tr_context)
-{
-  if (tr_context.display_about_dialog) {
-    ImGui::SetNextWindowBgAlpha(0.35f);
-    ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH * 0.75, 200));
-    ImGui::SetNextWindowPos(ImVec2((WINDOW_WIDTH - WINDOW_WIDTH * 0.75) / 2, WINDOW_HEIGHT / 2 - 100));
-
-    ImGuiWindowFlags window_flags = 0;
-    window_flags |= ImGuiWindowFlags_NoDecoration;
-    window_flags |= ImGuiWindowFlags_NoFocusOnAppearing;
-
-    ImGui::Begin("About", static_cast<bool *>(nullptr), window_flags);
-    ImGui::Text("About");
-    ImGui::Separator();
-
-    ImGui::TextWrapped("Frametime %.3f ms/frame (%.1f FPS)",
-      static_cast<double>(1000.0f / ImGui::GetIO().Framerate),
-      static_cast<double>(ImGui::GetIO().Framerate));
-    ImGui::TextWrapped("Project: %s", std::string(BuildInformation().PROJECT_NAME).c_str());
-    ImGui::TextWrapped("Version: %s %s",
-      std::string(BuildInformation().PROJECT_VERSION).c_str(),
-      std::string(BuildInformation().PROJECT_VERSION_ADDENDUM).c_str());
-    ImGui::TextWrapped("Branch: %s", std::string(BuildInformation().GIT_BRANCH).c_str());
-    ImGui::TextWrapped("Commit: %s", std::string(BuildInformation().GIT_SHORT_SHA).c_str());
-    ImGui::TextWrapped("Compiler: %s %s",
-      std::string(BuildInformation().COMPILER).c_str(),
-      std::string(BuildInformation().COMPILER_VERSION).c_str());
-    ImGui::TextWrapped("Platform: %s", std::string(BuildInformation().PLATFORM).c_str());
-    ImGui::TextWrapped("Build: %s %s",
-      std::string(BuildInformation().BUILD_TYPE).c_str(),
-      std::string(BuildInformation().BUILD_DATE).c_str());
-    ImGui::TextWrapped("dear imgui says hello! (%s) (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
-
-    if (ImGui::BeginPopupContextWindow()) {
-      if (ImGui::MenuItem("Close")) { tr_context.display_about_dialog = false; }
       ImGui::EndPopup();
     }
     ImGui::End();

@@ -2,15 +2,14 @@
 
 using namespace TimeBox;
 
-SerialInterface::SerialInterface(std::function<void(TimeboxReadout)> t_callback,
-  std::chrono::milliseconds t_timeout,
-  boost::asio::serial_port_base::parity t_parity,
-  boost::asio::serial_port_base::character_size t_character_size,
-  boost::asio::serial_port_base::flow_control t_flow_control,
-  boost::asio::serial_port_base::stop_bits t_stop_bits)
-  : m_callback(std::move(t_callback)), m_timeout_duration(t_timeout), m_parity(t_parity),
-    m_character_size(t_character_size), m_flow_control(t_flow_control), m_stop_bits(t_stop_bits), m_port_open(false),
-    m_error_flag(false)
+SerialInterface::SerialInterface(const std::function<void(TimeboxReadout)> t_callback,
+  const std::chrono::milliseconds t_timeout,
+  const boost::asio::serial_port_base::parity t_parity,
+  const boost::asio::serial_port_base::character_size t_character_size,
+  const boost::asio::serial_port_base::flow_control t_flow_control,
+  const boost::asio::serial_port_base::stop_bits t_stop_bits)
+  : m_callback(std::move(t_callback)), m_timeout(t_timeout), m_parity(t_parity), m_character_size(t_character_size),
+    m_flow_control(t_flow_control), m_stop_bits(t_stop_bits), m_port_open(false), m_error_flag(false)
 {
   mp_serial_port = std::make_shared<boost::asio::serial_port>(m_io_service);
   std::unique_lock<std::mutex>(m_condition_variable_mutex).swap(m_condition_variable_lock);
@@ -48,11 +47,11 @@ void SerialInterface::close()
 }
 
 void SerialInterface::open(const char *tp_device,
-  std::size_t t_baud,
-  std::optional<boost::asio::serial_port_base::parity> to_parity,
-  std::optional<boost::asio::serial_port_base::character_size> to_character_size,
-  std::optional<boost::asio::serial_port_base::flow_control> to_flow_control,
-  std::optional<boost::asio::serial_port_base::stop_bits> to_stop_bits)
+  const std::size_t t_baud,
+  const std::optional<boost::asio::serial_port_base::parity> to_parity,
+  const std::optional<boost::asio::serial_port_base::character_size> to_character_size,
+  const std::optional<boost::asio::serial_port_base::flow_control> to_flow_control,
+  const std::optional<boost::asio::serial_port_base::stop_bits> to_stop_bits)
 {
   std::string device{ tp_device };
 
@@ -60,11 +59,11 @@ void SerialInterface::open(const char *tp_device,
 }
 
 void SerialInterface::open(const std::string &tr_device,
-  std::size_t t_baud,
-  std::optional<boost::asio::serial_port_base::parity> to_parity,
-  std::optional<boost::asio::serial_port_base::character_size> to_character_size,
-  std::optional<boost::asio::serial_port_base::flow_control> to_flow_control,
-  std::optional<boost::asio::serial_port_base::stop_bits> to_stop_bits)
+  const std::size_t t_baud,
+  const std::optional<boost::asio::serial_port_base::parity> to_parity,
+  const std::optional<boost::asio::serial_port_base::character_size> to_character_size,
+  const std::optional<boost::asio::serial_port_base::flow_control> to_flow_control,
+  const std::optional<boost::asio::serial_port_base::stop_bits> to_stop_bits)
 {
   if (is_open()) { close(); }
 
@@ -93,7 +92,8 @@ void SerialInterface::open(const std::string &tr_device,
   m_port_open = true;
 }
 
-// TODO: Convert from shared_array to shared_ptr, compile error otherwise
+// TODO: convert from shared_array to shared_ptr, compile error otherwise
+
 // void SerialInterface::write(const char *tp_data, std::size_t t_buffer_size)
 // {
 //   std::scoped_lock<std::mutex> lock(m_write_queue_mutex);
@@ -152,7 +152,7 @@ std::string SerialInterface::read_string()
   std::scoped_lock<std::mutex> lock(m_read_queue_mutex);
   std::string read_buffer(m_read_queue.begin(), m_read_queue.end());
 
-  std::vector<char>().swap(m_read_queue);// Should be leak free
+  std::vector<char>().swap(m_read_queue);// should be leak free
 
   return read_buffer;
 }
@@ -178,8 +178,7 @@ void SerialInterface::callback_loop()
   std::regex readout_regex{ correct_serial_readout_regex };
 
   while (is_open()) {
-    if (m_condition_variable.wait_for(m_condition_variable_lock, m_timeout_duration) == std::cv_status::timeout
-        and is_open()) {
+    if (m_condition_variable.wait_for(m_condition_variable_lock, m_timeout) == std::cv_status::timeout and is_open()) {
       BOOST_LOG_TRIVIAL(error) << "Timeout reached, check serial connection";
     } else {
       auto buffer_string{ read_string_until("\n") };
@@ -239,7 +238,7 @@ void SerialInterface::read_end(const boost::system::error_code &tr_error, std::s
   }
 }
 
-void SerialInterface::set_error_status(bool t_status)
+void SerialInterface::set_error_status(const bool t_status)
 {
   std::scoped_lock<std::mutex> lock(m_error_mutex);
 

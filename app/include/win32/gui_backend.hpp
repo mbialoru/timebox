@@ -3,15 +3,16 @@
 
 #pragma once
 
+#include <SDL.h>
+#include <SDL_syswm.h>
 #include <boost/log/trivial.hpp>
 #include <cstdint>
 #include <d3d11.h>
+#include <imgui.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_impl_sdl.h>
-#include <imgui.h>
-#include <SDL_syswm.h>
-#include <SDL.h>
 #include <stdexcept>
+
 
 #include "appcontext.hpp"
 
@@ -33,20 +34,20 @@ struct D3DContext
   ID3D11RenderTargetView *p_render_target_view{ NULL };
 };
 
-bool create_d3d_device(HWND, D3DContext&);
+bool create_d3d_device(HWND, D3DContext &);
 
-HWND win32_windows_handle(SDL_Window*);
+HWND win32_windows_handle(SDL_Window *);
 
-SDL_Window* create_sdl_window(const std::string&, const std::size_t&, const std::size_t&);
+SDL_Window *create_sdl_window(const std::string &, const std::size_t &, const std::size_t &);
 
-void cleanup(SDL_Window*, D3DContext&);
-void create_render_target(D3DContext&);
-void destroy_d3d_device(D3DContext &);
-void destroy_render_target(D3DContext &);
-void handle_sdl_event(SDL_Window *, AppContext &);
-void initialize_imgui(SDL_Window *, D3DContext &);
+void cleanup(SDL_Window *tp_sdl_window, D3DContext &tr_d3d_context);
+void create_render_target(D3DContext &tr_context);
+void destroy_d3d_device(D3DContext &tr_context);
+void destroy_render_target(D3DContext &tr_context);
+void handle_sdl_event(SDL_Window *tp_sdl_window, AppContext &tr_context);
+void initialize_imgui(SDL_Window *tp_sdl_window, D3DContext &tr_context);
 void initialize_sdl();
-void render(D3DContext &);
+void render(D3DContext &tr_context);
 
 }// namespace TimeBox
 

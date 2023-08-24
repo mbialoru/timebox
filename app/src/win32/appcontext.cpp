@@ -15,7 +15,7 @@ AppContext::AppContext()
   ntp_running = check_ntp_status();
   using_docker = check_if_using_docker();
 
-  for (const auto& baud_rate : baud_rate_list) { baud_rate_string_list.push_back(std::to_string(baud_rate)); }
+  for (const auto &baud_rate : baud_rate_list) { baud_rate_string_list.push_back(std::to_string(baud_rate)); }
 
   std::make_shared<PID<double>>(0.0, 0.0, 0.0, 0.0).swap(p_pid);
 };

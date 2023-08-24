@@ -13,7 +13,7 @@ void TimeBox::main_loop(SDL_Window *tp_sdl_window, AppContext &tr_app_context, D
 
     handle_sdl_event(tp_sdl_window, tr_app_context);
 
-    // Start the Dear ImGui frame
+    // start the Dear ImGui frame
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
@@ -26,7 +26,7 @@ void TimeBox::main_loop(SDL_Window *tp_sdl_window, AppContext &tr_app_context, D
       SDL_Delay(1000 / MAX_FPS - s_this_frametime + s_last_frametime);
   }
 
-  // Cleanup
+  // cleanup
   tr_app_context.Reset();
 
   cleanup(tp_sdl_window, tr_d3d_context);

@@ -19,43 +19,45 @@ namespace TimeBox {
 class SerialInterface final : private boost::noncopyable
 {
 public:
-  explicit SerialInterface(std::function<void(TimeboxReadout)>,
-    std::chrono::milliseconds = std::chrono::duration<int64_t, std::milli>(5000),
-    boost::asio::serial_port_base::parity = boost::asio::serial_port_base::parity(
+  explicit SerialInterface(const std::function<void(TimeboxReadout)> t_callback,
+    const std::chrono::milliseconds t_timeout = std::chrono::duration<int64_t, std::milli>(5000),
+    const boost::asio::serial_port_base::parity t_parity = boost::asio::serial_port_base::parity(
       boost::asio::serial_port_base::parity::none),
-    boost::asio::serial_port_base::character_size = boost::asio::serial_port_base::character_size(8),
-    boost::asio::serial_port_base::flow_control = boost::asio::serial_port_base::flow_control(
+    const boost::asio::serial_port_base::character_size t_character_size =
+      boost::asio::serial_port_base::character_size(8),
+    const boost::asio::serial_port_base::flow_control t_flow_control = boost::asio::serial_port_base::flow_control(
       boost::asio::serial_port_base::flow_control::none),
-    boost::asio::serial_port_base::stop_bits = boost::asio::serial_port_base::stop_bits(
+    const boost::asio::serial_port_base::stop_bits t_stop_bits = boost::asio::serial_port_base::stop_bits(
       boost::asio::serial_port_base::stop_bits::one));
   virtual ~SerialInterface();
 
   // NOTE: Boost asio does not provide a high-level api for buffer flushing, we need to access the lower layer with
   // platform specific calls - implementation of this method is thus kept separate
+
   void close();
   void flush_input_buffer();
   void flush_io_buffers();
   void flush_output_buffer();
-  void open(const char*,
-    std::size_t,
-    std::optional<boost::asio::serial_port_base::parity> = std::nullopt,
-    std::optional<boost::asio::serial_port_base::character_size> = std::nullopt,
-    std::optional<boost::asio::serial_port_base::flow_control> = std::nullopt,
-    std::optional<boost::asio::serial_port_base::stop_bits> = std::nullopt);
-  void open(const std::string&,
-    std::size_t,
-    std::optional<boost::asio::serial_port_base::parity> = std::nullopt,
-    std::optional<boost::asio::serial_port_base::character_size> = std::nullopt,
-    std::optional<boost::asio::serial_port_base::flow_control> = std::nullopt,
-    std::optional<boost::asio::serial_port_base::stop_bits> = std::nullopt);
-  void write(const char*, std::size_t);
-  void write(const std::vector<char>&);
+  void open(const char *tp_device,
+    const std::size_t t_baud,
+    const std::optional<boost::asio::serial_port_base::parity> to_parity = std::nullopt,
+    const std::optional<boost::asio::serial_port_base::character_size> to_character_size = std::nullopt,
+    const std::optional<boost::asio::serial_port_base::flow_control> to_flow_control = std::nullopt,
+    const std::optional<boost::asio::serial_port_base::stop_bits> to_stop_bits = std::nullopt);
+  void open(const std::string &tr_device,
+    const std::size_t t_baud,
+    const std::optional<boost::asio::serial_port_base::parity> to_parity = std::nullopt,
+    const std::optional<boost::asio::serial_port_base::character_size> to_character_size = std::nullopt,
+    const std::optional<boost::asio::serial_port_base::flow_control> to_flow_control = std::nullopt,
+    const std::optional<boost::asio::serial_port_base::stop_bits> to_stop_bits = std::nullopt);
+  void write(const char *, std::size_t);
+  void write(const std::vector<char> &);
   void write_string(const std::string &);
 
   bool error_status() const;
   bool is_open() const;
 
-  std::size_t read(char*, std::size_t);
+  std::size_t read(char *, std::size_t);
 
   std::vector<char> read();
 
@@ -69,11 +71,11 @@ private:
   void close_port();
   void read_begin();
   void read_end(const boost::system::error_code &, std::size_t);
-  void set_error_status(bool);
+  void set_error_status(const bool);
   void write_begin();
   void write_end(const boost::system::error_code &);
 
-  static std::vector<char>::iterator find_in_buffer(std::vector<char>&, const std::string&);
+  static std::vector<char>::iterator find_in_buffer(std::vector<char> &, const std::string &);
 
   boost::asio::io_service m_io_service;
 
@@ -91,7 +93,7 @@ private:
   std::atomic<bool> m_error_flag;
   std::atomic<bool> m_port_open;
 
-  std::chrono::milliseconds m_timeout_duration;
+  std::chrono::milliseconds m_timeout;
 
   std::condition_variable m_condition_variable;
 

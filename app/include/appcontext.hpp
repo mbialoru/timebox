@@ -22,6 +22,7 @@ public:
   bool admin_privileges;
 
   std::size_t baud_rate;
+
   std::string serial_port;
   std::string main_window_name;
 
@@ -30,13 +31,13 @@ public:
 
   std::unique_ptr<TimeBox::ClockController> p_clock_controller;
   std::unique_ptr<TimeBox::SerialInterface> p_serial_reader;
+
   std::shared_ptr<TimeBox::PID<double>> p_pid;
 
   // ImGUI variables
   bool application_run;
   bool disabled_warning_popup;
   bool connection_established;
-
   bool display_about_dialog;
   bool display_connect_dialog;
 };

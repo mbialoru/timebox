@@ -17,16 +17,16 @@ namespace TimeBox {
 class ClockController final : public BaseClockController
 {
 public:
-  ClockController(std::size_t, std::shared_ptr<PID<double>>, double);
+  explicit ClockController(const std::size_t t_minimal_delay, std::shared_ptr<PID<double>> t_pid);
   ~ClockController();
 
-  void adjust_clock(TimeboxReadout) override;
+  void adjust_clock(const TimeboxReadout t_readout) override;
 
 private:
   HRESULT update_process_token();
 
   void print_current_clock_adjustments() const;
-  void system_time_adjustment_wrapper(long);
+  void system_time_adjustment_wrapper(const long t_adjustment);
 
   DWORD m_current_adjustment_legacy{ 0UL };
   DWORD m_initial_adjustment_legacy{ 0UL };
@@ -34,9 +34,6 @@ private:
   DWORD m_highest_adjustment_legacy{ 0UL };
 
   LARGE_INTEGER m_performance_counter_frequency{ 0L };
-
-  static constexpr DWORD SM_MICRO_PER_SECOND{ 1000000UL };
-  static constexpr DWORD SM_MINIMAL_ADJUSTMENT{ 0UL };
 
   std::shared_ptr<PID<double>> mp_pid;
 };

@@ -9,12 +9,15 @@
 
 namespace TimeBox {
 
-void about_dialog(AppContext &);
-void center_window(std::size_t, std::size_t);
-void connect_dialog(AppContext &);
-void handle_gui(AppContext &);
-void main_dialog(AppContext &);
-void warning_popup(AppContext &);
+// utilities
+void center_window(std::size_t t_height, std::size_t t_width);
+void handle_gui(AppContext &tr_context);
+
+// dialogs / popups
+void about_dialog(AppContext &tr_context);
+void connect_dialog(AppContext &tr_context);
+void main_dialog(AppContext &tr_context);
+void warning_popup(AppContext &tr_context);
 
 }// namespace TimeBox
 

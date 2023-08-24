@@ -2,25 +2,6 @@
 
 using namespace TimeBox;
 
-void TimeBox::cleanup(SDL_Window *tp_sdl_window, D3DContext &tr_d3d_context)
-{
-  ImGui_ImplDX11_Shutdown();
-  ImGui_ImplSDL2_Shutdown();
-  ImGui::DestroyContext();
-  destroy_d3d_device(tr_d3d_context);
-  SDL_DestroyWindow(tp_sdl_window);
-  SDL_Quit();
-}
-
-void TimeBox::render(D3DContext &tr_d3d_context)
-{
-  ImGui::Render();
-  tr_d3d_context.p_d3d_device_context->OMSetRenderTargets(1, &(tr_d3d_context.p_render_target_view), NULL);
-  tr_d3d_context.p_d3d_device_context->ClearRenderTargetView(tr_d3d_context.p_render_target_view, CLEAR_COLOR_ALPHA);
-  ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-  tr_d3d_context.p_swap_chain->Present(1, 0);// VSync
-}
-
 bool TimeBox::create_d3d_device(HWND t_hwnd, D3DContext &tr_context)
 {
   // Setup swap chain
@@ -70,6 +51,47 @@ bool TimeBox::create_d3d_device(HWND t_hwnd, D3DContext &tr_context)
   return true;
 }
 
+HWND TimeBox::win32_windows_handle(SDL_Window *tp_sdl_window)
+{
+  SDL_SysWMinfo wm_info;
+
+  SDL_VERSION(&wm_info.version);
+  SDL_GetWindowWMInfo(tp_sdl_window, &wm_info);
+
+  HWND win32_window_handle{ wm_info.info.win.window };
+
+  return win32_window_handle;
+}
+
+SDL_Window *
+  TimeBox::create_sdl_window(const std::string &tr_name, const std::size_t &tr_height, const std::size_t &tr_width)
+{
+  SDL_WindowFlags window_flags{ static_cast<SDL_WindowFlags>(SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI) };
+  SDL_Window *window{ SDL_CreateWindow(
+    tr_name.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, tr_height, tr_width, window_flags) };
+
+  return window;
+}
+
+void TimeBox::cleanup(SDL_Window *tp_sdl_window, D3DContext &tr_d3d_context)
+{
+  ImGui_ImplDX11_Shutdown();
+  ImGui_ImplSDL2_Shutdown();
+  ImGui::DestroyContext();
+  destroy_d3d_device(tr_d3d_context);
+  SDL_DestroyWindow(tp_sdl_window);
+  SDL_Quit();
+}
+
+void TimeBox::create_render_target(D3DContext &tr_context)
+{
+  ID3D11Texture2D *p_back_buffer;
+
+  tr_context.p_swap_chain->GetBuffer(0, IID_PPV_ARGS(&p_back_buffer));
+  tr_context.p_d3d_device->CreateRenderTargetView(p_back_buffer, NULL, &(tr_context.p_render_target_view));
+  p_back_buffer->Release();
+}
+
 void TimeBox::destroy_d3d_device(D3DContext &tr_context)
 {
   destroy_render_target(tr_context);
@@ -90,15 +112,6 @@ void TimeBox::destroy_d3d_device(D3DContext &tr_context)
   }
 }
 
-void TimeBox::create_render_target(D3DContext &tr_context)
-{
-  ID3D11Texture2D *p_back_buffer;
-
-  tr_context.p_swap_chain->GetBuffer(0, IID_PPV_ARGS(&p_back_buffer));
-  tr_context.p_d3d_device->CreateRenderTargetView(p_back_buffer, NULL, &(tr_context.p_render_target_view));
-  p_back_buffer->Release();
-}
-
 void TimeBox::destroy_render_target(D3DContext &tr_context)
 {
   if (tr_context.p_render_target_view) {
@@ -107,43 +120,7 @@ void TimeBox::destroy_render_target(D3DContext &tr_context)
   }
 }
 
-void TimeBox::initialize_sdl()
-{
-  // SDL Init
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER)) {
-    BOOST_LOG_TRIVIAL(error) << SDL_GetError();
-    throw std::runtime_error("Cannot initialize SDL backend");
-  }
-
-  // From SDL 2.0.18: Enable native IME.
-#ifdef SDL_HINT_IME_SHOW_UI
-  SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
-#endif
-}
-
-SDL_Window *
-  TimeBox::create_sdl_window(const std::string &tr_name, const std::size_t &tr_height, const std::size_t &tr_width)
-{
-  SDL_WindowFlags window_flags{ static_cast<SDL_WindowFlags>(SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI) };
-  SDL_Window *window{ SDL_CreateWindow(
-    tr_name.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, tr_height, tr_width, window_flags) };
-
-  return window;
-}
-
-HWND TimeBox::win32_windows_handle(SDL_Window *tp_sdl_window)
-{
-  SDL_SysWMinfo wm_info;
-
-  SDL_VERSION(&wm_info.version);
-  SDL_GetWindowWMInfo(tp_sdl_window, &wm_info);
-
-  HWND win32_window_handle{ wm_info.info.win.window };
-
-  return win32_window_handle;
-}
-
-void TimeBox::handle_sdl_event(SDL_Window *tp_sdl_window, AppContext &tr_app_context)
+void TimeBox::handle_sdl_event(SDL_Window *tp_sdl_window, AppContext &tr_context)
 {
   // Poll and handle events (inputs, window resize, etc.)
   // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your
@@ -159,12 +136,12 @@ void TimeBox::handle_sdl_event(SDL_Window *tp_sdl_window, AppContext &tr_app_con
     ImGui_ImplSDL2_ProcessEvent(&event);
     switch (event.type) {
     case SDL_QUIT:
-      tr_app_context.application_run = true;
+      tr_context.application_run = true;
       break;
 
     case SDL_WINDOWEVENT:
       if (event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(tp_sdl_window))
-        tr_app_context.application_run = false;
+        tr_context.application_run = false;
       break;
 
     default:
@@ -181,4 +158,27 @@ void TimeBox::initialize_imgui(SDL_Window *tp_sdl_window, D3DContext &tr_d3d_con
   ImGui::StyleColorsDark();
   ImGui_ImplSDL2_InitForD3D(tp_sdl_window);
   ImGui_ImplDX11_Init(tr_d3d_context.p_d3d_device, tr_d3d_context.p_d3d_device_context);
+}
+
+void TimeBox::initialize_sdl()
+{
+  // SDL Init
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER)) {
+    BOOST_LOG_TRIVIAL(error) << SDL_GetError();
+    throw std::runtime_error("Cannot initialize SDL backend");
+  }
+
+  // From SDL 2.0.18: Enable native IME.
+#ifdef SDL_HINT_IME_SHOW_UI
+  SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
+#endif
+}
+
+void TimeBox::render(D3DContext &tr_d3d_context)
+{
+  ImGui::Render();
+  tr_d3d_context.p_d3d_device_context->OMSetRenderTargets(1, &(tr_d3d_context.p_render_target_view), NULL);
+  tr_d3d_context.p_d3d_device_context->ClearRenderTargetView(tr_d3d_context.p_render_target_view, CLEAR_COLOR_ALPHA);
+  ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+  tr_d3d_context.p_swap_chain->Present(1, 0);// VSync
 }
