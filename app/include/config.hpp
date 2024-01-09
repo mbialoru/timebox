@@ -13,12 +13,12 @@ struct BuildInformation
   static constexpr std::string_view PROJECT_VERSION{ "0.0.15" };
   static constexpr std::string_view PROJECT_VERSION_ADDENDUM{ "InDev" };
   static constexpr std::string_view GIT_BRANCH{ "dev" };
-  static constexpr std::string_view GIT_SHORT_SHA{ "6add873e" };
+  static constexpr std::string_view GIT_SHORT_SHA{ "2972f391" };
   static constexpr std::string_view BUILD_TYPE{ "Debug" };
   static constexpr std::string_view PLATFORM{ "Windows" };
   static constexpr std::string_view COMPILER{ "GNU" };
   static constexpr std::string_view COMPILER_VERSION{ "12.2.0" };
-  static constexpr std::string_view BUILD_DATE{ "2023-08-21 10:09:42 UTC" };
+  static constexpr std::string_view BUILD_DATE{ "2023-08-21 12:17:48 UTC" };
 };
 
 static constexpr std::size_t WINDOW_HEIGHT{ 600 };

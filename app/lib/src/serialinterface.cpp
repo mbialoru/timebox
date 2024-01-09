@@ -47,7 +47,7 @@ void SerialInterface::close()
   }
 }
 
-void SerialInterface::open(const char* tp_device,
+void SerialInterface::open(const char *tp_device,
   std::size_t t_baud,
   std::optional<boost::asio::serial_port_base::parity> to_parity,
   std::optional<boost::asio::serial_port_base::character_size> to_character_size,
@@ -80,7 +80,7 @@ void SerialInterface::open(const std::string &tr_device,
   m_io_service.post(std::bind(&SerialInterface::read_begin, this));
 
   std::thread worker_thread{ std::bind(
-    static_cast<std::size_t(boost::asio::io_service::*)()>(&boost::asio::io_service::run), &m_io_service) };
+    static_cast<std::size_t (boost::asio::io_service::*)()>(&boost::asio::io_service::run), &m_io_service) };
 
   m_worker_thread.swap(worker_thread);
 
@@ -184,7 +184,11 @@ void SerialInterface::callback_loop()
     } else {
       auto buffer_string{ read_string_until("\n") };
       if (std::regex_search(buffer_string, readout_regex)) {
-        m_callback(TimeboxReadout{ buffer_string, std::chrono::system_clock::now() });
+        try {
+          m_callback(TimeboxReadout{ buffer_string, std::chrono::system_clock::now() });
+        } catch (const std::bad_function_call &e) {
+          BOOST_LOG_TRIVIAL(warning) << "SerialInterface callback call failed";
+        }
       } else {
         BOOST_LOG_TRIVIAL(warning) << "Received malformed readout data from serial";
       }
@@ -214,8 +218,10 @@ void SerialInterface::close_port()
 void SerialInterface::read_begin()
 {
   mp_serial_port->async_read_some(boost::asio::buffer(m_read_buffer, S_READ_BUFFER_SIZE),
-    boost::bind(
-      &SerialInterface::read_end, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    boost::bind(&SerialInterface::read_end,
+      this,
+      boost::asio::placeholders::error,
+      boost::asio::placeholders::bytes_transferred));
 }
 
 void SerialInterface::read_end(const boost::system::error_code &tr_error, std::size_t t_bytes)
